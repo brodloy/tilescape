@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { StatusBadge, Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { updateEventStatus } from '@/app/actions/events'
 import { RealtimeBoard } from '@/components/event/RealtimeBoard'
 import { MemberList } from '@/components/event/MemberList'
 import { SubmissionsPanel } from '@/components/event/SubmissionsPanel'
 import { EventHeader } from '@/components/event/EventHeader'
+import { goLive, endEvent } from '@/app/actions/forms'
 
 export default async function EventPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -16,20 +16,12 @@ export default async function EventPage({ params }: { params: { id: string } }) 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: event } = await db
-    .from('events')
-    .select('*')
-    .eq('id', params.id)
-    .single()
-
+  const { data: event } = await db.from('events').select('*').eq('id', params.id).single()
   if (!event) notFound()
 
   const { data: membership } = await db
-    .from('event_members')
-    .select('id, role')
-    .eq('event_id', params.id)
-    .eq('user_id', user.id)
-    .single()
+    .from('event_members').select('id, role')
+    .eq('event_id', params.id).eq('user_id', user.id).single()
 
   if (!membership) redirect(`/join?code=${event.invite_code}`)
 
@@ -37,21 +29,18 @@ export default async function EventPage({ params }: { params: { id: string } }) 
 
   const { data: tiles } = await db
     .from('tiles')
-    .select(`*, tile_completions(id, status, proof_url, submitted_at, team_id, users!submitted_by(display_name))`)
-    .eq('event_id', params.id)
-    .order('position')
+    .select('*, tile_completions(id, status, proof_url, submitted_at, team_id, users!submitted_by(display_name))')
+    .eq('event_id', params.id).order('position')
 
   const { data: teams } = await db
     .from('teams')
-    .select(`*, team_members(id, event_members(id, role, users(id, display_name, avatar_url)))`)
-    .eq('event_id', params.id)
-    .order('created_at')
+    .select('*, team_members(id, event_members(id, role, users(id, display_name, avatar_url)))')
+    .eq('event_id', params.id).order('created_at')
 
   const { data: members } = await db
     .from('event_members')
     .select('id, role, joined_at, users(id, display_name, avatar_url)')
-    .eq('event_id', params.id)
-    .order('joined_at')
+    .eq('event_id', params.id).order('joined_at')
 
   let pendingSubmissions: any[] = []
   if (isOwnerOrMod) {
@@ -59,7 +48,7 @@ export default async function EventPage({ params }: { params: { id: string } }) 
     if (tileIds.length > 0) {
       const { data } = await db
         .from('tile_completions')
-        .select(`id, proof_url, status, submitted_at, tiles(name, is_purple, source_raid), teams(name, color), users!submitted_by(display_name)`)
+        .select('id, proof_url, status, submitted_at, tiles(name, is_purple, source_raid), teams(name, color), users!submitted_by(display_name)')
         .eq('status', 'pending')
         .in('tile_id', tileIds)
         .order('submitted_at', { ascending: false })
@@ -67,7 +56,6 @@ export default async function EventPage({ params }: { params: { id: string } }) 
     }
   }
 
-  // Find current user's team
   const userMemberRecord = (members ?? []).find((m: any) => m.users?.id === user.id)
   const userTeam = (teams ?? []).find((t: any) =>
     t.team_members?.some((tm: any) => tm.event_members?.id === userMemberRecord?.id)
@@ -77,6 +65,8 @@ export default async function EventPage({ params }: { params: { id: string } }) 
   const approvedTiles = nonFreeTiles.filter((t: any) =>
     t.tile_completions?.some((c: any) => c.status === 'approved')
   )
+
+  const eventId = params.id
 
   return (
     <div className="min-h-screen bg-bg flex flex-col">
@@ -100,13 +90,11 @@ export default async function EventPage({ params }: { params: { id: string } }) 
             </Link>
           </div>
 
-          {/* Invite code */}
           <div className="p-4 border-b border-[rgba(232,184,75,0.10)]">
             <p className="font-pixel text-[6px] text-text-3 tracking-widest mb-2">INVITE CODE</p>
             <span className="font-pixel text-sm text-gold tracking-wider">{event.invite_code}</span>
           </div>
 
-          {/* Teams */}
           <div className="p-4 flex-1">
             <p className="font-pixel text-[6px] text-text-3 tracking-widest mb-3">TEAMS</p>
             <div className="space-y-2">
@@ -118,7 +106,7 @@ export default async function EventPage({ params }: { params: { id: string } }) 
                 </div>
               ))}
               {isOwnerOrMod && (
-                <Link href={`/events/${params.id}/manage`}>
+                <Link href={`/events/${eventId}/manage`}>
                   <button className="w-full mt-2 text-xs text-text-3 hover:text-gold border border-dashed border-[rgba(232,184,75,0.15)] rounded py-2 transition-colors">
                     + Manage teams & tiles
                   </button>
@@ -127,26 +115,19 @@ export default async function EventPage({ params }: { params: { id: string } }) 
             </div>
           </div>
 
-          {/* Status control */}
           {isOwnerOrMod && (
             <div className="p-4 border-t border-[rgba(232,184,75,0.10)]">
               <p className="font-pixel text-[6px] text-text-3 tracking-widest mb-3">EVENT STATUS</p>
               <StatusBadge status={event.status} />
               {event.status === 'draft' && (
-                <form action={async () => {
-                  'use server'
-                  await updateEventStatus(params.id, 'live')
-                }} className="mt-2">
+                <form action={goLive.bind(null, eventId)} className="mt-2">
                   <Button type="submit" size="sm" variant="primary" className="w-full text-xs">
                     Go Live
                   </Button>
                 </form>
               )}
               {event.status === 'live' && (
-                <form action={async () => {
-                  'use server'
-                  await updateEventStatus(params.id, 'ended')
-                }} className="mt-2">
+                <form action={endEvent.bind(null, eventId)} className="mt-2">
                   <Button type="submit" size="sm" variant="ghost" className="w-full text-xs">
                     End Event
                   </Button>
@@ -175,7 +156,7 @@ export default async function EventPage({ params }: { params: { id: string } }) 
             initialTiles={tiles ?? []}
             teams={teams ?? []}
             userTeamId={userTeam?.id ?? null}
-            eventId={params.id}
+            eventId={eventId}
             canSubmit={event.status === 'live'}
           />
         </main>
@@ -190,7 +171,7 @@ export default async function EventPage({ params }: { params: { id: string } }) 
             teams={teams ?? []}
             currentUserId={user.id}
             isOwnerOrMod={isOwnerOrMod}
-            eventId={params.id}
+            eventId={eventId}
           />
         </aside>
       </div>

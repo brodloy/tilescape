@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { joinEvent } from '@/app/actions/events'
+import { joinEventWithRedirect } from '@/app/actions/forms'
 import { Button } from '@/components/ui/Button'
 
 export default async function JoinPage({
@@ -90,15 +90,8 @@ export default async function JoinPage({
               </div>
             )}
 
-            <form action={async (formData: FormData) => {
-              'use server'
-              const code = formData.get('code') as string
-              if (!code?.trim()) return
-              const result = await joinEvent(code.trim())
-              if (result?.error) {
-                redirect(`/join?error=${encodeURIComponent(result.error)}${searchParams.code ? `&code=${searchParams.code}` : ''}`)
-              }
-            }}>
+            <form action={joinEventWithRedirect}>
+              <input type="hidden" name="return_code" value={searchParams.code ?? ''} />
               <div className="space-y-4">
                 <div>
                   <label className="block font-pixel text-[7px] text-text-2 tracking-wider mb-2 uppercase">

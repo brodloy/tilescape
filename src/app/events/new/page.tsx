@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { createEvent } from '@/app/actions/events'
+import { createEventAction } from '@/app/actions/forms'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
@@ -32,7 +32,7 @@ export default async function NewEventPage() {
             <span className="font-pixel text-[7px] text-gold tracking-widest">EVENT DETAILS</span>
           </CardHeader>
           <CardBody className="p-6">
-            <form action={async (fd: FormData) => { await createEvent(fd) }} className="space-y-5">
+            <form action={createEventAction} className="space-y-5">
 
               <Input
                 name="name"
