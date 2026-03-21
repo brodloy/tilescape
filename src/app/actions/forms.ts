@@ -4,7 +4,10 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
-// ── Event page ──
+export async function createEventVoid(formData: FormData): Promise<void> {
+  await createEventAction(formData)
+}
+
 export async function goLive(eventId: string) {
   const supabase = await createClient()
   const db = supabase as any

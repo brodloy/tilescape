@@ -1,32 +1,15 @@
-'use client'
-
-import { useState, useTransition } from 'react'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createEventAction } from '@/app/actions/forms'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
+import { createClient } from '@/lib/supabase/server'
+import { createEventVoid } from '@/app/actions/forms'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { Input } from '@/components/ui/Input'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
-export default function NewEventPage() {
-  const [error, setError] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
-
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError(null)
-    const formData = new FormData(e.currentTarget)
-    startTransition(async () => {
-      try {
-        const result = await createEventAction(formData)
-        if (result?.error) setError(result.error)
-      } catch (err: any) {
-        // redirect() throws — this is expected on success
-        if (!err?.message?.includes('NEXT_REDIRECT')) {
-          setError(err?.message ?? 'Something went wrong')
-        }
-      }
-    })
-  }
+export default async function NewEventPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
   return (
     <div className="min-h-screen bg-bg">
@@ -49,12 +32,7 @@ export default function NewEventPage() {
             <span className="font-pixel text-[7px] text-gold tracking-widest">EVENT DETAILS</span>
           </CardHeader>
           <CardBody className="p-6">
-            {error && (
-              <div className="mb-5 p-3 rounded bg-[rgba(232,85,85,0.1)] border border-[rgba(232,85,85,0.2)] text-red text-sm">
-                {error}
-              </div>
-            )}
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form action={createEventVoid} className="space-y-5">
               <Input
                 name="name"
                 label="Event Name"
@@ -85,12 +63,10 @@ export default function NewEventPage() {
                 type="url"
               />
               <div className="pt-2 flex gap-3 justify-end">
-                <Link href="/dashboard">
-                  <Button type="button" variant="ghost">Cancel</Button>
+                <Link href="/dashboard" className="inline-flex items-center px-4 py-2 rounded border border-[rgba(232,184,75,0.20)] text-text-2 text-sm hover:text-text hover:border-gold-dim transition-all">
+                  Cancel
                 </Link>
-                <Button type="submit" variant="primary" loading={isPending}>
-                  Create Event →
-                </Button>
+                <SubmitButton>Create Event →</SubmitButton>
               </div>
             </form>
           </CardBody>

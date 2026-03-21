@@ -242,7 +242,7 @@ export default async function ManagePage({ params }: { params: { id: string } })
                         <span className="text-[10px] text-text-3">{team ? team.name : 'Unassigned'}</span>
                       </div>
 
-                      {isOwner && member.role !== 'owner' && (
+                      {isOwner && (
                         <div className="flex items-center gap-2">
                           <form action={assignTeam.bind(null, member.id, eventId)}>
                             <select name="team_id" defaultValue={team?.id ?? ''}
@@ -254,17 +254,19 @@ export default async function ManagePage({ params }: { params: { id: string } })
                             </select>
                             <Button type="submit" size="sm" variant="ghost" className="text-[10px] px-2 h-8">Set</Button>
                           </form>
-                          <form action={toggleMod.bind(null, member.id, eventId, member.role)}>
-                            <button type="submit"
-                              className="font-pixel text-[5.5px] px-2 py-1.5 rounded border transition-colors"
-                              style={{
-                                background: member.role === 'moderator' ? 'rgba(75,158,240,0.1)' : 'rgba(255,255,255,0.03)',
-                                borderColor: member.role === 'moderator' ? 'rgba(75,158,240,0.25)' : 'rgba(255,255,255,0.08)',
-                                color: member.role === 'moderator' ? '#4b9ef0' : '#4a4438',
-                              }}>
-                              {member.role === 'moderator' ? 'MOD ✓' : 'MOD'}
-                            </button>
-                          </form>
+                          {member.role !== 'owner' && (
+                            <form action={toggleMod.bind(null, member.id, eventId, member.role)}>
+                              <button type="submit"
+                                className="font-pixel text-[5.5px] px-2 py-1.5 rounded border transition-colors"
+                                style={{
+                                  background: member.role === 'moderator' ? 'rgba(75,158,240,0.1)' : 'rgba(255,255,255,0.03)',
+                                  borderColor: member.role === 'moderator' ? 'rgba(75,158,240,0.25)' : 'rgba(255,255,255,0.08)',
+                                  color: member.role === 'moderator' ? '#4b9ef0' : '#4a4438',
+                                }}>
+                                {member.role === 'moderator' ? 'MOD ✓' : 'MOD'}
+                              </button>
+                            </form>
+                          )}
                         </div>
                       )}
                     </div>
