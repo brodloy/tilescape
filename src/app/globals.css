@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500&display=swap');
+
+:root {
+  --bg:        #0c0a08;
+  --bg2:       #110e0a;
+  --bg3:       #181410;
+  --surface:   #1c1812;
+  --surface2:  #242018;
+  --gold:      #e8b84b;
+  --gold-dim:  #7a5c1e;
+  --green:     #3ecf74;
+  --red:       #e85555;
+  --purple:    #a875f0;
+  --text:      #f0e8d8;
+  --text2:     #9a8f7a;
+  --text3:     #4a4438;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+
+.font-pixel { font-family: 'Press Start 2P', monospace; }
+.font-syne  { font-family: 'Syne', sans-serif; }
