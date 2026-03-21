@@ -1,15 +1,32 @@
-import { redirect } from 'next/navigation'
+'use client'
+
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
 import { createEventAction } from '@/app/actions/forms'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 
-export default async function NewEventPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+export default function NewEventPage() {
+  const [error, setError] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setError(null)
+    const formData = new FormData(e.currentTarget)
+    startTransition(async () => {
+      try {
+        const result = await createEventAction(formData)
+        if (result?.error) setError(result.error)
+      } catch (err: any) {
+        // redirect() throws — this is expected on success
+        if (!err?.message?.includes('NEXT_REDIRECT')) {
+          setError(err?.message ?? 'Something went wrong')
+        }
+      }
+    })
+  }
 
   return (
     <div className="min-h-screen bg-bg">
@@ -32,8 +49,12 @@ export default async function NewEventPage() {
             <span className="font-pixel text-[7px] text-gold tracking-widest">EVENT DETAILS</span>
           </CardHeader>
           <CardBody className="p-6">
-            <form action={createEventAction} className="space-y-5">
-
+            {error && (
+              <div className="mb-5 p-3 rounded bg-[rgba(232,85,85,0.1)] border border-[rgba(232,85,85,0.2)] text-red text-sm">
+                {error}
+              </div>
+            )}
+            <form onSubmit={handleSubmit} className="space-y-5">
               <Input
                 name="name"
                 label="Event Name"
@@ -41,7 +62,6 @@ export default async function NewEventPage() {
                 required
                 maxLength={80}
               />
-
               <div>
                 <label className="block font-pixel text-[7px] text-text-2 tracking-wider mb-2 uppercase">
                   Description <span className="text-text-3">(optional)</span>
@@ -53,20 +73,10 @@ export default async function NewEventPage() {
                   className="w-full px-4 py-3 rounded bg-surface border border-[rgba(232,184,75,0.20)] text-text text-sm placeholder:text-text-3 outline-none resize-none focus:border-gold-dim focus:bg-bg3 transition-all"
                 />
               </div>
-
               <div className="grid grid-cols-2 gap-4">
-                <Input
-                  name="start_date"
-                  type="datetime-local"
-                  label="Start Date"
-                />
-                <Input
-                  name="end_date"
-                  type="datetime-local"
-                  label="End Date"
-                />
+                <Input name="start_date" type="datetime-local" label="Start Date" />
+                <Input name="end_date" type="datetime-local" label="End Date" />
               </div>
-
               <Input
                 name="discord_webhook_url"
                 label="Discord Webhook URL"
@@ -74,12 +84,11 @@ export default async function NewEventPage() {
                 hint="Optional — posts drop notifications to your Discord channel"
                 type="url"
               />
-
               <div className="pt-2 flex gap-3 justify-end">
                 <Link href="/dashboard">
                   <Button type="button" variant="ghost">Cancel</Button>
                 </Link>
-                <Button type="submit" variant="primary">
+                <Button type="submit" variant="primary" loading={isPending}>
                   Create Event →
                 </Button>
               </div>
@@ -91,9 +100,9 @@ export default async function NewEventPage() {
           <p className="font-pixel text-[6px] text-gold tracking-wider mb-2">WHAT HAPPENS NEXT</p>
           <ul className="text-xs text-text-2 space-y-1.5">
             <li>→ An 8-character invite code is automatically generated</li>
-            <li>→ You'll be taken to the event page to add tiles and teams</li>
+            <li>→ You will be taken to the event page to add tiles and teams</li>
             <li>→ Share the invite code with your clan to let them join</li>
-            <li>→ Set the event live when you're ready</li>
+            <li>→ Set the event live when you are ready</li>
           </ul>
         </div>
       </main>

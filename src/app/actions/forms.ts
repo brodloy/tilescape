@@ -208,30 +208,50 @@ export async function createEventAction(formData: FormData) {
   const endDate     = formData.get('end_date') as string
   const webhookUrl  = (formData.get('discord_webhook_url') as string)?.trim()
 
-  if (!name) return
+  if (!name) return { error: 'Event name is required' }
 
-  const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase()
+  // Ensure user profile exists (may not if trigger didn't fire)
+  const { data: profile } = await db
+    .from('users').select('id').eq('id', user.id).single()
+
+  if (!profile) {
+    const { error: upsertError } = await db.from('users').upsert({
+      id:           user.id,
+      email:        user.email,
+      display_name: user.user_metadata?.display_name
+                    ?? user.user_metadata?.full_name
+                    ?? user.email?.split('@')[0]
+                    ?? 'Player',
+    })
+    if (upsertError) return { error: `Profile error: ${upsertError.message}` }
+  }
+
+  const inviteCode = Math.random().toString(36).substring(2, 6).toUpperCase()
+               + Math.random().toString(36).substring(2, 6).toUpperCase()
 
   const { data: event, error: eventError } = await db
     .from('events')
     .insert({
       name,
-      description:          description || null,
-      created_by:           user.id,
-      start_date:           startDate || null,
-      end_date:             endDate || null,
-      invite_code:          inviteCode,
-      status:               'draft',
-      discord_webhook_url:  webhookUrl || null,
+      description:         description || null,
+      created_by:          user.id,
+      start_date:          startDate || null,
+      end_date:            endDate || null,
+      invite_code:         inviteCode,
+      status:              'draft',
+      discord_webhook_url: webhookUrl || null,
     })
     .select()
     .single()
 
-  if (eventError || !event) return
+  if (eventError) return { error: `Failed to create event: ${eventError.message}` }
+  if (!event) return { error: 'Event was not created' }
 
-  await db
+  const { error: memberError } = await db
     .from('event_members')
     .insert({ event_id: event.id, user_id: user.id, role: 'owner' })
+
+  if (memberError) return { error: `Member error: ${memberError.message}` }
 
   revalidatePath('/dashboard')
   redirect(`/events/${event.id}`)
