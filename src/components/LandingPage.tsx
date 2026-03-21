@@ -200,7 +200,7 @@ export function LandingPage() {
         <ul>
           <li><a href="#tiles-marquee">How It Works</a></li>
           <li><a href="#testimonials">Reviews</a></li>
-          <li><a href="/dashboard">Preview Dashboard</a></li>
+          <li><a href="/preview">Preview Dashboard</a></li>
         </ul>
         <div className="nav-actions">
           <Link href="/login" className="btn-ghost">Log in</Link>
@@ -218,7 +218,7 @@ export function LandingPage() {
         <p className="hero-sub">The modern event platform built for OSRS clans. Track bingo boards, manage teams, and celebrate every purple drop — no spreadsheets required.</p>
         <div className="hero-ctas">
           <Link href="/login" className="btn-hero-primary">Create Your Clan Board</Link>
-          <Link href="/dashboard" className="btn-hero-secondary">Preview Dashboard →</Link>
+          <Link href="/preview" className="btn-hero-secondary">Preview Dashboard →</Link>
         </div>
         <div className="hero-board">
           <div className="board-chrome">
@@ -330,7 +330,7 @@ export function LandingPage() {
         <div className="footer-links">
           <a href="#tiles-marquee">How It Works</a>
           <a href="#testimonials">Reviews</a>
-          <Link href="/dashboard">Dashboard</Link>
+          <Link href="/preview">Dashboard</Link>
           <Link href="/login">Log in</Link>
           <Link href="/login">Register</Link>
         </div>
