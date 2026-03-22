@@ -18,72 +18,70 @@ const WIKI = 'https://oldschool.runescape.wiki/w/Special:FilePath/'
 const W = (n: string) => `${WIKI}${encodeURIComponent(n.replace(/ /g, '_'))}.png`
 
 const OSRS_ITEMS = [
-  { name: 'Twisted bow',            source: 'CoX',     purple: true,  sprite: W('Twisted bow') },
-  { name: 'Scythe of vitur',        source: 'ToB',     purple: true,  sprite: W('Scythe of vitur') },
-  { name: "Tumeken's shadow",       source: 'ToA',     purple: true,  sprite: W("Tumeken's shadow") },
-  { name: 'Ghrazi rapier',          source: 'ToB',     purple: true,  sprite: W('Ghrazi rapier') },
-  { name: "Osmumten's fang",        source: 'ToA',     purple: true,  sprite: W("Osmumten's fang") },
-  { name: 'Kodai wand',             source: 'CoX',     purple: false, sprite: W('Kodai wand') },
-  { name: 'Elder maul',             source: 'CoX',     purple: false, sprite: W('Elder maul') },
-  { name: 'Avernic hilt',           source: 'ToB',     purple: false, sprite: W('Avernic defender hilt') },
-  { name: 'Zaryte crossbow',        source: 'Nex',     purple: false, sprite: W('Zaryte crossbow') },
-  { name: 'Sanguinesti staff',      source: 'ToB',     purple: false, sprite: W('Sanguinesti staff') },
-  { name: 'Dragon hunter crossbow', source: 'CoX',     purple: false, sprite: W('Dragon hunter crossbow') },
-  { name: 'Justiciar faceguard',    source: 'ToB',     purple: false, sprite: W('Justiciar faceguard') },
-  { name: "Elidinis' ward",         source: 'ToA',     purple: false, sprite: W("Elidinis' ward (f)") },
-  { name: 'Lightbearer',            source: 'ToA',     purple: false, sprite: W('Lightbearer') },
-  { name: 'Olmlet',                 source: 'CoX',     purple: true,  sprite: W('Olmlet') },
-  { name: 'Magus ring',             source: 'DT2',     purple: true,  sprite: W('Magus ring') },
-  { name: "Inquisitor's mace",      source: 'NM',      purple: false, sprite: W("Inquisitor's mace") },
-  { name: 'Dragon warhammer',       source: 'Liz',     purple: false, sprite: W('Dragon warhammer') },
-  { name: 'Infernal cape',          source: 'Inferno', purple: true,  sprite: W('Infernal cape') },
-  { name: "Lil' Zik",               source: 'ToB',     purple: true,  sprite: W("Lil' zik") },
-  { name: 'Jal-nib-rek',            source: 'Inferno', purple: true,  sprite: W('Jal-nib-rek') },
-  { name: 'Nightmare staff',        source: 'NM',      purple: true,  sprite: W('Nightmare staff') },
-  { name: 'Ancestral robe top',     source: 'CoX',     purple: false, sprite: W('Ancestral robe top') },
-  { name: 'Blood torva',            source: 'Nex',     purple: true,  sprite: W('Ancient blood ornament kit') },
-  { name: 'Ancestral robe bottom',  source: 'CoX',     purple: false, sprite: W('Ancestral robe bottom') },
-  { name: 'Ancestral hat',          source: 'CoX',     purple: false, sprite: W('Ancestral hat') },
-  { name: 'Dexterous prayer scroll',source: 'CoX',     purple: false, sprite: W('Dexterous prayer scroll') },
-  { name: 'Arcane prayer scroll',   source: 'CoX',     purple: false, sprite: W('Arcane prayer scroll') },
-  { name: "Dinh's bulwark",         source: 'CoX',     purple: false, sprite: W("Dinh's bulwark") },
-  { name: 'Dragon hunter lance',    source: 'CoX',     purple: false, sprite: W('Dragon hunter lance') },
-  { name: 'Dragon claws',           source: 'CoX',     purple: false, sprite: W('Dragon claws') },
-  { name: 'Justiciar legguards',    source: 'ToB',     purple: false, sprite: W('Justiciar legguards') },
-  { name: 'Justiciar chestguard',   source: 'ToB',     purple: false, sprite: W('Justiciar chestguard') },
-  { name: 'Avernic defender',       source: 'ToB',     purple: false, sprite: W('Avernic defender') },
-  { name: 'Torva full helm',        source: 'Nex',     purple: false, sprite: W('Torva full helm') },
-  { name: 'Torva platebody',        source: 'Nex',     purple: false, sprite: W('Torva platebody') },
-  { name: 'Torva platelegs',        source: 'Nex',     purple: false, sprite: W('Torva platelegs') },
-  { name: 'Bellator ring',          source: 'DT2',     purple: true,  sprite: W('Bellator ring') },
-  { name: 'Venator ring',           source: 'DT2',     purple: true,  sprite: W('Venator ring') },
-  { name: 'Ultor ring',             source: 'DT2',     purple: true,  sprite: W('Ultor ring') },
-  { name: "Inquisitor's great helm",source: 'NM',      purple: false, sprite: W("Inquisitor's great helm") },
-  { name: "Inquisitor's hauberk",   source: 'NM',      purple: false, sprite: W("Inquisitor's hauberk") },
-  { name: "Inquisitor's plateskirt",source: 'NM',      purple: false, sprite: W("Inquisitor's plateskirt") },
-  { name: 'Volatile orb',           source: 'NM',      purple: true,  sprite: W('Volatile orb') },
-  { name: 'Harmonised orb',         source: 'NM',      purple: true,  sprite: W('Harmonised orb') },
-  { name: 'Eldritch orb',           source: 'NM',      purple: true,  sprite: W('Eldritch orb') },
-  { name: 'Masori mask',            source: 'ToA',     purple: false, sprite: W('Masori mask') },
-  { name: 'Masori body',            source: 'ToA',     purple: false, sprite: W('Masori body (f)') },
-  { name: 'Masori chaps',           source: 'ToA',     purple: false, sprite: W('Masori chaps (f)') },
-  { name: 'Bandos chestplate',      source: 'GWD',     purple: false, sprite: W('Bandos chestplate') },
-  { name: 'Bandos tassets',         source: 'GWD',     purple: false, sprite: W('Bandos tassets') },
-  { name: 'Armadyl helmet',         source: 'GWD',     purple: false, sprite: W('Armadyl helmet') },
-  { name: 'Armadyl chestplate',     source: 'GWD',     purple: false, sprite: W('Armadyl chestplate') },
-  { name: 'Armadyl chainskirt',     source: 'GWD',     purple: false, sprite: W('Armadyl chainskirt') },
-  { name: 'Pet general graardor',   source: 'GWD',     purple: true,  sprite: W('Pet general graardor') },
-  { name: "Pet kree'arra",          source: 'GWD',     purple: true,  sprite: W("Pet kree'arra") },
-  { name: 'Abyssal whip',           source: 'Slayer',  purple: false, sprite: W('Abyssal whip') },
-  { name: 'Abyssal dagger',         source: 'Slayer',  purple: false, sprite: W('Abyssal dagger') },
-  { name: 'Trident of the seas',    source: 'Slayer',  purple: false, sprite: W('Trident of the seas') },
-  { name: 'Occult necklace',        source: 'Slayer',  purple: false, sprite: W('Occult necklace') },
-  { name: 'Tanzanite fang',         source: 'Slayer',  purple: false, sprite: W('Tanzanite fang') },
+  { name: 'Twisted bow',  sprite: W('Twisted bow') },
+  { name: 'Scythe of vitur',  sprite: W('Scythe of vitur') },
+  { name: "Tumeken's shadow",  sprite: W("Tumeken's shadow") },
+  { name: 'Ghrazi rapier',  sprite: W('Ghrazi rapier') },
+  { name: "Osmumten's fang",  sprite: W("Osmumten's fang") },
+  { name: 'Kodai wand', sprite: W('Kodai wand') },
+  { name: 'Elder maul', sprite: W('Elder maul') },
+  { name: 'Avernic hilt', sprite: W('Avernic defender hilt') },
+  { name: 'Zaryte crossbow', sprite: W('Zaryte crossbow') },
+  { name: 'Sanguinesti staff', sprite: W('Sanguinesti staff') },
+  { name: 'Dragon hunter crossbow', sprite: W('Dragon hunter crossbow') },
+  { name: 'Justiciar faceguard', sprite: W('Justiciar faceguard') },
+  { name: "Elidinis' ward", sprite: W("Elidinis' ward (f)") },
+  { name: 'Lightbearer', sprite: W('Lightbearer') },
+  { name: 'Olmlet',  sprite: W('Olmlet') },
+  { name: 'Magus ring',  sprite: W('Magus ring') },
+  { name: "Inquisitor's mace", sprite: W("Inquisitor's mace") },
+  { name: 'Dragon warhammer', sprite: W('Dragon warhammer') },
+  { name: 'Infernal cape',  sprite: W('Infernal cape') },
+  { name: "Lil' Zik",  sprite: W("Lil' zik") },
+  { name: 'Jal-nib-rek',  sprite: W('Jal-nib-rek') },
+  { name: 'Nightmare staff',  sprite: W('Nightmare staff') },
+  { name: 'Ancestral robe top', sprite: W('Ancestral robe top') },
+  { name: 'Blood torva',  sprite: W('Ancient blood ornament kit') },
+  { name: 'Ancestral robe bottom', sprite: W('Ancestral robe bottom') },
+  { name: 'Ancestral hat', sprite: W('Ancestral hat') },
+  { name: 'Dexterous prayer scroll', sprite: W('Dexterous prayer scroll') },
+  { name: 'Arcane prayer scroll', sprite: W('Arcane prayer scroll') },
+  { name: "Dinh's bulwark", sprite: W("Dinh's bulwark") },
+  { name: 'Dragon hunter lance', sprite: W('Dragon hunter lance') },
+  { name: 'Dragon claws', sprite: W('Dragon claws') },
+  { name: 'Justiciar legguards', sprite: W('Justiciar legguards') },
+  { name: 'Justiciar chestguard', sprite: W('Justiciar chestguard') },
+  { name: 'Avernic defender', sprite: W('Avernic defender') },
+  { name: 'Torva full helm', sprite: W('Torva full helm') },
+  { name: 'Torva platebody', sprite: W('Torva platebody') },
+  { name: 'Torva platelegs', sprite: W('Torva platelegs') },
+  { name: 'Bellator ring',  sprite: W('Bellator ring') },
+  { name: 'Venator ring',  sprite: W('Venator ring') },
+  { name: 'Ultor ring',  sprite: W('Ultor ring') },
+  { name: "Inquisitor's great helm", sprite: W("Inquisitor's great helm") },
+  { name: "Inquisitor's hauberk", sprite: W("Inquisitor's hauberk") },
+  { name: "Inquisitor's plateskirt", sprite: W("Inquisitor's plateskirt") },
+  { name: 'Volatile orb',  sprite: W('Volatile orb') },
+  { name: 'Harmonised orb',  sprite: W('Harmonised orb') },
+  { name: 'Eldritch orb',  sprite: W('Eldritch orb') },
+  { name: 'Masori mask', sprite: W('Masori mask') },
+  { name: 'Masori body', sprite: W('Masori body (f)') },
+  { name: 'Masori chaps', sprite: W('Masori chaps (f)') },
+  { name: 'Bandos chestplate', sprite: W('Bandos chestplate') },
+  { name: 'Bandos tassets', sprite: W('Bandos tassets') },
+  { name: 'Armadyl helmet', sprite: W('Armadyl helmet') },
+  { name: 'Armadyl chestplate', sprite: W('Armadyl chestplate') },
+  { name: 'Armadyl chainskirt', sprite: W('Armadyl chainskirt') },
+  { name: 'Pet general graardor',  sprite: W('Pet general graardor') },
+  { name: "Pet kree'arra",  sprite: W("Pet kree'arra") },
+  { name: 'Abyssal whip', sprite: W('Abyssal whip') },
+  { name: 'Abyssal dagger', sprite: W('Abyssal dagger') },
+  { name: 'Trident of the seas', sprite: W('Trident of the seas') },
+  { name: 'Occult necklace', sprite: W('Occult necklace') },
+  { name: 'Tanzanite fang', sprite: W('Tanzanite fang') },
 ]
 
 const TEAM_COLORS = ['#e8824b','#4b9ef0','#3ecf74','#a875f0','#e8b84b','#e85555','#4bd4e8','#f0c85a']
-const RAIDS = ['CoX','ToB','ToA','Nex','NM','DT2','Inferno','Liz','GWD','Slayer','Other']
-
 // ── Shared style helpers ──────────────────────────────────────────────────────
 const input: React.CSSProperties = {
   width: '100%', height: '44px', padding: '0 14px',
@@ -93,7 +91,7 @@ const input: React.CSSProperties = {
 }
 const label: React.CSSProperties = {
   display: 'block', fontFamily: "'Press Start 2P',monospace",
-  fontSize: '7px', color: '#4a4438', letterSpacing: '1.5px', marginBottom: '8px',
+  fontSize: '9px', color: '#6a5c3e', letterSpacing: '1px', marginBottom: '10px',
 }
 const card: React.CSSProperties = {
   background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.10)',
@@ -111,117 +109,117 @@ function btn(variant: 'gold'|'ghost'|'danger'|'neutral' = 'ghost'): React.CSSPro
 }
 
 // ── Live OSRS item search using wiki API ───────────────────────────────────────
-type OsrsItem = { name: string; source: string; purple: boolean; sprite: string; id?: number }
+type OsrsItem = { name: string; sprite: string; id?: number }
 
 // Curated bingo-relevant items with source metadata
 const CURATED: OsrsItem[] = [
-  { name: 'Twisted bow',            source: 'CoX',     purple: true,  sprite: W('Twisted bow') },
-  { name: 'Scythe of vitur',        source: 'ToB',     purple: true,  sprite: W('Scythe of vitur') },
-  { name: "Tumeken's shadow",       source: 'ToA',     purple: true,  sprite: W("Tumeken's shadow") },
-  { name: 'Ghrazi rapier',          source: 'ToB',     purple: true,  sprite: W('Ghrazi rapier') },
-  { name: "Osmumten's fang",        source: 'ToA',     purple: true,  sprite: W("Osmumten's fang") },
-  { name: 'Kodai wand',             source: 'CoX',     purple: false, sprite: W('Kodai wand') },
-  { name: 'Elder maul',             source: 'CoX',     purple: false, sprite: W('Elder maul') },
-  { name: 'Avernic defender hilt',  source: 'ToB',     purple: false, sprite: W('Avernic defender hilt') },
-  { name: 'Zaryte crossbow',        source: 'Nex',     purple: false, sprite: W('Zaryte crossbow') },
-  { name: 'Sanguinesti staff',      source: 'ToB',     purple: false, sprite: W('Sanguinesti staff') },
-  { name: 'Dragon hunter crossbow', source: 'CoX',     purple: false, sprite: W('Dragon hunter crossbow') },
-  { name: 'Justiciar faceguard',    source: 'ToB',     purple: false, sprite: W('Justiciar faceguard') },
-  { name: "Elidinis' ward (f)",     source: 'ToA',     purple: false, sprite: W("Elidinis' ward (f)") },
-  { name: 'Lightbearer',            source: 'ToA',     purple: false, sprite: W('Lightbearer') },
-  { name: 'Olmlet',                 source: 'CoX',     purple: true,  sprite: W('Olmlet') },
-  { name: 'Magus ring',             source: 'DT2',     purple: true,  sprite: W('Magus ring') },
-  { name: "Inquisitor's mace",      source: 'NM',      purple: false, sprite: W("Inquisitor's mace") },
-  { name: 'Dragon warhammer',       source: 'Liz',     purple: false, sprite: W('Dragon warhammer') },
-  { name: 'Infernal cape',          source: 'Inferno', purple: true,  sprite: W('Infernal cape') },
-  { name: "Lil' zik",               source: 'ToB',     purple: true,  sprite: W("Lil' zik") },
-  { name: 'Jal-nib-rek',            source: 'Inferno', purple: true,  sprite: W('Jal-nib-rek') },
-  { name: 'Nightmare staff',        source: 'NM',      purple: true,  sprite: W('Nightmare staff') },
-  { name: 'Ancestral robe top',     source: 'CoX',     purple: false, sprite: W('Ancestral robe top') },
-  { name: 'Ancient blood ornament kit', source: 'Nex', purple: true,  sprite: W('Ancient blood ornament kit') },
-  { name: 'Ancestral robe bottom',  source: 'CoX',     purple: false, sprite: W('Ancestral robe bottom') },
-  { name: 'Ancestral hat',          source: 'CoX',     purple: false, sprite: W('Ancestral hat') },
-  { name: 'Dexterous prayer scroll',source: 'CoX',     purple: false, sprite: W('Dexterous prayer scroll') },
-  { name: 'Arcane prayer scroll',   source: 'CoX',     purple: false, sprite: W('Arcane prayer scroll') },
-  { name: "Dinh's bulwark",         source: 'CoX',     purple: false, sprite: W("Dinh's bulwark") },
-  { name: 'Dragon hunter lance',    source: 'CoX',     purple: false, sprite: W('Dragon hunter lance') },
-  { name: 'Dragon claws',           source: 'CoX',     purple: false, sprite: W('Dragon claws') },
-  { name: 'Justiciar legguards',    source: 'ToB',     purple: false, sprite: W('Justiciar legguards') },
-  { name: 'Justiciar chestguard',   source: 'ToB',     purple: false, sprite: W('Justiciar chestguard') },
-  { name: 'Avernic defender',       source: 'ToB',     purple: false, sprite: W('Avernic defender') },
-  { name: 'Torva full helm',        source: 'Nex',     purple: false, sprite: W('Torva full helm') },
-  { name: 'Torva platebody',        source: 'Nex',     purple: false, sprite: W('Torva platebody') },
-  { name: 'Torva platelegs',        source: 'Nex',     purple: false, sprite: W('Torva platelegs') },
-  { name: 'Nihil horn',             source: 'Nex',     purple: false, sprite: W('Nihil horn') },
-  { name: 'Bellator ring',          source: 'DT2',     purple: true,  sprite: W('Bellator ring') },
-  { name: 'Venator ring',           source: 'DT2',     purple: true,  sprite: W('Venator ring') },
-  { name: 'Ultor ring',             source: 'DT2',     purple: true,  sprite: W('Ultor ring') },
-  { name: "Inquisitor's great helm",source: 'NM',      purple: false, sprite: W("Inquisitor's great helm") },
-  { name: "Inquisitor's hauberk",   source: 'NM',      purple: false, sprite: W("Inquisitor's hauberk") },
-  { name: "Inquisitor's plateskirt",source: 'NM',      purple: false, sprite: W("Inquisitor's plateskirt") },
-  { name: 'Volatile orb',           source: 'NM',      purple: true,  sprite: W('Volatile orb') },
-  { name: 'Harmonised orb',         source: 'NM',      purple: true,  sprite: W('Harmonised orb') },
-  { name: 'Eldritch orb',           source: 'NM',      purple: true,  sprite: W('Eldritch orb') },
-  { name: 'Masori mask',            source: 'ToA',     purple: false, sprite: W('Masori mask') },
-  { name: 'Masori body (f)',         source: 'ToA',     purple: false, sprite: W('Masori body (f)') },
-  { name: 'Masori chaps (f)',        source: 'ToA',     purple: false, sprite: W('Masori chaps (f)') },
-  { name: 'Bandos chestplate',      source: 'GWD',     purple: false, sprite: W('Bandos chestplate') },
-  { name: 'Bandos tassets',         source: 'GWD',     purple: false, sprite: W('Bandos tassets') },
-  { name: 'Bandos boots',           source: 'GWD',     purple: false, sprite: W('Bandos boots') },
-  { name: 'Armadyl helmet',         source: 'GWD',     purple: false, sprite: W('Armadyl helmet') },
-  { name: 'Armadyl chestplate',     source: 'GWD',     purple: false, sprite: W('Armadyl chestplate') },
-  { name: 'Armadyl chainskirt',     source: 'GWD',     purple: false, sprite: W('Armadyl chainskirt') },
-  { name: 'Zamorakian spear',       source: 'GWD',     purple: false, sprite: W('Zamorakian spear') },
-  { name: 'Saradomin sword',        source: 'GWD',     purple: false, sprite: W('Saradomin sword') },
-  { name: 'Pet general graardor',   source: 'GWD',     purple: true,  sprite: W('Pet general graardor') },
-  { name: "Pet kree'arra",          source: 'GWD',     purple: true,  sprite: W("Pet kree'arra") },
-  { name: 'Pet zilyana',            source: 'GWD',     purple: true,  sprite: W('Pet zilyana') },
-  { name: 'Pet kril tsutsaroth',    source: 'GWD',     purple: true,  sprite: W("Pet k'ril tsutsaroth") },
-  { name: 'Abyssal whip',           source: 'Slayer',  purple: false, sprite: W('Abyssal whip') },
-  { name: 'Abyssal dagger',         source: 'Slayer',  purple: false, sprite: W('Abyssal dagger') },
-  { name: 'Trident of the seas',    source: 'Slayer',  purple: false, sprite: W('Trident of the seas') },
-  { name: 'Occult necklace',        source: 'Slayer',  purple: false, sprite: W('Occult necklace') },
-  { name: 'Tanzanite fang',         source: 'Slayer',  purple: false, sprite: W('Tanzanite fang') },
-  { name: 'Magic fang',             source: 'Slayer',  purple: false, sprite: W('Magic fang') },
-  { name: 'Jar of souls',           source: 'Slayer',  purple: true,  sprite: W('Jar of souls') },
-  { name: 'Abyssal bludgeon',       source: 'Slayer',  purple: false, sprite: W('Abyssal bludgeon') },
-  { name: 'Dragon pickaxe',         source: 'Wildy',   purple: false, sprite: W('Dragon pickaxe') },
-  { name: 'Dragon 2h sword',        source: 'Wildy',   purple: false, sprite: W('Dragon 2h sword') },
-  { name: "Voidwaker",              source: 'Wildy',   purple: true,  sprite: W('Voidwaker') },
-  { name: 'Skull of vet\'ion',      source: 'Wildy',   purple: true,  sprite: W("Skull of vet'ion") },
-  { name: 'Fangs of venenatis',     source: 'Wildy',   purple: true,  sprite: W('Fangs of venenatis') },
-  { name: 'Claws of callisto',      source: 'Wildy',   purple: true,  sprite: W('Claws of callisto') },
-  { name: 'Scorpia\'s offspring',   source: 'Wildy',   purple: true,  sprite: W("Scorpia's offspring") },
-  { name: 'Amulet of torture',      source: 'Zulrah',  purple: false, sprite: W('Amulet of torture') },
-  { name: 'Necklace of anguish',    source: 'Zulrah',  purple: false, sprite: W('Necklace of anguish') },
-  { name: 'Tormented bracelet',     source: 'Zulrah',  purple: false, sprite: W('Tormented bracelet') },
-  { name: 'Tanzanite mutagen',      source: 'Zulrah',  purple: true,  sprite: W('Tanzanite mutagen') },
-  { name: 'Magma mutagen',          source: 'Zulrah',  purple: true,  sprite: W('Magma mutagen') },
-  { name: 'Pet snakeling',          source: 'Zulrah',  purple: true,  sprite: W('Pet snakeling') },
-  { name: 'Dragonfire ward',        source: 'Vorkath', purple: false, sprite: W('Dragonfire ward') },
-  { name: 'Draconic visage',        source: 'Vorkath', purple: false, sprite: W('Draconic visage') },
-  { name: 'Skeletal visage',        source: 'Vorkath', purple: false, sprite: W('Skeletal visage') },
-  { name: 'Vorki',                  source: 'Vorkath', purple: true,  sprite: W('Vorki') },
-  { name: 'Zenyte shard',           source: 'Demonic', purple: true,  sprite: W('Zenyte shard') },
-  { name: 'Ballista spring',        source: 'Demonic', purple: false, sprite: W('Ballista spring') },
-  { name: 'Heavy frame',            source: 'Demonic', purple: false, sprite: W('Heavy frame') },
-  { name: 'Monkey tail',            source: 'Demonic', purple: false, sprite: W('Monkey tail') },
-  { name: 'Pegasian crystal',       source: 'Cerb',    purple: true,  sprite: W('Pegasian crystal') },
-  { name: 'Eternal crystal',        source: 'Cerb',    purple: true,  sprite: W('Eternal crystal') },
-  { name: 'Smouldering stone',      source: 'Cerb',    purple: true,  sprite: W('Smouldering stone') },
-  { name: 'Hellpuppy',              source: 'Cerb',    purple: true,  sprite: W('Hellpuppy') },
-  { name: 'Primordial crystal',     source: 'Cerb',    purple: true,  sprite: W('Primordial crystal') },
-  { name: 'Blowpipe',               source: 'Zulrah',  purple: false, sprite: W('Toxic blowpipe') },
-  { name: 'Toxic staff of the dead',source: 'Zulrah',  purple: false, sprite: W('Toxic staff of the dead') },
-  { name: 'Serpentine visage',      source: 'Zulrah',  purple: false, sprite: W('Serpentine visage') },
-  { name: 'Berserker ring (i)',      source: 'Raids',   purple: false, sprite: W('Berserker ring (i)') },
-  { name: 'Imbued heart',           source: 'Slayer',  purple: false, sprite: W('Imbued heart') },
-  { name: 'Dust devil pet',         source: 'Slayer',  purple: true,  sprite: W('Noon') },
-  { name: 'Crystal armour seed',    source: 'Gauntlet',purple: false, sprite: W('Crystal armour seed') },
-  { name: 'Crystal weapon seed',    source: 'Gauntlet',purple: false, sprite: W('Crystal weapon seed') },
-  { name: 'Youngllef',              source: 'Gauntlet',purple: true,  sprite: W('Youngllef') },
-  { name: 'Enhanced crystal weapon seed', source: 'Gauntlet', purple: true, sprite: W('Enhanced crystal weapon seed') },
-  { name: 'Corrupted youngllef',    source: 'Gauntlet',purple: true,  sprite: W('Corrupted youngllef') },
+  { name: 'Twisted bow',  sprite: W('Twisted bow') },
+  { name: 'Scythe of vitur',  sprite: W('Scythe of vitur') },
+  { name: "Tumeken's shadow",  sprite: W("Tumeken's shadow") },
+  { name: 'Ghrazi rapier',  sprite: W('Ghrazi rapier') },
+  { name: "Osmumten's fang",  sprite: W("Osmumten's fang") },
+  { name: 'Kodai wand', sprite: W('Kodai wand') },
+  { name: 'Elder maul', sprite: W('Elder maul') },
+  { name: 'Avernic defender hilt', sprite: W('Avernic defender hilt') },
+  { name: 'Zaryte crossbow', sprite: W('Zaryte crossbow') },
+  { name: 'Sanguinesti staff', sprite: W('Sanguinesti staff') },
+  { name: 'Dragon hunter crossbow', sprite: W('Dragon hunter crossbow') },
+  { name: 'Justiciar faceguard', sprite: W('Justiciar faceguard') },
+  { name: "Elidinis' ward (f)", sprite: W("Elidinis' ward (f)") },
+  { name: 'Lightbearer', sprite: W('Lightbearer') },
+  { name: 'Olmlet',  sprite: W('Olmlet') },
+  { name: 'Magus ring',  sprite: W('Magus ring') },
+  { name: "Inquisitor's mace", sprite: W("Inquisitor's mace") },
+  { name: 'Dragon warhammer', sprite: W('Dragon warhammer') },
+  { name: 'Infernal cape',  sprite: W('Infernal cape') },
+  { name: "Lil' zik",  sprite: W("Lil' zik") },
+  { name: 'Jal-nib-rek',  sprite: W('Jal-nib-rek') },
+  { name: 'Nightmare staff',  sprite: W('Nightmare staff') },
+  { name: 'Ancestral robe top', sprite: W('Ancestral robe top') },
+  { name: 'Ancient blood ornament kit',  sprite: W('Ancient blood ornament kit') },
+  { name: 'Ancestral robe bottom', sprite: W('Ancestral robe bottom') },
+  { name: 'Ancestral hat', sprite: W('Ancestral hat') },
+  { name: 'Dexterous prayer scroll', sprite: W('Dexterous prayer scroll') },
+  { name: 'Arcane prayer scroll', sprite: W('Arcane prayer scroll') },
+  { name: "Dinh's bulwark", sprite: W("Dinh's bulwark") },
+  { name: 'Dragon hunter lance', sprite: W('Dragon hunter lance') },
+  { name: 'Dragon claws', sprite: W('Dragon claws') },
+  { name: 'Justiciar legguards', sprite: W('Justiciar legguards') },
+  { name: 'Justiciar chestguard', sprite: W('Justiciar chestguard') },
+  { name: 'Avernic defender', sprite: W('Avernic defender') },
+  { name: 'Torva full helm', sprite: W('Torva full helm') },
+  { name: 'Torva platebody', sprite: W('Torva platebody') },
+  { name: 'Torva platelegs', sprite: W('Torva platelegs') },
+  { name: 'Nihil horn', sprite: W('Nihil horn') },
+  { name: 'Bellator ring',  sprite: W('Bellator ring') },
+  { name: 'Venator ring',  sprite: W('Venator ring') },
+  { name: 'Ultor ring',  sprite: W('Ultor ring') },
+  { name: "Inquisitor's great helm", sprite: W("Inquisitor's great helm") },
+  { name: "Inquisitor's hauberk", sprite: W("Inquisitor's hauberk") },
+  { name: "Inquisitor's plateskirt", sprite: W("Inquisitor's plateskirt") },
+  { name: 'Volatile orb',  sprite: W('Volatile orb') },
+  { name: 'Harmonised orb',  sprite: W('Harmonised orb') },
+  { name: 'Eldritch orb',  sprite: W('Eldritch orb') },
+  { name: 'Masori mask', sprite: W('Masori mask') },
+  { name: 'Masori body (f)', sprite: W('Masori body (f)') },
+  { name: 'Masori chaps (f)', sprite: W('Masori chaps (f)') },
+  { name: 'Bandos chestplate', sprite: W('Bandos chestplate') },
+  { name: 'Bandos tassets', sprite: W('Bandos tassets') },
+  { name: 'Bandos boots', sprite: W('Bandos boots') },
+  { name: 'Armadyl helmet', sprite: W('Armadyl helmet') },
+  { name: 'Armadyl chestplate', sprite: W('Armadyl chestplate') },
+  { name: 'Armadyl chainskirt', sprite: W('Armadyl chainskirt') },
+  { name: 'Zamorakian spear', sprite: W('Zamorakian spear') },
+  { name: 'Saradomin sword', sprite: W('Saradomin sword') },
+  { name: 'Pet general graardor',  sprite: W('Pet general graardor') },
+  { name: "Pet kree'arra",  sprite: W("Pet kree'arra") },
+  { name: 'Pet zilyana',  sprite: W('Pet zilyana') },
+  { name: 'Pet kril tsutsaroth',  sprite: W("Pet k'ril tsutsaroth") },
+  { name: 'Abyssal whip', sprite: W('Abyssal whip') },
+  { name: 'Abyssal dagger', sprite: W('Abyssal dagger') },
+  { name: 'Trident of the seas', sprite: W('Trident of the seas') },
+  { name: 'Occult necklace', sprite: W('Occult necklace') },
+  { name: 'Tanzanite fang', sprite: W('Tanzanite fang') },
+  { name: 'Magic fang', sprite: W('Magic fang') },
+  { name: 'Jar of souls',  sprite: W('Jar of souls') },
+  { name: 'Abyssal bludgeon', sprite: W('Abyssal bludgeon') },
+  { name: 'Dragon pickaxe', sprite: W('Dragon pickaxe') },
+  { name: 'Dragon 2h sword', sprite: W('Dragon 2h sword') },
+  { name: "Voidwaker",  sprite: W('Voidwaker') },
+  { name: 'Skull of vet\'ion',  sprite: W("Skull of vet'ion") },
+  { name: 'Fangs of venenatis',  sprite: W('Fangs of venenatis') },
+  { name: 'Claws of callisto',  sprite: W('Claws of callisto') },
+  { name: 'Scorpia\'s offspring',  sprite: W("Scorpia's offspring") },
+  { name: 'Amulet of torture', sprite: W('Amulet of torture') },
+  { name: 'Necklace of anguish', sprite: W('Necklace of anguish') },
+  { name: 'Tormented bracelet', sprite: W('Tormented bracelet') },
+  { name: 'Tanzanite mutagen',  sprite: W('Tanzanite mutagen') },
+  { name: 'Magma mutagen',  sprite: W('Magma mutagen') },
+  { name: 'Pet snakeling',  sprite: W('Pet snakeling') },
+  { name: 'Dragonfire ward', sprite: W('Dragonfire ward') },
+  { name: 'Draconic visage', sprite: W('Draconic visage') },
+  { name: 'Skeletal visage', sprite: W('Skeletal visage') },
+  { name: 'Vorki',  sprite: W('Vorki') },
+  { name: 'Zenyte shard',  sprite: W('Zenyte shard') },
+  { name: 'Ballista spring', sprite: W('Ballista spring') },
+  { name: 'Heavy frame', sprite: W('Heavy frame') },
+  { name: 'Monkey tail', sprite: W('Monkey tail') },
+  { name: 'Pegasian crystal',  sprite: W('Pegasian crystal') },
+  { name: 'Eternal crystal',  sprite: W('Eternal crystal') },
+  { name: 'Smouldering stone',  sprite: W('Smouldering stone') },
+  { name: 'Hellpuppy',  sprite: W('Hellpuppy') },
+  { name: 'Primordial crystal',  sprite: W('Primordial crystal') },
+  { name: 'Blowpipe', sprite: W('Toxic blowpipe') },
+  { name: 'Toxic staff of the dead', sprite: W('Toxic staff of the dead') },
+  { name: 'Serpentine visage', sprite: W('Serpentine visage') },
+  { name: 'Berserker ring (i)', sprite: W('Berserker ring (i)') },
+  { name: 'Imbued heart', sprite: W('Imbued heart') },
+  { name: 'Dust devil pet',  sprite: W('Noon') },
+  { name: 'Crystal armour seed', sprite: W('Crystal armour seed') },
+  { name: 'Crystal weapon seed', sprite: W('Crystal weapon seed') },
+  { name: 'Youngllef',  sprite: W('Youngllef') },
+  { name: 'Enhanced crystal weapon seed', sprite: W('Enhanced crystal weapon seed') },
+  { name: 'Corrupted youngllef',  sprite: W('Corrupted youngllef') },
 ]
 
 function useWikiSearch(query: string) {
@@ -233,8 +231,7 @@ function useWikiSearch(query: string) {
 
     // First check curated list
     const curatedMatches = CURATED.filter(i =>
-      i.name.toLowerCase().includes(query.toLowerCase()) ||
-      i.source.toLowerCase().includes(query.toLowerCase())
+      i.name.toLowerCase().includes(query.toLowerCase())
     )
 
     if (curatedMatches.length > 0) {
@@ -252,7 +249,7 @@ function useWikiSearch(query: string) {
       .then(r => r.json())
       .then(([_, names]: [string, string[]]) => {
         const items: OsrsItem[] = names.map(n => ({
-          name: n, source: '', purple: false, sprite: W(n),
+          name: n, sprite: W(n),
         }))
         setResults(items)
       })
@@ -288,8 +285,7 @@ function ItemSearchDropdown({ onSelect, takenPositions, boardTiles }: {
   const displayItems: OsrsItem[] = query.length < 2
     ? CURATED.slice(0, 16)
     : wikiResults.length > 0 ? wikiResults : CURATED.filter(i =>
-        i.name.toLowerCase().includes(query.toLowerCase()) ||
-        i.source.toLowerCase().includes(query.toLowerCase())
+        i.name.toLowerCase().includes(query.toLowerCase())
       ).slice(0, 20)
 
   function pick(item: OsrsItem) {
@@ -297,7 +293,7 @@ function ItemSearchDropdown({ onSelect, takenPositions, boardTiles }: {
   }
 
   function clear() {
-    setSelected(null); setQuery(''); onSelect({ name: '', source: '', purple: false, sprite: '' })
+    setSelected(null); setQuery(''); onSelect({ name: '', sprite: '' })
   }
 
   return (
@@ -321,12 +317,7 @@ function ItemSearchDropdown({ onSelect, takenPositions, boardTiles }: {
           style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '15px', fontFamily: "'DM Sans',sans-serif" }}
         />
         {loading && <span style={{ fontSize: '12px', color: '#4a4438' }}>…</span>}
-        {selected && (
-          <>
-            <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', padding: '3px 8px', borderRadius: '4px', background: selected.purple ? 'rgba(168,117,240,0.12)' : 'rgba(232,184,75,0.08)', color: selected.purple ? '#a875f0' : '#9a8f7a', border: `1px solid ${selected.purple ? 'rgba(168,117,240,0.25)' : 'rgba(232,184,75,0.15)'}`, whiteSpace: 'nowrap', flexShrink: 0 }}>{selected.source || 'CUSTOM'}</span>
-            <button onClick={e => { e.stopPropagation(); clear() }} style={{ background: 'none', border: 'none', color: '#4a4438', cursor: 'pointer', fontSize: '16px', padding: '0 2px', flexShrink: 0 }}>×</button>
-          </>
-        )}
+        
       </div>
 
       {open && (
@@ -343,18 +334,18 @@ function ItemSearchDropdown({ onSelect, takenPositions, boardTiles }: {
                 <img src={item.sprite} alt={item.name} style={{ width: '32px', height: '32px', objectFit: 'contain', imageRendering: 'pixelated', flexShrink: 0 }} onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0.15' }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
-                  {item.source && <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', marginTop: '2px' }}>{item.source}</div>}
+                  
                 </div>
                 <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexShrink: 0 }}>
-                  {item.purple && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#a875f0', padding: '2px 6px', borderRadius: '3px', background: 'rgba(168,117,240,0.1)', border: '1px solid rgba(168,117,240,0.2)' }}>PURPLE</span>}
-                  {onBoard && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4b9ef0', padding: '2px 6px', borderRadius: '3px', background: 'rgba(75,158,240,0.08)', border: '1px solid rgba(75,158,240,0.15)' }}>ON BOARD</span>}
+                  
+                  
                 </div>
               </div>
             )
           })}
           {/* Always allow custom */}
           {query && !CURATED.find(i => i.name.toLowerCase() === query.toLowerCase()) && (
-            <div onClick={() => pick({ name: query, source: '', purple: false, sprite: W(query) })}
+            <div onClick={() => pick({ name: query, sprite: W(query) })}
               style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', cursor: 'pointer', borderTop: '1px solid rgba(232,184,75,0.08)' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none' }}>
@@ -371,7 +362,7 @@ function ItemSearchDropdown({ onSelect, takenPositions, boardTiles }: {
   )
 }
 
-// ── AddTilePanel ──────────────────────────────────────────────────────────────
+// ── TilePanel ────────────────────────────────────────────────────────────────
 function TilePanel({ position, existingTile, eventId, boardTiles, onClose, onDone }: {
   position: number; existingTile: any | null; eventId: string
   boardTiles: any[]; onClose: () => void; onDone: () => void
@@ -380,31 +371,30 @@ function TilePanel({ position, existingTile, eventId, boardTiles, onClose, onDon
   const [pending, startTransition] = useTransition()
   const [deleting, startDelete] = useTransition()
   const [selectedItem, setSelectedItem] = useState<OsrsItem | null>(
-    isEdit && !existingTile.free_space ? {
-      name: existingTile.name, source: existingTile.source_raid ?? '',
-      purple: existingTile.is_purple ?? false, sprite: existingTile.sprite_url ?? W(existingTile.name),
-    } : null
+    isEdit && !existingTile.free_space
+      ? { name: existingTile.name, sprite: existingTile.sprite_url ?? W(existingTile.name) }
+      : null
   )
-  const [isFree, setIsFree] = useState(isEdit ? !!existingTile.free_space : false)
-  const [isPurple, setIsPurple] = useState(isEdit ? !!existingTile.is_purple : false)
-  const [source, setSource] = useState(isEdit ? (existingTile.source_raid ?? '') : '')
+  const [customName, setCustomName] = useState<string>(
+    isEdit && !existingTile.free_space ? existingTile.name : ''
+  )
 
   function handleSelect(item: OsrsItem) {
     if (!item.name) { setSelectedItem(null); return }
-    setSelectedItem(item); setIsPurple(item.purple); setSource(item.source)
+    setSelectedItem(item)
+    setCustomName(item.name)  // pre-populate name from dropdown
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    const trimmedName = customName.trim()
+    if (!trimmedName || !selectedItem?.sprite) return
     const fd = new FormData(e.currentTarget)
     fd.set('position', String(position))
-    if (isFree) {
-      fd.set('name', 'FREE'); fd.set('free_space', 'true'); fd.set('sprite_url', ''); fd.set('is_purple', 'false')
-    } else {
-      if (!selectedItem?.name) return
-      fd.set('name', selectedItem.name)
-      fd.set('sprite_url', selectedItem.sprite || W(selectedItem.name))
-    }
+    fd.set('name', trimmedName)
+    fd.set('sprite_url', selectedItem.sprite)
+    fd.set('is_purple', 'false')
+    fd.set('source_raid', '')
     startTransition(async () => {
       if (isEdit) await updateTile(existingTile.id, eventId, fd)
       else await addTileAction(eventId, fd)
@@ -417,101 +407,64 @@ function TilePanel({ position, existingTile, eventId, boardTiles, onClose, onDon
     startDelete(async () => { await removeTile(existingTile.id, eventId); onDone() })
   }
 
-  const canSubmit = isFree || !!selectedItem?.name
+  const canSubmit = !!customName.trim() && !!selectedItem?.sprite
 
   return (
     <div style={{ background: 'var(--bg2)', borderLeft: '1px solid rgba(232,184,75,0.12)', display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', width: '400px', flexShrink: 0 }}>
       {/* Header */}
       <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(232,184,75,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, background: 'var(--bg2)', zIndex: 10 }}>
         <div>
-          <div style={label}>{isEdit ? 'EDIT TILE' : 'ADD TILE'} · POSITION {position}</div>
-          <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '20px', color: 'var(--text)' }}>
-            {isEdit ? (existingTile.free_space ? 'Free Space ⭐' : existingTile.name) : 'Choose an Item'}
+          <div style={label}>{isEdit ? 'EDIT TILE' : 'ADD TILE'} · POSITION {position + 1}</div>
+          <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '22px', color: 'var(--text)' }}>
+            {isEdit ? existingTile.name : 'Choose an Item'}
           </div>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           {isEdit && (
             <button onClick={handleDelete} disabled={deleting}
-              style={{ height: '36px', padding: '0 14px', background: 'rgba(232,85,85,0.08)', border: '1px solid rgba(232,85,85,0.25)', borderRadius: '8px', color: '#e85555', cursor: 'pointer', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px' }}>
+              style={{ height: '38px', padding: '0 16px', background: 'rgba(232,85,85,0.08)', border: '1px solid rgba(232,85,85,0.25)', borderRadius: '8px', color: '#e85555', cursor: 'pointer', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px' }}>
               {deleting ? '…' : 'Remove'}
             </button>
           )}
-          <button onClick={onClose} style={{ width: '36px', height: '36px', background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.12)', borderRadius: '8px', color: '#9a8f7a', cursor: 'pointer', fontSize: '18px' }}>×</button>
+          <button onClick={onClose} style={{ width: '38px', height: '38px', background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.12)', borderRadius: '8px', color: '#9a8f7a', cursor: 'pointer', fontSize: '20px' }}>×</button>
         </div>
       </div>
 
-      {/* Edit mode — show current tile */}
-      {isEdit && !existingTile.free_space && existingTile.sprite_url && (
-        <div style={{ padding: '20px 24px 4px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 16px', background: existingTile.is_purple ? 'rgba(168,117,240,0.06)' : 'var(--surface)', border: `2px solid ${existingTile.is_purple ? 'rgba(168,117,240,0.3)' : 'rgba(232,184,75,0.12)'}`, borderRadius: '12px' }}>
-            <img src={existingTile.sprite_url} alt={existingTile.name} style={{ width: '52px', height: '52px', objectFit: 'contain', imageRendering: 'pixelated', flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '15px', color: existingTile.is_purple ? '#a875f0' : 'var(--text)', marginBottom: '3px' }}>{existingTile.name}</div>
-              {existingTile.source_raid && <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438' }}>{existingTile.source_raid}</div>}
-            </div>
-          </div>
-          <div style={{ fontSize: '12px', color: '#4a4438', padding: '8px 2px 0' }}>Search below to replace with a different item</div>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <input type="hidden" name="position" value={position} />
-        <input type="hidden" name="is_purple" value={isPurple ? 'true' : 'false'} />
-        <input type="hidden" name="source_raid" value={source} />
 
-        {/* Free space */}
-        <label style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', padding: '14px 16px', background: isFree ? 'rgba(232,184,75,0.06)' : 'var(--surface)', border: `1px solid ${isFree ? 'rgba(232,184,75,0.3)' : 'rgba(232,184,75,0.1)'}`, borderRadius: '12px', transition: 'all .15s' }}>
-          <input type="checkbox" checked={isFree} onChange={e => { setIsFree(e.target.checked); if (e.target.checked) setSelectedItem(null) }} style={{ accentColor: '#e8b84b', width: '18px', height: '18px', flexShrink: 0 }} />
-          <div>
-            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '15px', color: isFree ? '#e8b84b' : 'var(--text)' }}>⭐ Free Space</div>
-            <div style={{ fontSize: '13px', color: '#9a8f7a', marginTop: '2px' }}>Always completed for all teams</div>
+        {/* Sprite preview */}
+        {selectedItem?.sprite && (
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: '96px', height: '96px', borderRadius: '16px', border: '1px solid rgba(232,184,75,0.2)', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <img src={selectedItem.sprite} alt={customName} style={{ width: '72px', height: '72px', objectFit: 'contain', imageRendering: 'pixelated', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.8))' }}
+                onError={e => (e.currentTarget.style.opacity = '0.2')} />
+            </div>
           </div>
-        </label>
-
-        {!isFree && (
-          <>
-            <div>
-              <div style={label}>SEARCH ITEM</div>
-              <ItemSearchDropdown onSelect={handleSelect} takenPositions={new Set()} boardTiles={boardTiles} />
-            </div>
-
-            {selectedItem?.name && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px', background: isPurple ? 'rgba(168,117,240,0.06)' : 'var(--surface)', border: `2px solid ${isPurple ? 'rgba(168,117,240,0.3)' : 'rgba(232,184,75,0.15)'}`, borderRadius: '12px' }}>
-                <img src={selectedItem.sprite} alt={selectedItem.name} style={{ width: '50px', height: '50px', objectFit: 'contain', imageRendering: 'pixelated', flexShrink: 0 }} onError={e => (e.currentTarget.style.display = 'none')} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '15px', color: isPurple ? '#a875f0' : 'var(--text)', marginBottom: '3px' }}>{selectedItem.name}</div>
-                  {source && <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438' }}>{source}</div>}
-                </div>
-              </div>
-            )}
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <div style={label}>SOURCE / RAID</div>
-                <select value={source} onChange={e => setSource(e.target.value)} style={{ ...input, cursor: 'pointer' }}>
-                  <option value="">None</option>
-                  {RAIDS.map(r => <option key={r} value={r}>{r}</option>)}
-                </select>
-              </div>
-              <div>
-                <div style={label}>POINTS</div>
-                <input name="points" type="number" min="1" defaultValue={existingTile?.points ?? 1} style={input} />
-              </div>
-            </div>
-
-            <label style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', padding: '14px 16px', background: isPurple ? 'rgba(168,117,240,0.06)' : 'var(--surface)', border: `1px solid ${isPurple ? 'rgba(168,117,240,0.25)' : 'rgba(232,184,75,0.1)'}`, borderRadius: '12px', transition: 'all .15s' }}>
-              <input type="checkbox" checked={isPurple} onChange={e => setIsPurple(e.target.checked)} style={{ accentColor: '#a875f0', width: '18px', height: '18px', flexShrink: 0 }} />
-              <div>
-                <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '15px', color: isPurple ? '#a875f0' : 'var(--text)' }}>⬥ Purple / Mega-rare</div>
-                <div style={{ fontSize: '13px', color: '#9a8f7a', marginTop: '2px' }}>Highlighted with purple glow on board</div>
-              </div>
-            </label>
-          </>
         )}
 
+        {/* Item search */}
+        <div>
+          <div style={label}>SEARCH SPRITE</div>
+          <ItemSearchDropdown onSelect={handleSelect} takenPositions={new Set()} boardTiles={boardTiles} />
+          <div style={{ fontSize: '13px', color: '#6a5c3e', marginTop: '8px' }}>Search to pick a sprite — the name below will be pre-filled but you can edit it</div>
+        </div>
+
+        {/* Custom name */}
+        <div>
+          <div style={label}>TILE NAME</div>
+          <input
+            value={customName}
+            onChange={e => setCustomName(e.target.value)}
+            placeholder="e.g. Twisted Bow, ToA Purple…"
+            maxLength={40}
+            style={{ ...input, fontSize: '16px', height: '50px' }}
+          />
+        </div>
+
         <button type="submit" disabled={pending || !canSubmit}
-          style={{ ...btn('gold'), width: '100%', padding: '14px', fontSize: '15px', opacity: !canSubmit ? 0.4 : 1, cursor: !canSubmit ? 'not-allowed' : 'pointer' }}>
-          {pending ? (isEdit ? 'Saving…' : 'Adding…') : isEdit ? 'Save Changes' : `Add to Position ${position}`}
+          style={{ ...btn('gold'), width: '100%', padding: '16px', fontSize: '15px', opacity: !canSubmit ? 0.4 : 1, cursor: !canSubmit ? 'not-allowed' : 'pointer' }}>
+          {pending ? (isEdit ? 'Saving…' : 'Adding…') : isEdit ? 'Save Changes' : `Add to Position ${position + 1}`}
         </button>
       </form>
     </div>
@@ -597,26 +550,24 @@ function BoardTab({ tiles, eventId, isOwner }: { tiles: any[]; eventId: string; 
                     onClick={() => isOwner && handleCellClick(pos)}
                     style={{ aspectRatio: '1', borderRadius: '12px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '10px 6px 8px', overflow: 'hidden',
                       cursor: isOwner ? 'pointer' : 'default', transition: 'all .15s',
-                      background: isSelected ? (tile ? 'rgba(232,184,75,0.1)' : 'rgba(232,184,75,0.07)') : tile?.free_space ? 'rgba(232,184,75,0.06)' : tile?.is_purple ? 'rgba(168,117,240,0.08)' : tile ? 'var(--surface)' : 'var(--bg3)',
-                      border: isSelected ? '2px solid rgba(232,184,75,0.6)' : tile?.free_space ? '1px solid rgba(232,184,75,0.3)' : tile?.is_purple ? '1px solid rgba(168,117,240,0.3)' : tile ? '1px solid rgba(255,255,255,0.07)' : '1px dashed rgba(255,255,255,0.05)',
+                      background: isSelected ? 'rgba(232,184,75,0.1)' : tile ? 'var(--surface)' : 'var(--bg3)',
+                      border: isSelected ? '2px solid rgba(232,184,75,0.6)' : tile ? '1px solid rgba(255,255,255,0.07)' : '1px dashed rgba(255,255,255,0.05)',
                       boxShadow: isSelected ? '0 0 0 3px rgba(232,184,75,0.15)' : 'none',
                     }}>
                     {tile ? (
                       <>
-                        {tile.is_purple && <div style={{ position: 'absolute', top: '6px', left: '6px', width: '6px', height: '6px', background: '#a875f0', borderRadius: '1px', boxShadow: '0 0 5px #a875f0' }} />}
+                        
                         {/* Edit indicator */}
                         {isOwner && isSelected && (
                           <div style={{ position: 'absolute', top: '5px', right: '5px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#e8b84b', background: 'rgba(232,184,75,0.15)', border: '1px solid rgba(232,184,75,0.3)', borderRadius: '4px', padding: '2px 4px' }}>EDIT</div>
                         )}
                         {tile.sprite_url ? (
                           <img src={tile.sprite_url} alt={tile.name} style={{ width: '52%', height: '52%', objectFit: 'contain', imageRendering: 'pixelated', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.8))' }} onError={e => (e.currentTarget.style.display = 'none')} />
-                        ) : tile.free_space ? <span style={{ fontSize: '26px' }}>⭐</span> : null}
-                        <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5px', color: tile.free_space ? '#e8b84b' : tile.is_purple ? '#c4a0f5' : '#9a8f7a', textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 4px' }}>
-                          {tile.free_space ? 'FREE' : tile.name.split(' ').slice(0, 2).join(' ')}
+                        ) : null}
+                        <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#c8b882', textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 4px' }}>
+                          {tile.name.split(' ').slice(0, 2).join(' ')}
                         </div>
-                        {tile.source_raid && !tile.free_space && (
-                          <div style={{ position: 'absolute', bottom: '4px', fontFamily: "'Press Start 2P',monospace", fontSize: '4px', color: '#4a4438' }}>{tile.source_raid}</div>
-                        )}
+                        
                       </>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>

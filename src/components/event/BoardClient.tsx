@@ -13,12 +13,6 @@ import { Avatar } from '@/components/ui/Avatar'
 const WIKI = 'https://oldschool.runescape.wiki/w/Special:FilePath/'
 const W = (n: string) => WIKI + encodeURIComponent(n.replace(/ /g, '_')) + '.png'
 
-const RAID_COLORS: Record<string, string> = {
-  CoX: '#e8b84b', ToB: '#e85555', ToA: '#a875f0',
-  Nex: '#4b9ef0', NM: '#3ecf74', DT2: '#e8824b',
-  Inferno: '#ff7755', Liz: '#88dd66', GWD: '#f0c85a', Slayer: '#4bd4e8',
-}
-
 // DEV MODE: set to false to require proof URLs
 const DEV_QUICK_COMPLETE = true
 
@@ -113,8 +107,8 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
       showToast({ type: 'error', title: 'Error', subtitle: result.error })
     } else {
       showToast({
-        type: tile.is_purple ? 'purple' : 'complete',
-        title: tile.is_purple ? '⬥ Purple Drop!' : 'Tile Completed!',
+        type: 'complete',
+        title: 'Tile Completed!',
         subtitle: tile.name,
       })
     }
@@ -273,7 +267,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
               {[
                 { label: 'DONE', value: totalApproved, color: '#e8b84b' },
                 { label: 'PCT', value: `${Math.round(totalApproved/Math.max(nonFree.length,1)*100)}%`, color: '#3ecf74' },
-                { label: 'PURPLES', value: tiles.filter(t => !t.free_space && t.is_purple && t.tile_completions?.some((c:any) => c.status==='approved')).length, color: '#a875f0' },
+                
                 { label: 'TEAMS', value: teams.length, color: '#4b9ef0' },
               ].map(s => (
                 <div key={s.label} style={{ background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.08)', borderRadius: '8px', padding: '10px' }}>
@@ -310,15 +304,14 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                 else if (isTeamMode && state === 'pending') { bg = 'rgba(232,184,75,0.08)'; border = 'rgba(232,184,75,0.3)' }
                 else if (isTeamMode && state === 'none') { bg = '#0e0c09'; border = 'rgba(255,255,255,0.04)' }
                 else if (!isTeamMode && approvedTeams.length > 0) { bg = 'var(--surface)' }
-                else if (tile.is_purple) { bg = 'rgba(168,117,240,0.06)'; border = 'rgba(168,117,240,0.2)' }
-                else { bg = 'var(--bg3)'; border = 'rgba(255,255,255,0.04)' }
+                                else { bg = 'var(--bg3)'; border = 'rgba(255,255,255,0.04)' }
 
                 const imgFilter = isTeamMode && state === 'none' ? 'grayscale(1) brightness(0.35)' : isTeamMode && state === 'approved' ? 'drop-shadow(0 0 8px rgba(62,207,116,0.4)) brightness(1.1)' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.9))'
 
                 return (
                   <button key={tile.id}
-                    onClick={() => { if (tile.free_space) return; setSelectedTile(tile) }}
-                    style={{ aspectRatio: '1', background: bg, border: `1px solid ${border}`, borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', cursor: tile.free_space ? 'default' : 'pointer', position: 'relative', overflow: 'hidden', padding: '8px 4px 6px', transition: 'all .2s',
+                    onClick={() => setSelectedTile(tile)}
+                    style={{ aspectRatio: '1', background: bg, border: `1px solid ${border}`, borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', cursor: 'pointer', position: 'relative', overflow: 'hidden', padding: '8px 4px 6px', transition: 'all .2s',
                       boxShadow: isTeamMode && state === 'approved' ? '0 0 16px rgba(62,207,116,0.08)' : 'none',
                       transform: completingTileId === tile.id ? 'scale(1.08)' : 'scale(1)',
                     }}>
@@ -331,9 +324,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                     )}
 
                     {/* Purple pip */}
-                    {tile.is_purple && (
-                      <div style={{ position: 'absolute', top: '5px', left: '5px', width: '6px', height: '6px', background: '#a875f0', borderRadius: '1px', boxShadow: '0 0 5px #a875f0' }} />
-                    )}
+                    
 
                     {/* Approved — clean full bottom sweep */}
                     {isTeamMode && state === 'approved' && (
@@ -357,15 +348,13 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                     )}
 
                     {/* Sprite */}
-                    {tile.free_space ? (
-                      <span style={{ fontSize: '22px' }}>⭐</span>
-                    ) : (
+                    {(
                       <img src={tile.sprite_url || W(tile.name)} alt={tile.name} style={{ width: '55%', height: '55%', objectFit: 'contain', imageRendering: 'pixelated', filter: imgFilter, transition: 'filter .2s' }} onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0.1' }} />
                     )}
 
                     {/* Name */}
-                    <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5px', textAlign: 'center', color: tile.free_space ? '#e8b84b' : isTeamMode && state === 'approved' ? '#88ffbb' : isTeamMode && state === 'none' ? '#2a2520' : '#4a4438', padding: '0 2px', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'color .2s' }}>
-                      {tile.free_space ? 'FREE' : tile.name}
+                    <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', textAlign: 'center', color: isTeamMode && state === 'approved' ? '#88ffbb' : isTeamMode && state === 'none' ? '#2a2520' : '#c8b882', padding: '0 2px', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'color .2s' }}>
+                      {tile.name}
                     </div>
 
                     {/* Pending dots (all-teams view) */}
@@ -502,12 +491,8 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(232,184,75,0.08)' }}>
               <div>
-                {selectedTile.source_raid && (
-                  <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '8px', color: RAID_COLORS[selectedTile.source_raid] ?? '#4a4438', marginBottom: '5px' }}>{selectedTile.source_raid}</div>
-                )}
-                {selectedTile.is_purple && (
-                  <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '8px', color: '#a875f0', marginBottom: '5px' }}>⬥ PURPLE DROP</div>
-                )}
+                
+                
                 <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '20px', color: 'var(--text)', letterSpacing: '-0.5px' }}>{selectedTile.name}</div>
               </div>
               <button onClick={() => setSelectedTile(null)} style={{ width: '32px', height: '32px', background: 'var(--surface)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#9a8f7a', cursor: 'pointer', fontSize: '16px' }}>✕</button>
