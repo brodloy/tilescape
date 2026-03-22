@@ -139,6 +139,7 @@ export default async function ProfilePage({ params }: { params: { userId: string
           {/* Events sidebar */}
           <div>
             <div style={S.sectionLabel}>EVENTS</div>
+            <style>{`.profile-event-card:hover { border-color: rgba(232,184,75,0.28) !important; background: var(--surface2) !important; }`}</style>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {events.length === 0 ? (
                 <div style={{ padding: '24px', background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.08)', borderRadius: '12px', textAlign: 'center', color: '#4a4438', fontSize: '13px' }}>No events yet</div>
@@ -149,9 +150,7 @@ export default async function ProfilePage({ params }: { params: { userId: string
                 const count = dropsByEvent[event.id] ?? 0
                 return (
                   <Link key={m.id} href={`/events/${event.id}`} style={{ textDecoration: 'none' }}>
-                    <div style={{ padding: '14px 16px', background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.08)', borderRadius: '12px', transition: 'border-color .15s' }}
-                      onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(232,184,75,0.25)'}
-                      onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'rgba(232,184,75,0.08)'}>
+                    <div className="profile-event-card" style={{ padding: '14px 16px', background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.08)', borderRadius: '12px', transition: 'all .15s' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                         <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: '#f0e8d8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginRight: '8px' }}>{event.name}</div>
                         <div style={{ ...S.pill, color: statusColor, flexShrink: 0 }}>{event.status?.toUpperCase()}</div>

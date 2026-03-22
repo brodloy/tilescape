@@ -369,3 +369,6 @@ create policy "Members can delete own team completions"
         and em.role in ('owner', 'moderator')
     )
   );
+
+-- Add prize pool to events
+alter table public.events add column if not exists prize_pool bigint default 0;
