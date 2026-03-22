@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { joinEventAction } from '@/app/actions/forms'
 import { UserMenu } from '@/components/ui/UserMenu'
-import { CopyButton } from '@/components/ui/CopyButton'
 import { EventCard } from '@/components/ui/EventCard'
 
 export default async function DashboardPage() {
@@ -167,54 +166,6 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
-
-        {/* ── INVITE CODES BANNER ── full width, for live events */}
-        {liveEvents.length > 0 && (
-          <div style={{
-            background: 'rgba(232,184,75,0.04)',
-            borderBottom: '1px solid rgba(232,184,75,0.10)',
-            padding: '0 48px',
-          }}>
-            <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px 0' }}>
-              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#4a4438', letterSpacing: '2px', marginBottom: '14px' }}>
-                LIVE EVENT CODES — SHARE WITH YOUR CLAN
-              </div>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                {liveEvents.map((event: any) => (
-                  <div key={event.id} style={{
-                    display: 'flex', alignItems: 'center', gap: '16px',
-                    background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.18)',
-                    borderRadius: '10px', padding: '14px 20px',
-                    flex: '1', minWidth: '280px',
-                  }}>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#4a4438', letterSpacing: '1px', marginBottom: '6px' }}>
-                        {event.name}
-                      </div>
-                      <div style={{
-                        fontFamily: "'Press Start 2P', monospace",
-                        fontSize: '20px', color: '#e8b84b',
-                        letterSpacing: '6px', lineHeight: 1,
-                      }}>
-                        {event.invite_code}
-                      </div>
-                    </div>
-                    <CopyButton text={`Join my TileScape bingo at tilescape.vercel.app/join?code=${event.invite_code} — Code: ${event.invite_code}`} label="COPY LINK" />
-                    <Link href={`/events/${event.id}`} style={{
-                      fontFamily: "'Press Start 2P', monospace", fontSize: '11px',
-                      padding: '8px 14px', borderRadius: '6px',
-                      background: 'rgba(232,184,75,0.1)', border: '1px solid rgba(232,184,75,0.25)',
-                      color: '#e8b84b', textDecoration: 'none',
-                      whiteSpace: 'nowrap', letterSpacing: '0.5px',
-                    }}>
-                      VIEW →
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* ── EVENTS GRID ── */}
         <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 48px 80px' }}>

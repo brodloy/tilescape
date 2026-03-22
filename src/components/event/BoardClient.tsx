@@ -88,9 +88,11 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
 
   async function handleQuickComplete(tile: any) {
     if (!userTeamId || !tile || tile.free_space) return
-    const state = getTileState(tile, userTeamId)
 
-    // If already approved — undo it
+    // Always read current state from the live tiles array, not the stale modal tile
+    const liveTile = tiles.find(t => t.id === tile.id) ?? tile
+    const state = getTileState(liveTile, userTeamId)
+
     if (state === 'approved') {
       setCompletingTileId(tile.id)
       await uncompleteTeamTile(tile.id, userTeamId)
@@ -100,7 +102,6 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
       return
     }
 
-    // Complete it
     setCompletingTileId(tile.id)
     const result = await quickCompleteTile(tile.id, userTeamId)
     await refreshTiles()
@@ -321,32 +322,37 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                       transform: completingTileId === tile.id ? 'scale(1.08)' : 'scale(1)',
                     }}>
 
-                    {/* Top colour bar */}
+                    {/* Top colour bar — all teams view */}
                     {!isTeamMode && approvedTeams.length > 0 && (
                       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', display: 'flex' }}>
                         {approvedTeams.map(t => <div key={t.id} style={{ flex: 1, background: t.color }} />)}
                       </div>
                     )}
-                    {isTeamMode && state === 'approved' && (
-                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: '#3ecf74' }} />
-                    )}
 
                     {/* Purple pip */}
-                    {tile.is_purple && <div style={{ position: 'absolute', top: '4px', left: '4px', width: '5px', height: '5px', background: '#a875f0', borderRadius: '1px', boxShadow: '0 0 4px #a875f0' }} />}
+                    {tile.is_purple && (
+                      <div style={{ position: 'absolute', top: '5px', left: '5px', width: '6px', height: '6px', background: '#a875f0', borderRadius: '1px', boxShadow: '0 0 5px #a875f0' }} />
+                    )}
 
-                    {/* Raid tag */}
-                    {tile.source_raid && (
-                      <div style={{ position: 'absolute', top: '3px', right: '3px', fontFamily: "'Press Start 2P',monospace", fontSize: '4.5px', padding: '2px 4px', borderRadius: '2px', background: `${RAID_COLORS[tile.source_raid] ?? '#4a4438'}20`, color: RAID_COLORS[tile.source_raid] ?? '#4a4438' }}>
-                        {tile.source_raid}
+                    {/* Approved — clean full bottom sweep */}
+                    {isTeamMode && state === 'approved' && (
+                      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+                        {/* Subtle green tint overlay */}
+                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(62,207,116,0.07)', borderRadius: '9px' }} />
+                        {/* Bottom bar */}
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', background: 'linear-gradient(90deg, #3ecf74, #5ee890)', borderRadius: '0 0 9px 9px' }} />
+                        {/* Tick — top right, clean circle */}
+                        <div style={{ position: 'absolute', top: '5px', right: '5px', width: '16px', height: '16px', borderRadius: '50%', background: '#3ecf74', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 8px rgba(62,207,116,0.6)' }}>
+                          <svg width="9" height="7" viewBox="0 0 9 7" fill="none">
+                            <path d="M1 3.5L3.5 6L8 1" stroke="#041a0c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
                       </div>
                     )}
 
-                    {/* State badge */}
-                    {isTeamMode && state === 'approved' && (
-                      <div style={{ position: 'absolute', top: '4px', right: tile.source_raid ? '30px' : '4px', width: '16px', height: '16px', background: '#3ecf74', borderRadius: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', color: '#041a0c', fontWeight: 900, boxShadow: '0 0 6px rgba(62,207,116,0.5)' }}>✓</div>
-                    )}
+                    {/* Pending — subtle gold bottom bar */}
                     {isTeamMode && state === 'pending' && (
-                      <div style={{ position: 'absolute', top: '4px', right: tile.source_raid ? '30px' : '4px', width: '16px', height: '16px', background: '#e8b84b', borderRadius: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', color: '#0c0a08', fontWeight: 900 }}>?</div>
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '3px', background: '#e8b84b', borderRadius: '0 0 9px 9px', opacity: 0.7 }} />
                     )}
 
                     {/* Sprite */}
@@ -514,7 +520,8 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
 
               {/* State / actions */}
               {(() => {
-                const state = getTileState(selectedTile, userTeamId)
+                const liveTile = tiles.find(t => t.id === selectedTile.id) ?? selectedTile
+                const state = getTileState(liveTile, userTeamId)
 
                 if (!userTeamId) return (
                   <p style={{ textAlign: 'center', color: '#9a8f7a', fontSize: '14px', lineHeight: 1.6 }}>
