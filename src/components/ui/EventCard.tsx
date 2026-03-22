@@ -10,11 +10,12 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; border: string;
   ended: { bg: 'rgba(74,68,56,0.25)',    color: '#4a4438', border: 'rgba(74,68,56,0.35)',   label: 'ENDED', dot: false },
 }
 
-export function EventCard({ event, stats, isOwner, tiles = [] }: {
+export function EventCard({ event, stats, isOwner, tiles = [], teams = [] }: {
   event: any
   stats?: { total: number; done: number; purples: number; teams: number }
   isOwner?: boolean
   tiles?: any[]
+  teams?: { id: string; name: string; color: string; done: number; pct: number }[]
 }) {
   const [hovered, setHovered] = useState(false)
   const [deleting, startDelete] = useTransition()
@@ -99,40 +100,47 @@ export function EventCard({ event, stats, isOwner, tiles = [] }: {
         {/* Mini board preview */}
         {tiles.length > 0 && <MiniBoard tiles={tiles} status={event.status} />}
 
-        {/* Progress bar */}
-        {stats && stats.total > 0 && (
-          <div style={{ marginBottom: '18px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', color: '#9a8f7a', fontWeight: 500 }}>
-                {stats.done} of {stats.total} tiles completed
-              </span>
-              <span style={{
-                fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '18px',
-                color: event.status === 'live' ? '#3ecf74' : '#9a8f7a',
-                letterSpacing: '-0.5px',
-              }}>{pct}%</span>
-            </div>
-            <div style={{ height: '8px', background: 'var(--bg3)', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.04)' }}>
-              <div style={{
-                height: '100%', borderRadius: '4px', width: `${pct}%`,
-                background: event.status === 'live' ? 'linear-gradient(90deg, #3ecf74, #5ee890)'
-                  : event.status === 'ended' ? '#2a2520'
-                  : 'linear-gradient(90deg, #e8b84b, #f0c85a)',
-                transition: 'width .6s cubic-bezier(.4,0,.2,1)',
-                position: 'relative', minWidth: pct > 0 ? '8px' : '0',
-              }}>
-                <div style={{ position: 'absolute', top: '1px', left: '2px', right: '2px', height: '40%', background: 'rgba(255,255,255,0.2)', borderRadius: '3px 3px 0 0' }} />
+        {/* Per-team progress bars */}
+        {teams.length > 0 && stats && stats.total > 0 && (
+          <div style={{ marginBottom: '18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {teams.map((team, i) => (
+              <div key={team.id}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: team.color, flexShrink: 0 }} />
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: '13px', color: '#9a8f7a' }}>{team.name}</span>
+                  </div>
+                  <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '13px', color: team.color, letterSpacing: '-0.3px' }}>
+                    {team.done}<span style={{ color: '#4a4438', fontWeight: 400 }}>/{stats.total}</span>
+                  </span>
+                </div>
+                <div style={{ height: '6px', background: 'var(--bg3)', borderRadius: '3px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.03)' }}>
+                  <div style={{
+                    height: '100%', borderRadius: '3px',
+                    width: `${team.pct}%`,
+                    background: team.color,
+                    transition: `width .8s cubic-bezier(.4,0,.2,1) ${i * 80}ms`,
+                    minWidth: team.pct > 0 ? '6px' : '0',
+                    position: 'relative',
+                  }}>
+                    <div style={{ position: 'absolute', top: '1px', left: '2px', right: '2px', height: '40%', background: 'rgba(255,255,255,0.25)', borderRadius: '2px 2px 0 0' }} />
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         )}
 
-        {/* Stat pills row */}
-        {stats && (
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
-            <Chip label={`${stats.done}/${stats.total} Tiles`} />
-            {stats.teams > 0 && <Chip label={`${stats.teams} Team${stats.teams !== 1 ? 's' : ''}`} />}
-            {stats.purples > 0 && <Chip label={`${stats.purples} Purple${stats.purples !== 1 ? 's' : ''}`} color="#a875f0" border="rgba(168,117,240,0.2)" bg="rgba(168,117,240,0.08)" />}
+        {/* Fallback overall bar when no teams */}
+        {teams.length === 0 && stats && stats.total > 0 && (
+          <div style={{ marginBottom: '18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <span style={{ fontSize: '13px', color: '#9a8f7a' }}>{stats.done} of {stats.total} tiles</span>
+              <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '16px', color: '#9a8f7a' }}>{pct}%</span>
+            </div>
+            <div style={{ height: '6px', background: 'var(--bg3)', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', borderRadius: '3px', width: `${pct}%`, background: 'rgba(232,184,75,0.5)', transition: 'width .6s' }} />
+            </div>
           </div>
         )}
 
@@ -191,17 +199,6 @@ export function EventCard({ event, stats, isOwner, tiles = [] }: {
   )
 }
 
-function Chip({ label, color = '#9a8f7a', border = 'rgba(232,184,75,0.12)', bg = 'var(--surface2)' }: { label: string; color?: string; border?: string; bg?: string }) {
-  return (
-    <span style={{
-      fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: '13px',
-      padding: '4px 12px', borderRadius: '20px',
-      background: bg, border: `1px solid ${border}`, color,
-    }}>
-      {label}
-    </span>
-  )
-}
 
 function InviteCodeGroup({ code }: { code: string }) {
   const [copied, setCopied] = useState(false)
@@ -272,59 +269,73 @@ function InviteCodeGroup({ code }: { code: string }) {
   )
 }
 
-const WIKI_SPRITE = (n: string) => `https://oldschool.runescape.wiki/w/Special:FilePath/${encodeURIComponent(n.replace(/ /g, '_'))}.png`
-
 function MiniBoard({ tiles, status }: { tiles: any[]; status: string }) {
   if (tiles.length === 0) return null
 
-  // Sort: purples first, then completed, then rest — take top 9
-  const sorted = [...tiles].sort((a, b) => {
-    const aApproved = a.tile_completions?.some((c: any) => c.status === 'approved') ? 1 : 0
-    const bApproved = b.tile_completions?.some((c: any) => c.status === 'approved') ? 1 : 0
+  const nonFree = tiles.filter(t => !t.free_space && t.sprite_url)
+  if (nonFree.length === 0) return null
+
+  // Sort: approved first, then purples, then rest
+  const sorted = [...nonFree].sort((a, b) => {
+    const aApproved = a.tile_completions?.some((c: any) => c.status === 'approved') ? 2 : 0
+    const bApproved = b.tile_completions?.some((c: any) => c.status === 'approved') ? 2 : 0
     const aPurple = a.is_purple ? 1 : 0
     const bPurple = b.is_purple ? 1 : 0
-    return (bPurple + bApproved) - (aPurple + aApproved)
+    return (bApproved + bPurple) - (aApproved + aPurple)
   })
 
-  const preview = sorted.slice(0, 9)
-  const totalApproved = tiles.filter(t => !t.free_space && t.tile_completions?.some((c: any) => c.status === 'approved')).length
-  const total = tiles.filter(t => !t.free_space).length
+  // Duplicate for seamless loop
+  const items = [...sorted, ...sorted]
+  const itemW = 40 // px per item including gap
+  const totalW = sorted.length * itemW
 
   return (
-    <div style={{ marginBottom: '14px', position: 'relative' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(9, 1fr)', gap: '3px' }}>
-        {preview.map((tile, i) => {
-          const approved = tile.tile_completions?.some((c: any) => c.status === 'approved')
-          const isFree = tile.free_space
+    <div style={{ marginBottom: '16px', position: 'relative', overflow: 'hidden', height: '36px' }}>
+      {/* Left fade */}
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '32px', background: 'linear-gradient(90deg, var(--surface), transparent)', zIndex: 2, pointerEvents: 'none' }} />
+      {/* Right fade */}
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '32px', background: 'linear-gradient(270deg, var(--surface), transparent)', zIndex: 2, pointerEvents: 'none' }} />
 
+      <div style={{
+        display: 'flex', gap: '6px', alignItems: 'center',
+        animation: `tilescroll ${sorted.length * 1.4}s linear infinite`,
+        width: 'max-content',
+      }}>
+        {items.map((tile, i) => {
+          const approved = tile.tile_completions?.some((c: any) => c.status === 'approved')
           return (
             <div key={i} style={{
-              aspectRatio: '1', borderRadius: '3px',
-              background: isFree ? 'rgba(232,184,75,0.06)'
-                : approved ? 'rgba(62,207,116,0.15)'
-                : tile.is_purple ? 'rgba(168,117,240,0.08)'
-                : 'var(--bg3)',
-              border: `1px solid ${isFree ? 'rgba(232,184,75,0.2)' : approved ? 'rgba(62,207,116,0.35)' : tile.is_purple ? 'rgba(168,117,240,0.2)' : 'rgba(255,255,255,0.04)'}`,
+              width: '34px', height: '34px', flexShrink: 0, borderRadius: '6px',
+              background: approved ? 'rgba(62,207,116,0.12)' : tile.is_purple ? 'rgba(168,117,240,0.08)' : 'var(--bg3)',
+              border: `1px solid ${approved ? 'rgba(62,207,116,0.3)' : tile.is_purple ? 'rgba(168,117,240,0.2)' : 'rgba(255,255,255,0.05)'}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              overflow: 'hidden', position: 'relative',
+              position: 'relative', overflow: 'hidden',
             }}>
-              {tile.sprite_url && !isFree ? (
-                <img src={tile.sprite_url} alt="" style={{ width: '75%', height: '75%', objectFit: 'contain', imageRendering: 'pixelated', filter: approved ? 'brightness(1.1)' : 'grayscale(0.5) brightness(0.6)' }}
-                  onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
-              ) : isFree ? (
-                <span style={{ fontSize: '7px' }}>⭐</span>
-              ) : null}
+              <img src={tile.sprite_url} alt={tile.name}
+                style={{ width: '72%', height: '72%', objectFit: 'contain', imageRendering: 'pixelated', filter: approved ? 'brightness(1.1)' : 'grayscale(0.4) brightness(0.7)' }}
+                onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+              />
               {approved && (
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(62,207,116,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '7px', color: '#3ecf74', fontWeight: 900 }}>✓</span>
+                <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '10px', height: '10px', borderRadius: '50%', background: '#3ecf74', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="6" height="5" viewBox="0 0 6 5" fill="none">
+                    <path d="M1 2.5L2.5 4L5 1" stroke="#041a0c" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </div>
+              )}
+              {tile.is_purple && !approved && (
+                <div style={{ position: 'absolute', top: '2px', left: '2px', width: '4px', height: '4px', background: '#a875f0', borderRadius: '1px' }} />
               )}
             </div>
           )
         })}
       </div>
-      {/* Fade overlay on right edge */}
-      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '30px', background: 'linear-gradient(90deg, transparent, var(--surface))', pointerEvents: 'none', borderRadius: '0 3px 3px 0' }} />
+
+      <style>{`
+        @keyframes tilescroll {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-${totalW + sorted.length * 6}px); }
+        }
+      `}</style>
     </div>
   )
 }

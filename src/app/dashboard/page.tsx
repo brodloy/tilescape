@@ -29,6 +29,7 @@ export default async function DashboardPage() {
   const eventIds = allEvents.map((e: any) => e.id).filter(Boolean)
   let tileStats: Record<string, { total: number; done: number; teams: number; purples: number }> = {}
   let tilesByEvent: Record<string, any[]> = {}
+  let teamsByEvent: Record<string, { id: string; name: string; color: string; done: number; pct: number }[]> = {}
 
   if (eventIds.length > 0) {
     const { data: tiles } = await db
@@ -38,7 +39,7 @@ export default async function DashboardPage() {
       .order('position')
     const { data: teams } = await db
       .from('teams')
-      .select('event_id, color, id')
+      .select('event_id, color, id, name')
       .in('event_id', eventIds)
 
     eventIds.forEach((id: string) => {
@@ -48,6 +49,10 @@ export default async function DashboardPage() {
       const evTeams = (teams ?? []).filter((t: any) => t.event_id === id)
       tileStats[id] = { total: evTiles.length, done: done.length, purples: purples.length, teams: evTeams.length }
       tilesByEvent[id] = (tiles ?? []).filter((t: any) => t.event_id === id)
+      teamsByEvent[id] = evTeams.map((team: any) => {
+        const teamDone = evTiles.filter((t: any) => t.tile_completions?.some((c: any) => c.team_id === team.id && c.status === 'approved')).length
+        return { id: team.id as string, name: team.name as string, color: team.color as string, done: teamDone, pct: Math.round(teamDone / Math.max(evTiles.length, 1) * 100) }
+      }).sort((a: { done: number }, b: { done: number }) => b.done - a.done)
     })
   }
 
@@ -192,7 +197,7 @@ export default async function DashboardPage() {
                 <section style={{ marginBottom: '48px' }}>
                   <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px', color: '#f0e8d8', marginBottom: '20px' }}>My Events</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {myEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={true} tiles={tilesByEvent[event.id] ?? []} />)}
+                    {myEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={true} tiles={tilesByEvent[event.id] ?? []} teams={teamsByEvent[event.id] ?? []} />)}
                   </div>
                 </section>
               )}
@@ -200,7 +205,7 @@ export default async function DashboardPage() {
                 <section>
                   <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px', color: '#f0e8d8', marginBottom: '20px' }}>Joined Events</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {joinedEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={false} tiles={tilesByEvent[event.id] ?? []} />)}
+                    {joinedEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={false} tiles={tilesByEvent[event.id] ?? []} teams={teamsByEvent[event.id] ?? []} />)}
                   </div>
                 </section>
               )}
