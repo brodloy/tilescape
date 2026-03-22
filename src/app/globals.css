@@ -83,3 +83,84 @@ input, textarea, select {
   font-family: 'DM Sans', sans-serif;
   overflow: hidden;
 }
+
+/* ── MOBILE RESPONSIVENESS ── */
+@media (max-width: 768px) {
+
+  /* Dashboard */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Board — stack sidebar + main + right panel vertically */
+  .board-layout {
+    grid-template-columns: 1fr !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+  .board-sidebar {
+    display: none !important;
+  }
+  .board-right-panel {
+    display: none !important;
+  }
+  .board-tile-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 4px !important;
+    padding: 12px !important;
+  }
+
+  /* Manage — hide sidebar tabs, show as horizontal scroll */
+  .manage-layout {
+    flex-direction: column !important;
+  }
+  .manage-tab-bar {
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid rgba(232,184,75,0.1) !important;
+    min-width: unset !important;
+    width: 100% !important;
+  }
+
+  /* Nav — tighten up */
+  .app-nav-centre { display: none !important; }
+
+  /* Profile grid */
+  .profile-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Profile hero */
+  .profile-hero {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: '16px' !important;
+  }
+  .profile-stats {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  /* Results grid */
+  .results-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Event card footer — wrap */
+  .event-card-footer {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .board-tile-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 3px !important;
+  }
+  .invite-pill-code {
+    font-size: 11px !important;
+    letter-spacing: 2px !important;
+  }
+}

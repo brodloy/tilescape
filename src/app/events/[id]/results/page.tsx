@@ -118,7 +118,7 @@ export default async function ResultsPage({ params }: { params: { id: string } }
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '40px' }}>
+        <div className="results-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '40px' }}>
           {/* MVP */}
           {mvp && (
             <div style={{ padding: '24px', background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.12)', borderRadius: '16px' }}>

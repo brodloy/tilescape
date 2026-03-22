@@ -85,7 +85,7 @@ export default async function ProfilePage({ params }: { params: { userId: string
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '24px', alignItems: 'start' }}>
+        <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '24px', alignItems: 'start' }}>
 
           {/* Drop history */}
           <div>

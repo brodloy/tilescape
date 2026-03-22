@@ -119,7 +119,7 @@ export function EventCard({ event, stats, isOwner, teams = [] }: {
         )}
 
         {/* Footer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '14px', borderTop: '1px solid rgba(232,184,75,0.08)', gap: '10px' }}>
+        <div className="event-card-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '14px', borderTop: '1px solid rgba(232,184,75,0.08)', gap: '10px' }}>
           <InviteCodeGroup code={event.invite_code} />
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
             {isOwner && !isEnded && (

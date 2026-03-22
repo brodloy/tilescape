@@ -238,7 +238,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
       <AppNav displayName={displayName} avatarUrl={avatarUrl} context={navContext} actions={navActions} />
 
       {/* Three-column layout below nav */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '220px 1fr 260px', marginTop: '64px', minHeight: 0, overflow: 'hidden' }}>
+      <div className="board-layout" style={{ flex: 1, display: 'grid', gridTemplateColumns: '220px 1fr 260px', marginTop: '64px', minHeight: 0, overflow: 'hidden' }}>
 
         {/* ── Sidebar ── */}
         <aside style={{ background: 'var(--bg2)', borderRight: '1px solid rgba(232,184,75,0.10)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
@@ -331,7 +331,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
 
           {/* Board grid */}
           <div style={{ padding: '0 24px', flex: 1 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '7px', maxWidth: '820px' }}>
+            <div className="board-tile-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '7px', maxWidth: '820px' }}>
               {[...tiles].sort((a,b) => a.position - b.position).map(tile => {
                 const state = getTileState(tile, displayTeamId)
                 const approvedTeams = getApprovedTeams(tile)

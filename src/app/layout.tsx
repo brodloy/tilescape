@@ -1,7 +1,14 @@
 import type { Metadata } from 'next'
+import type { Viewport } from 'next'
 import { Suspense } from 'react'
 import './globals.css'
 import { NavigationProgress } from '@/components/ui/NavigationProgress'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+}
 
 export const metadata: Metadata = {
   title: 'TileScape — OSRS Clan Bingo & Event Tracker',

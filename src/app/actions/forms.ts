@@ -360,3 +360,22 @@ export async function saveRequireProof(eventId: string, requireProof: boolean) {
   revalidatePath(`/events/${eventId}/manage`)
   revalidatePath(`/events/${eventId}`)
 }
+
+export async function syncDiscordAvatar() {
+  const supabase = await createClient()
+  const db = supabase as any
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  // Get fresh avatar from Discord via Supabase identity
+  const identity = user.identities?.find((i: any) => i.provider === 'discord')
+  if (!identity) return { error: 'No Discord account linked' }
+
+  const avatarUrl = identity.identity_data?.avatar_url
+  if (!avatarUrl) return { error: 'No avatar found on Discord account' }
+
+  await db.from('users').update({ avatar_url: avatarUrl }).eq('id', user.id)
+  revalidatePath('/account')
+  revalidatePath('/dashboard')
+  return { success: true }
+}
