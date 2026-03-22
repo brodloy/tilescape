@@ -27,13 +27,16 @@ export default async function ManagePage({ params }: { params: { id: string } })
 
   const { data: teams } = await db
     .from('teams')
-    .select('*, team_members(id, event_members(id, users(id, display_name)))')
+    .select('*, team_members(id, event_members(id, users(id, display_name, avatar_url)))')
     .eq('event_id', params.id).order('created_at')
 
   const { data: members } = await db
     .from('event_members')
-    .select('id, role, users(id, display_name)')
+    .select('id, role, users(id, display_name, avatar_url)')
     .eq('event_id', params.id).order('joined_at')
+
+  const currentMember = (members ?? []).find((m: any) => m.users?.id === user.id)
+  const avatarUrl = currentMember?.users?.avatar_url ?? null
 
   return (
     <ManageClient
@@ -43,6 +46,7 @@ export default async function ManagePage({ params }: { params: { id: string } })
       members={members ?? []}
       isOwner={isOwner}
       currentUserId={user.id}
+      avatarUrl={avatarUrl}
     />
   )
 }

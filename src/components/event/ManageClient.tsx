@@ -4,6 +4,7 @@ import { useState, useTransition, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { AppNav } from '@/components/ui/AppNav'
+import { Avatar } from '@/components/ui/Avatar'
 import {
   loadTemplate, removeTile, addTileAction,
   addTeamAction, removeTeam, assignTeam, toggleMod, saveWebhook,
@@ -696,9 +697,7 @@ function TeamsTab({ teams, members, eventId, isOwner }: { teams: any[]; members:
                     <div style={{ fontSize: '13px', color: '#4a4438', fontStyle: 'italic', padding: '6px 0' }}>No members yet</div>
                   ) : teamMembers.map(m => (
                     <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', background: 'var(--bg3)', borderRadius: '8px' }}>
-                      <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: `${team.color}22`, border: `1px solid ${team.color}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: team.color, flexShrink: 0 }}>
-                        {m.users?.display_name?.substring(0, 2).toUpperCase()}
-                      </div>
+                      <Avatar src={m.users?.avatar_url} name={m.users?.display_name ?? '?'} color={team.color} size={26} />
                       <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text)', flex: 1 }}>{m.users?.display_name}</span>
                       {m.role === 'owner' && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5px', color: '#7a5c1e' }}>OWNER</span>}
                     </div>
@@ -717,9 +716,7 @@ function TeamsTab({ teams, members, eventId, isOwner }: { teams: any[]; members:
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {unassigned.map(m => (
                   <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', background: 'var(--bg3)', borderRadius: '8px' }}>
-                    <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', flexShrink: 0 }}>
-                      {m.users?.display_name?.substring(0, 2).toUpperCase()}
-                    </div>
+                    <Avatar src={m.users?.avatar_url} name={m.users?.display_name ?? '?'} size={26} />
                     <span style={{ fontSize: '14px', fontWeight: 500, color: '#9a8f7a', flex: 1 }}>{m.users?.display_name}</span>
                     {isOwner && teams.length > 0 && (
                       <select defaultValue="" onChange={e => e.target.value && handleAssign(m.id, e.target.value)}
@@ -794,9 +791,7 @@ function MembersTab({ members, teams, eventId, isOwner, currentUserId }: { membe
           const isMe = usr?.id === currentUserId
           return (
             <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 24px', borderBottom: i < members.length - 1 ? '1px solid rgba(232,184,75,0.06)' : 'none' }}>
-              <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: team ? `${team.color}22` : 'var(--surface2)', border: `2px solid ${team ? team.color + '55' : 'rgba(255,255,255,0.06)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Press Start 2P',monospace", fontSize: '8px', color: team?.color ?? '#4a4438', flexShrink: 0 }}>
-                {usr?.display_name?.substring(0, 2).toUpperCase()}
-              </div>
+              <Avatar src={usr?.avatar_url} name={usr?.display_name ?? '?'} color={team?.color ?? '#e8b84b'} size={42} />
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
                   <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '16px', color: isMe ? '#e8b84b' : 'var(--text)' }}>{usr?.display_name}</span>
@@ -955,10 +950,10 @@ type Tab = typeof TABS[number]
 
 interface Props {
   event: any; tiles: any[]; teams: any[]; members: any[]
-  isOwner: boolean; currentUserId: string
+  isOwner: boolean; currentUserId: string; avatarUrl?: string | null
 }
 
-export function ManageClient({ event, tiles, teams, members, isOwner, currentUserId }: Props) {
+export function ManageClient({ event, tiles, teams, members, isOwner, currentUserId, avatarUrl }: Props) {
   const [tab, setTab] = useState<Tab>('Board')
   const displayName = members.find(m => m.users?.id === currentUserId)?.users?.display_name ?? ''
 
@@ -983,7 +978,7 @@ export function ManageClient({ event, tiles, teams, members, isOwner, currentUse
     <>
       <style>{`html,body{height:100%;overflow:hidden;margin:0;padding:0;}`}</style>
       <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif" }}>
-        <AppNav displayName={displayName} context={navContext} actions={navActions} />
+        <AppNav displayName={displayName} avatarUrl={avatarUrl} context={navContext} actions={navActions} />
 
         {/* Tab bar */}
         <div style={{ height: '52px', marginTop: '64px', background: 'var(--bg2)', borderBottom: '1px solid rgba(232,184,75,0.10)', display: 'flex', alignItems: 'center', padding: '0 40px', gap: '4px', flexShrink: 0, zIndex: 10 }}>

@@ -3,14 +3,16 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { signOut } from '@/app/actions/auth'
+import { Avatar } from '@/components/ui/Avatar'
 
 interface Props {
   displayName: string
-  context?: React.ReactNode   // centre slot — event name, page title etc
-  actions?: React.ReactNode   // right slot — extra buttons before user menu
+  avatarUrl?: string | null
+  context?: React.ReactNode
+  actions?: React.ReactNode
 }
 
-export function AppNav({ displayName, context, actions }: Props) {
+export function AppNav({ displayName, avatarUrl, context, actions }: Props) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -19,8 +21,6 @@ export function AppNav({ displayName, context, actions }: Props) {
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [])
-
-  const initials = displayName?.substring(0, 2).toUpperCase() ?? '??'
 
   return (
     <nav style={{
@@ -59,12 +59,7 @@ export function AppNav({ displayName, context, actions }: Props) {
             background: open ? 'var(--surface2)' : 'var(--surface)',
             border: '1px solid rgba(232,184,75,0.15)', cursor: 'pointer', transition: 'all .15s',
           }}>
-            <div style={{
-              width: '30px', height: '30px', borderRadius: '50%',
-              background: 'rgba(232,184,75,0.15)', border: '1px solid rgba(232,184,75,0.35)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#e8b84b', flexShrink: 0,
-            }}>{initials}</div>
+            <Avatar src={avatarUrl} name={displayName} size={30} />
             <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 600, fontSize: '13px', color: '#f0e8d8' }}>{displayName}</span>
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ color: '#4a4438', transition: 'transform .15s', transform: open ? 'rotate(180deg)' : 'none' }}>
               <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -77,9 +72,12 @@ export function AppNav({ displayName, context, actions }: Props) {
               background: 'var(--bg2)', border: '1px solid rgba(232,184,75,0.18)',
               borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.7)', overflow: 'hidden', zIndex: 200,
             }}>
-              <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid rgba(232,184,75,0.08)' }}>
-                <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1px' }}>SIGNED IN AS</div>
-                <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: '#e8b84b', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
+              <div style={{ padding: '14px', borderBottom: '1px solid rgba(232,184,75,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Avatar src={avatarUrl} name={displayName} size={40} />
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1px', marginBottom: '4px' }}>SIGNED IN AS</div>
+                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: '#e8b84b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
+                </div>
               </div>
               <div style={{ padding: '6px' }}>
                 <Link href="/dashboard" onClick={() => setOpen(false)} style={menuItemStyle}>

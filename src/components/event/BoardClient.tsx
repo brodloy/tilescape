@@ -8,6 +8,7 @@ import { submitCompletion, reviewCompletion, quickCompleteTile, uncompleteTeamTi
 import { goLive, endEvent } from '@/app/actions/forms'
 import { useRouter } from 'next/navigation'
 import { ToastArea, BingoCelebration, showToast } from '@/components/event/Celebrations'
+import { Avatar } from '@/components/ui/Avatar'
 
 const WIKI = 'https://oldschool.runescape.wiki/w/Special:FilePath/'
 const W = (n: string) => WIKI + encodeURIComponent(n.replace(/ /g, '_')) + '.png'
@@ -25,7 +26,7 @@ interface Props {
   event: any; initialTiles: any[]; teams: any[]; members: any[]
   pendingSubmissions: any[]; userTeamId: string | null
   isOwnerOrMod: boolean; isOwner: boolean
-  displayName: string; eventId: string
+  displayName: string; avatarUrl: string | null; eventId: string
 }
 
 function calcBingos(tiles: any[], teamId: string) {
@@ -42,7 +43,7 @@ function calcBingos(tiles: any[], teamId: string) {
   return lines.filter(l => l.every(check)).length
 }
 
-export function BoardClient({ event, initialTiles, teams, members, pendingSubmissions, userTeamId, isOwnerOrMod, isOwner, displayName, eventId }: Props) {
+export function BoardClient({ event, initialTiles, teams, members, pendingSubmissions, userTeamId, isOwnerOrMod, isOwner, displayName, avatarUrl, eventId }: Props) {
   const [tiles, setTiles] = useState(initialTiles)
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
   const [selectedTile, setSelectedTile] = useState<any | null>(null)
@@ -210,7 +211,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
     <>
     <style>{`html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }`}</style>
     <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif" }}>
-      <AppNav displayName={displayName} context={navContext} actions={navActions} />
+      <AppNav displayName={displayName} avatarUrl={avatarUrl} context={navContext} actions={navActions} />
 
       {/* Three-column layout below nav */}
       <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '220px 1fr 260px', marginTop: '64px', minHeight: 0, overflow: 'hidden' }}>
@@ -472,9 +473,12 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                   <div key={member.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 8px', borderRadius: '8px', transition: 'background .15s', cursor: 'default' }}
                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--surface)'}
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'none'}>
-                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0, background: team ? `${team.color}22` : 'var(--surface2)', border: `1.5px solid ${team ? team.color + '55' : 'rgba(255,255,255,0.06)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: team?.color ?? '#4a4438' }}>
-                      {usr?.display_name?.substring(0, 2).toUpperCase()}
-                    </div>
+                    <Avatar
+                      src={usr?.avatar_url}
+                      name={usr?.display_name ?? '?'}
+                      color={team?.color ?? '#e8b84b'}
+                      size={28}
+                    />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: '13px', fontWeight: 500, color: isMe ? '#e8b84b' : 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{usr?.display_name}</div>
                       {team && <div style={{ fontSize: '11px', color: '#4a4438' }}>{team.name}</div>}

@@ -57,6 +57,7 @@ export default async function DashboardPage() {
   }
 
   const displayName = profile?.display_name ?? 'Adventurer'
+  const avatarUrl = profile?.avatar_url ?? null
   const liveEvents = allEvents.filter((e: any) => e.status === 'live')
 
   return (
@@ -94,7 +95,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* User menu */}
-        <UserMenu displayName={displayName} />
+        <UserMenu displayName={displayName} avatarUrl={avatarUrl} />
       </nav>
 
       <main style={{ paddingTop: '64px', position: 'relative', zIndex: 10 }}>

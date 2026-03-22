@@ -54,6 +54,7 @@ export default async function EventPage({ params }: { params: { id: string } }) 
   )
 
   const displayName = userMember?.users?.display_name ?? ''
+  const avatarUrl = userMember?.users?.avatar_url ?? null
 
   return (
     <BoardClient
@@ -66,6 +67,7 @@ export default async function EventPage({ params }: { params: { id: string } }) 
       isOwnerOrMod={isOwnerOrMod}
       isOwner={membership.role === 'owner'}
       displayName={displayName}
+      avatarUrl={avatarUrl}
       eventId={params.id}
     />
   )
