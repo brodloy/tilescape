@@ -13,7 +13,6 @@ import { Avatar } from '@/components/ui/Avatar'
 import { ReviewModal } from '@/components/event/ReviewModal'
 
 const W = (n: string) => `https://oldschool.runescape.wiki/w/Special:FilePath/${encodeURIComponent(n.replace(/ /g, '_'))}.png?action=raw`
-const COINS = 'https://oldschool.runescape.wiki/w/Special:FilePath/Coins_10000.png?action=raw'
 function formatGP(gp: number): string {
   if (gp >= 1_000_000_000) return `${(gp / 1_000_000_000).toFixed(1)}B`
   if (gp >= 1_000_000) return `${(gp / 1_000_000).toFixed(1)}M`
@@ -238,10 +237,10 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
       <AppNav displayName={displayName} avatarUrl={avatarUrl} context={navContext} actions={navActions} />
 
       {/* Three-column layout below nav */}
-      <div className="board-layout" style={{ flex: 1, display: 'grid', gridTemplateColumns: '220px 1fr 260px', marginTop: '64px', minHeight: 0, overflow: 'hidden' }}>
+      <div className="board-layout" style={{ flex: 1, display: 'grid', gridTemplateColumns: '220px 1fr 260px', minHeight: 0, overflow: 'hidden', marginTop: '64px' }}>
 
         {/* ── Sidebar ── */}
-        <aside style={{ background: 'var(--bg2)', borderRight: '1px solid rgba(232,184,75,0.10)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <aside className="board-sidebar" style={{ background: 'var(--bg2)', borderRight: '1px solid rgba(232,184,75,0.10)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
           {/* Invite code */}
           <div style={{ padding: '14px', borderBottom: '1px solid rgba(232,184,75,0.08)' }}>
             <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '8px', color: '#4a4438', letterSpacing: '1px', marginBottom: '6px' }}>INVITE CODE</div>
@@ -251,7 +250,18 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
           {/* Prize pool */}
           {event.prize_pool > 0 && (
             <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(232,184,75,0.08)', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(232,184,75,0.03)' }}>
-              <img src={COINS} alt="GP" style={{ width: '20px', height: '20px', imageRendering: 'pixelated', flexShrink: 0 }} />
+              <svg width="20" height="20" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+              <ellipse cx="22" cy="34" rx="14" ry="5" fill="#7a5c1e"/>
+              <rect x="8" y="20" width="28" height="14" fill="#c8861a"/>
+              <ellipse cx="22" cy="20" rx="14" ry="5" fill="#e8b84b"/>
+              <ellipse cx="22" cy="28" rx="14" ry="5" fill="#7a5c1e"/>
+              <rect x="8" y="14" width="28" height="14" fill="#c8861a"/>
+              <ellipse cx="22" cy="14" rx="14" ry="5" fill="#e8b84b"/>
+              <ellipse cx="22" cy="22" rx="14" ry="5" fill="#7a5c1e"/>
+              <rect x="8" y="8" width="28" height="14" fill="#c8861a"/>
+              <ellipse cx="22" cy="8" rx="14" ry="5" fill="#e8b84b"/>
+              <ellipse cx="22" cy="8" rx="10" ry="3.5" fill="#f5d060"/>
+            </svg>
               <div>
                 <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '16px', color: '#e8b84b', letterSpacing: '-0.3px', lineHeight: 1 }}>{formatGP(event.prize_pool)}</div>
                 <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#7a5c1e', marginTop: '3px' }}>PRIZE POOL</div>
@@ -455,7 +465,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
         </main>
 
         {/* ── Right panel ── */}
-        <aside style={{ background: 'var(--bg2)', borderLeft: '1px solid rgba(232,184,75,0.10)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <aside className="board-right-panel" style={{ background: 'var(--bg2)', borderLeft: '1px solid rgba(232,184,75,0.10)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
           {/* Pending submissions */}
           {isOwnerOrMod && pendingSubmissions.length > 0 && (
             <div style={{ borderBottom: '1px solid rgba(232,184,75,0.08)' }}>

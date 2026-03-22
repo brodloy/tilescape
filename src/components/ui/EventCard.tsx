@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { deleteEventVoid } from '@/app/actions/deleteEvent'
 
-const COINS = 'https://oldschool.runescape.wiki/w/Special:FilePath/Coins_10000.png?action=raw'
 
 function formatGP(gp: number): string {
   if (gp >= 1_000_000_000) return `${(gp / 1_000_000_000).toFixed(1)}B`
@@ -76,7 +75,22 @@ export function EventCard({ event, stats, isOwner, teams = [] }: {
         {/* Prize pool */}
         {prizePool > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 18px', background: 'rgba(232,184,75,0.05)', border: '1px solid rgba(232,184,75,0.18)', borderRadius: '12px', marginBottom: '18px' }}>
-            <img src={COINS} alt="GP" style={{ width: '44px', height: '44px', imageRendering: 'pixelated', flexShrink: 0, filter: 'drop-shadow(0 2px 8px rgba(232,184,75,0.35))' }} />
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+              {/* Stack of coins */}
+              <ellipse cx="22" cy="34" rx="14" ry="5" fill="#7a5c1e"/>
+              <rect x="8" y="20" width="28" height="14" fill="#c8861a"/>
+              <ellipse cx="22" cy="20" rx="14" ry="5" fill="#e8b84b"/>
+              <ellipse cx="22" cy="20" rx="10" ry="3.5" fill="#f0c85a"/>
+              <ellipse cx="22" cy="28" rx="14" ry="5" fill="#7a5c1e"/>
+              <rect x="8" y="14" width="28" height="14" fill="#c8861a"/>
+              <ellipse cx="22" cy="14" rx="14" ry="5" fill="#e8b84b"/>
+              <ellipse cx="22" cy="14" rx="10" ry="3.5" fill="#f0c85a"/>
+              <ellipse cx="22" cy="22" rx="14" ry="5" fill="#7a5c1e"/>
+              <rect x="8" y="8" width="28" height="14" fill="#c8861a"/>
+              <ellipse cx="22" cy="8" rx="14" ry="5" fill="#e8b84b"/>
+              <ellipse cx="22" cy="8" rx="10" ry="3.5" fill="#f5d060"/>
+              <text x="22" y="11" textAnchor="middle" fontSize="5" fontWeight="bold" fill="#7a5c1e" fontFamily="monospace">$</text>
+            </svg>
             <div>
               <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '28px', color: '#e8b84b', letterSpacing: '-1px', lineHeight: 1 }}>{formatGP(prizePool)}</div>
               <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#7a5c1e', marginTop: '5px', letterSpacing: '1px' }}>PRIZE POOL</div>
