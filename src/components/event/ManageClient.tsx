@@ -774,7 +774,11 @@ export function ManageClient({ event, tiles, teams, members, isOwner, currentUse
   )
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif", overflow: 'hidden' }}>
+    <>
+      <style>{`
+        html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }
+      `}</style>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif", overflow: 'hidden', width: '100%' }}>
       <AppNav displayName={displayName} context={navContext} actions={navActions} />
 
       {/* Tab bar */}
@@ -796,12 +800,13 @@ export function ManageClient({ event, tiles, teams, members, isOwner, currentUse
       </div>
 
       {/* Tab content — fills remaining height */}
-      <div style={{ height: 'calc(100vh - 64px - 52px)', overflow: 'hidden' }}>
+      <div style={{ height: 'calc(100vh - 64px - 52px)', overflow: 'hidden', width: '100%' }}>
         {tab === 'Board'    && <BoardTab   tiles={tiles}   eventId={event.id} isOwner={isOwner} />}
         {tab === 'Teams'    && <TeamsTab   teams={teams}   members={members} eventId={event.id} isOwner={isOwner} />}
         {tab === 'Members'  && <MembersTab members={members} teams={teams} eventId={event.id} isOwner={isOwner} currentUserId={currentUserId} />}
         {tab === 'Settings' && <SettingsTab event={event} eventId={event.id} isOwner={isOwner} />}
       </div>
     </div>
+    </>
   )
 }

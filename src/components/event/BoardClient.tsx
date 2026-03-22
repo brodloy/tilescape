@@ -154,7 +154,9 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
   )
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif", overflow: 'hidden' }}>
+    <>
+    <style>{`html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }`}</style>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif", overflow: 'hidden', width: '100%' }}>
       <AppNav displayName={displayName} context={navContext} actions={navActions} />
 
       {/* Main layout */}
@@ -470,5 +472,6 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
         </div>
       )}
     </div>
+    </>
   )
 }
