@@ -235,17 +235,17 @@ export default async function DashboardPage() {
             <>
               {myEvents.length > 0 && (
                 <section style={{ marginBottom: '48px' }}>
-                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: '#4a4438', letterSpacing: '2px', marginBottom: '20px' }}>MY EVENTS</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
-                    {myEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} />)}
+                  <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px', color: '#f0e8d8', marginBottom: '20px' }}>My Events</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {myEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={true} />)}
                   </div>
                 </section>
               )}
               {joinedEvents.length > 0 && (
                 <section>
-                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: '#4a4438', letterSpacing: '2px', marginBottom: '20px' }}>JOINED EVENTS</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
-                    {joinedEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} />)}
+                  <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px', color: '#f0e8d8', marginBottom: '20px' }}>Joined Events</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    {joinedEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={false} />)}
                   </div>
                 </section>
               )}
