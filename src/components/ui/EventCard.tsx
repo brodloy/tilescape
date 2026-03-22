@@ -4,10 +4,13 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { deleteEventVoid } from '@/app/actions/deleteEvent'
 
-const STATUS_STYLES: Record<string, { bg: string; color: string; border: string; label: string; dot: boolean }> = {
-  live:  { bg: 'rgba(62,207,116,0.1)',   color: '#3ecf74', border: 'rgba(62,207,116,0.3)',  label: 'LIVE',  dot: true  },
-  draft: { bg: 'rgba(154,143,122,0.08)', color: '#9a8f7a', border: 'rgba(154,143,122,0.2)', label: 'DRAFT', dot: false },
-  ended: { bg: 'rgba(74,68,56,0.25)',    color: '#4a4438', border: 'rgba(74,68,56,0.35)',   label: 'ENDED', dot: false },
+const COINS = 'https://oldschool.runescape.wiki/w/Special:FilePath/Coins_10000.png?action=raw'
+
+function formatGP(gp: number): string {
+  if (gp >= 1_000_000_000) return `${(gp / 1_000_000_000).toFixed(1)}B`
+  if (gp >= 1_000_000) return `${(gp / 1_000_000).toFixed(1)}M`
+  if (gp >= 1_000) return `${Math.round(gp / 1_000)}K`
+  return gp.toLocaleString()
 }
 
 export function EventCard({ event, stats, isOwner, tiles = [], teams = [] }: {
@@ -17,179 +20,124 @@ export function EventCard({ event, stats, isOwner, tiles = [], teams = [] }: {
   tiles?: any[]
   teams?: { id: string; name: string; color: string; done: number; pct: number }[]
 }) {
-  const [hovered, setHovered] = useState(false)
   const [deleting, startDelete] = useTransition()
 
   const now = new Date()
   const end = event.end_date ? new Date(event.end_date) : null
   const daysLeft = end ? Math.ceil((end.getTime() - now.getTime()) / 86400000) : null
-  const pct = stats ? Math.round(stats.done / Math.max(stats.total, 1) * 100) : 0
-  const st = STATUS_STYLES[event.status] ?? STATUS_STYLES.draft
+  const prizePool = event.prize_pool ?? 0
 
   function handleDelete(e: React.MouseEvent) {
-    e.preventDefault()
-    e.stopPropagation()
+    e.preventDefault(); e.stopPropagation()
     if (!confirm(`Delete "${event.name}"? This cannot be undone.`)) return
     startDelete(async () => { await deleteEventVoid(event.id) })
   }
 
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: hovered ? 'var(--surface2)' : 'var(--surface)',
-        border: `1px solid ${hovered ? 'rgba(232,184,75,0.28)' : 'rgba(232,184,75,0.10)'}`,
-        borderRadius: '14px', overflow: 'hidden',
-        transition: 'all .2s',
-        boxShadow: hovered ? '0 16px 48px rgba(0,0,0,0.5)' : 'none',
-        position: 'relative',
-      }}
-    >
-      {/* Top accent bar */}
-      <div style={{
-        height: '3px',
-        background: event.status === 'live' ? '#3ecf74'
-          : event.status === 'ended' ? '#2a2520'
-          : 'rgba(232,184,75,0.35)',
-      }} />
+  const isLive = event.status === 'live'
+  const isEnded = event.status === 'ended'
 
-      <div style={{ padding: '22px 24px' }}>
-        {/* Top row — status + role badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-            fontFamily: "'Press Start 2P', monospace", fontSize: '12px',
-            padding: '5px 12px', borderRadius: '4px',
-            background: st.bg, color: st.color, border: `1px solid ${st.border}`,
-          }}>
-            {st.dot && <span style={{ width: '5px', height: '5px', background: '#3ecf74', borderRadius: '50%', boxShadow: '0 0 5px #3ecf74', flexShrink: 0 }} />}
-            {st.label}
-          </div>
-          {event.myRole === 'owner' && (
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '11px', color: '#7a5c1e', padding: '4px 10px', borderRadius: '4px', background: 'rgba(232,184,75,0.07)', border: '1px solid rgba(232,184,75,0.15)' }}>OWNER</span>
-          )}
-          {event.myRole === 'moderator' && (
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '11px', color: '#4b9ef0', padding: '4px 10px', borderRadius: '4px', background: 'rgba(75,158,240,0.08)', border: '1px solid rgba(75,158,240,0.2)' }}>MOD</span>
-          )}
-          {daysLeft !== null && event.status === 'live' && (
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '11px', marginLeft: 'auto', color: daysLeft <= 1 ? '#e85555' : daysLeft <= 3 ? '#e8b84b' : '#9a8f7a' }}>
+  return (
+    <div style={{
+      background: 'var(--surface)',
+      border: '1px solid rgba(232,184,75,0.12)',
+      borderRadius: '16px', overflow: 'hidden',
+      transition: 'all .2s',
+      position: 'relative',
+    }}
+    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(232,184,75,0.3)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 40px rgba(0,0,0,0.4)' }}
+    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(232,184,75,0.12)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none' }}
+    >
+      {/* Status bar */}
+      <div style={{ height: '3px', background: isLive ? '#3ecf74' : isEnded ? '#2a2520' : 'rgba(232,184,75,0.3)' }} />
+
+      <div style={{ padding: '20px 22px' }}>
+
+        {/* Top row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+          <StatusBadge status={event.status} />
+          {event.myRole === 'owner' && <RoleBadge role="owner" />}
+          {event.myRole === 'moderator' && <RoleBadge role="moderator" />}
+          {daysLeft !== null && isLive && (
+            <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', marginLeft: 'auto', color: daysLeft <= 1 ? '#e85555' : daysLeft <= 3 ? '#e8b84b' : '#9a8f7a' }}>
               {daysLeft <= 0 ? 'ENDS TODAY' : `${daysLeft}D LEFT`}
             </span>
           )}
         </div>
 
-        {/* Title + description */}
-        <div style={{ marginBottom: '18px' }}>
-          <h3 style={{
-            fontFamily: "'Syne', sans-serif", fontWeight: 800,
-            fontSize: '24px', letterSpacing: '-0.8px',
-            color: hovered ? '#e8b84b' : '#f0e8d8',
-            marginBottom: '6px', lineHeight: 1.1,
-            transition: 'color .2s',
-          }}>
-            {event.name}
-          </h3>
-          {event.description && (
-            <p style={{ fontSize: '14px', color: '#9a8f7a', fontWeight: 300, lineHeight: 1.6, margin: 0 }}>
-              {event.description}
-            </p>
-          )}
-        </div>
+        {/* Title */}
+        <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '22px', letterSpacing: '-0.6px', color: '#f0e8d8', marginBottom: '6px', lineHeight: 1.1 }}>
+          {event.name}
+        </h3>
+        {event.description && (
+          <p style={{ fontSize: '14px', color: '#9a8f7a', fontWeight: 300, lineHeight: 1.5, marginBottom: '14px', margin: '0 0 14px' }}>
+            {event.description}
+          </p>
+        )}
 
-        {/* Mini board preview */}
-        {tiles.length > 0 && <MiniBoard tiles={tiles} status={event.status} />}
+        {/* Prize pool */}
+        {prizePool > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: 'rgba(232,184,75,0.06)', border: '1px solid rgba(232,184,75,0.15)', borderRadius: '10px', marginBottom: '16px' }}>
+            <img src={COINS} alt="GP" style={{ width: '22px', height: '22px', imageRendering: 'pixelated', flexShrink: 0 }} />
+            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '18px', color: '#e8b84b', letterSpacing: '-0.5px' }}>{formatGP(prizePool)}</span>
+            <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#7a5c1e' }}>PRIZE POOL</span>
+          </div>
+        )}
 
-        {/* Per-team progress bars */}
+        {/* Tile preview */}
+        {tiles.length > 0 && <TileShowcase tiles={tiles} />}
+
+        {/* Team progress */}
         {teams.length > 0 && stats && stats.total > 0 && (
-          <div style={{ marginBottom: '18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ marginBottom: '18px', display: 'flex', flexDirection: 'column', gap: '7px' }}>
             {teams.map((team, i) => (
               <div key={team.id}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '2px', background: team.color, flexShrink: 0 }} />
-                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 600, fontSize: '13px', color: '#9a8f7a' }}>{team.name}</span>
+                    <span style={{ fontFamily: "'DM Sans',sans-serif", fontWeight: 600, fontSize: '13px', color: '#9a8f7a' }}>{team.name}</span>
                   </div>
-                  <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '13px', color: team.color, letterSpacing: '-0.3px' }}>
+                  <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '13px', color: team.color }}>
                     {team.done}<span style={{ color: '#4a4438', fontWeight: 400 }}>/{stats.total}</span>
                   </span>
                 </div>
-                <div style={{ height: '6px', background: 'var(--bg3)', borderRadius: '3px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.03)' }}>
-                  <div style={{
-                    height: '100%', borderRadius: '3px',
-                    width: `${team.pct}%`,
-                    background: team.color,
-                    transition: `width .8s cubic-bezier(.4,0,.2,1) ${i * 80}ms`,
-                    minWidth: team.pct > 0 ? '6px' : '0',
-                    position: 'relative',
-                  }}>
-                    <div style={{ position: 'absolute', top: '1px', left: '2px', right: '2px', height: '40%', background: 'rgba(255,255,255,0.25)', borderRadius: '2px 2px 0 0' }} />
-                  </div>
+                <div style={{ height: '5px', background: 'var(--bg3)', borderRadius: '3px', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', borderRadius: '3px', width: `${team.pct}%`, background: team.color, transition: `width .8s cubic-bezier(.4,0,.2,1) ${i * 80}ms`, minWidth: team.pct > 0 ? '4px' : '0' }} />
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Fallback overall bar when no teams */}
         {teams.length === 0 && stats && stats.total > 0 && (
-          <div style={{ marginBottom: '18px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
               <span style={{ fontSize: '13px', color: '#9a8f7a' }}>{stats.done} of {stats.total} tiles</span>
-              <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '16px', color: '#9a8f7a' }}>{pct}%</span>
+              <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '15px', color: '#9a8f7a' }}>{Math.round(stats.done / Math.max(stats.total, 1) * 100)}%</span>
             </div>
-            <div style={{ height: '6px', background: 'var(--bg3)', borderRadius: '3px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', borderRadius: '3px', width: `${pct}%`, background: 'rgba(232,184,75,0.5)', transition: 'width .6s' }} />
+            <div style={{ height: '5px', background: 'var(--bg3)', borderRadius: '3px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', borderRadius: '3px', width: `${Math.round(stats.done / Math.max(stats.total, 1) * 100)}%`, background: 'rgba(232,184,75,0.4)', transition: 'width .6s' }} />
             </div>
           </div>
         )}
 
-        {/* Footer — invite code group + action buttons */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          paddingTop: '16px', borderTop: '1px solid rgba(232,184,75,0.08)',
-          gap: '12px',
-        }}>
-          {/* Invite code pill group */}
+        {/* Footer */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '14px', borderTop: '1px solid rgba(232,184,75,0.08)', gap: '10px' }}>
           <InviteCodeGroup code={event.invite_code} />
-
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            {isOwner && event.status !== 'ended' && (
-              <Link href={`/events/${event.id}/manage`}
-                onClick={e => e.stopPropagation()}
-                style={{
-                  fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '13px',
-                  padding: '9px 16px', borderRadius: '7px',
-                  background: 'none', border: '1px solid rgba(232,184,75,0.2)',
-                  color: '#9a8f7a', textDecoration: 'none', transition: 'all .15s',
-                }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+            {isOwner && !isEnded && (
+              <Link href={`/events/${event.id}/manage`} onClick={e => e.stopPropagation()}
+                style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px', padding: '8px 14px', borderRadius: '7px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', color: '#9a8f7a', textDecoration: 'none' }}>
                 Manage
               </Link>
             )}
             {isOwner && (
-              <button
-                onClick={handleDelete}
-                disabled={deleting}
-                style={{
-                  fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '13px',
-                  padding: '9px 16px', borderRadius: '7px',
-                  background: 'none', border: '1px solid rgba(232,85,85,0.2)',
-                  color: deleting ? '#4a4438' : '#e85555', cursor: deleting ? 'not-allowed' : 'pointer',
-                  transition: 'all .15s',
-                }}>
+              <button onClick={handleDelete} disabled={deleting}
+                style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px', padding: '8px 14px', borderRadius: '7px', background: 'none', border: '1px solid rgba(232,85,85,0.2)', color: deleting ? '#4a4438' : '#e85555', cursor: deleting ? 'not-allowed' : 'pointer' }}>
                 {deleting ? 'Deleting…' : 'Delete'}
               </button>
             )}
-            <Link href={`/events/${event.id}`}
-              onClick={e => e.stopPropagation()}
-              style={{
-                fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '13px',
-                padding: '9px 20px', borderRadius: '7px',
-                background: '#e8b84b', color: '#0c0a08',
-                textDecoration: 'none', transition: 'all .15s',
-                boxShadow: '0 0 20px rgba(232,184,75,0.2)',
-                flexShrink: 0,
-              }}>
+            <Link href={`/events/${event.id}`} onClick={e => e.stopPropagation()}
+              style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px', padding: '8px 18px', borderRadius: '7px', background: '#e8b84b', color: '#0c0a08', textDecoration: 'none', boxShadow: '0 0 18px rgba(232,184,75,0.2)', flexShrink: 0 }}>
               View Board →
             </Link>
           </div>
@@ -199,145 +147,108 @@ export function EventCard({ event, stats, isOwner, tiles = [], teams = [] }: {
   )
 }
 
-
-function InviteCodeGroup({ code }: { code: string }) {
-  const [copied, setCopied] = useState(false)
-
-  function handleCopy(e: React.MouseEvent) {
-    e.preventDefault(); e.stopPropagation()
-    navigator.clipboard.writeText(`https://tilescape.vercel.app/join?code=${code}`)
-    setCopied(true); setTimeout(() => setCopied(false), 2200)
+// ── Status badge ──────────────────────────────────────────────────────────────
+function StatusBadge({ status }: { status: string }) {
+  const styles: Record<string, { bg: string; color: string; border: string }> = {
+    live:  { bg: 'rgba(62,207,116,0.1)',  color: '#3ecf74', border: 'rgba(62,207,116,0.3)'  },
+    draft: { bg: 'rgba(154,143,122,0.08)', color: '#9a8f7a', border: 'rgba(154,143,122,0.2)' },
+    ended: { bg: 'rgba(74,68,56,0.25)',    color: '#4a4438', border: 'rgba(74,68,56,0.35)'  },
   }
-
+  const s = styles[status] ?? styles.draft
   return (
-    <div style={{ display: 'flex', alignItems: 'stretch', borderRadius: '11px', overflow: 'hidden', border: '1px solid rgba(232,184,75,0.22)', flexShrink: 0 }}>
-      {/* Label segment */}
-      <div style={{
-        padding: '0 16px',
-        background: 'rgba(232,184,75,0.07)',
-        borderRight: '1px solid rgba(232,184,75,0.14)',
-        display: 'flex', alignItems: 'center',
-      }}>
-        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#7a5c1e', letterSpacing: '1.5px', whiteSpace: 'nowrap' }}>
-          INVITE
-        </span>
-      </div>
-
-      {/* Code segment */}
-      <div style={{
-        padding: '14px 18px',
-        background: 'var(--bg3)',
-        display: 'flex', alignItems: 'center',
-        borderRight: '1px solid rgba(232,184,75,0.14)',
-      }}>
-        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '16px', color: '#e8b84b', letterSpacing: '5px', lineHeight: 1 }}>
-          {code}
-        </span>
-      </div>
-
-      {/* Copy button segment */}
-      <button
-        onClick={handleCopy}
-        title="Copy join link"
-        style={{
-          padding: '0 18px',
-          background: copied ? 'rgba(62,207,116,0.12)' : 'var(--bg3)',
-          border: 'none', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: '8px',
-          transition: 'background .2s',
-          color: copied ? '#3ecf74' : '#9a8f7a',
-        }}
-      >
-        {copied ? (
-          <>
-            <svg width="15" height="15" viewBox="0 0 13 13" fill="none">
-              <path d="M2 7L5 10L11 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '9px', whiteSpace: 'nowrap' }}>COPIED</span>
-          </>
-        ) : (
-          <>
-            <svg width="15" height="15" viewBox="0 0 13 13" fill="none">
-              <rect x="4.5" y="1.5" width="7" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
-              <path d="M2.5 4.5H2A1.5 1.5 0 0 0 .5 6v5A1.5 1.5 0 0 0 2 12.5h5A1.5 1.5 0 0 0 8.5 11v-.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
-            </svg>
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '9px', whiteSpace: 'nowrap' }}>COPY</span>
-          </>
-        )}
-      </button>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '10px', padding: '5px 11px', borderRadius: '5px', background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
+      {status === 'live' && <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#3ecf74', boxShadow: '0 0 5px #3ecf74', animation: 'pulse 2s infinite' }} />}
+      {status.toUpperCase()}
     </div>
   )
 }
 
-function MiniBoard({ tiles, status }: { tiles: any[]; status: string }) {
-  if (tiles.length === 0) return null
+function RoleBadge({ role }: { role: string }) {
+  const c = role === 'owner' ? { color: '#7a5c1e', bg: 'rgba(232,184,75,0.07)', border: 'rgba(232,184,75,0.15)' } : { color: '#4b9ef0', bg: 'rgba(75,158,240,0.08)', border: 'rgba(75,158,240,0.2)' }
+  return <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: c.color, padding: '4px 10px', borderRadius: '4px', background: c.bg, border: `1px solid ${c.border}` }}>{role.toUpperCase()}</span>
+}
 
+// ── Tile showcase — replaces the tiny scrolling icons ─────────────────────────
+function TileShowcase({ tiles }: { tiles: any[] }) {
   const nonFree = tiles.filter(t => !t.free_space && t.sprite_url)
   if (nonFree.length === 0) return null
 
-  const sorted = [...nonFree].sort((a, b) => {
-    const aApproved = a.tile_completions?.some((c: any) => c.status === 'approved') ? 1 : 0
-    const bApproved = b.tile_completions?.some((c: any) => c.status === 'approved') ? 1 : 0
-    return bApproved - aApproved
-  })
+  const approved = nonFree.filter(t => t.tile_completions?.some((c: any) => c.status === 'approved'))
+  const pending = nonFree.filter(t => !t.tile_completions?.some((c: any) => c.status === 'approved') && t.tile_completions?.some((c: any) => c.status === 'pending'))
+  const remaining = nonFree.filter(t => !t.tile_completions?.some((c: any) => c.status !== 'none' && c.status))
 
-  const itemW = 40 // 34px tile + 6px gap
-  const cardW = 600 // generous estimate of max card width
-  // Repeat enough times so we always have more than 2× the card width
-  const copiesNeeded = Math.ceil((cardW * 3) / (sorted.length * itemW)) + 1
-  const items = Array.from({ length: copiesNeeded }, () => sorted).flat()
-  const loopW = sorted.length * itemW // width of one full set
-
-  // Unique name per render to avoid global keyframe conflicts between cards
-  const animName = `tscroll_${sorted.length}_${loopW}`
-
-  // Don't animate if tiles fill less than the container — just show static row
-  const shouldAnimate = sorted.length * itemW > 80
+  // Show up to 6 featured tiles — approved first, then rest
+  const featured = [...approved, ...pending, ...remaining].slice(0, 6)
+  const total = nonFree.length
+  const doneCount = approved.length
+  const pct = Math.round(doneCount / Math.max(total, 1) * 100)
 
   return (
-    <div style={{ marginBottom: '16px', position: 'relative', overflow: 'hidden', height: '36px' }}>
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '24px', background: 'linear-gradient(90deg, var(--surface), transparent)', zIndex: 2, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '24px', background: 'linear-gradient(270deg, var(--surface), transparent)', zIndex: 2, pointerEvents: 'none' }} />
-
-      <div style={{
-        display: 'flex', gap: '6px', alignItems: 'center',
-        width: 'max-content',
-        animation: shouldAnimate ? `${animName} ${Math.max(sorted.length * 1.6, 6)}s linear infinite` : 'none',
-      }}>
-        {(shouldAnimate ? items : sorted).map((tile, i) => {
-          const approved = tile.tile_completions?.some((c: any) => c.status === 'approved')
+    <div style={{ marginBottom: '16px', background: 'var(--bg3)', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.04)' }}>
+      {/* Sprites row */}
+      <div style={{ display: 'flex', gap: '2px', padding: '12px 12px 10px' }}>
+        {featured.map((tile, i) => {
+          const isDone = tile.tile_completions?.some((c: any) => c.status === 'approved')
+          const isPending = !isDone && tile.tile_completions?.some((c: any) => c.status === 'pending')
           return (
-            <div key={i} style={{
-              width: '34px', height: '34px', flexShrink: 0, borderRadius: '6px',
-              background: approved ? 'rgba(62,207,116,0.12)' : 'var(--bg3)',
-              border: `1px solid ${approved ? 'rgba(62,207,116,0.3)' : 'rgba(255,255,255,0.05)'}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              position: 'relative', overflow: 'hidden',
-            }}>
+            <div key={i} style={{ flex: 1, aspectRatio: '1', borderRadius: '8px', background: isDone ? 'rgba(62,207,116,0.12)' : isPending ? 'rgba(232,184,75,0.08)' : 'var(--surface)', border: `1px solid ${isDone ? 'rgba(62,207,116,0.25)' : isPending ? 'rgba(232,184,75,0.2)' : 'rgba(255,255,255,0.05)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', padding: '6px' }}>
               <img src={tile.sprite_url} alt={tile.name}
-                style={{ width: '72%', height: '72%', objectFit: 'contain', imageRendering: 'pixelated', filter: approved ? 'brightness(1.1)' : 'grayscale(0.4) brightness(0.7)' }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated', filter: isDone ? 'brightness(1.1) drop-shadow(0 0 6px rgba(62,207,116,0.4))' : 'brightness(0.75) saturate(0.7)' }}
                 onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
               />
-              {approved && (
-                <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '10px', height: '10px', borderRadius: '50%', background: '#3ecf74', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="6" height="5" viewBox="0 0 6 5" fill="none">
-                    <path d="M1 2.5L2.5 4L5 1" stroke="#041a0c" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+              {isDone && (
+                <div style={{ position: 'absolute', bottom: '3px', right: '3px', width: '12px', height: '12px', borderRadius: '50%', background: '#3ecf74', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="7" height="6" viewBox="0 0 7 6" fill="none"><path d="M1 3L3 5L6 1" stroke="#041a0c" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
               )}
             </div>
           )
         })}
+        {/* Empty slots */}
+        {Array.from({ length: Math.max(0, 6 - featured.length) }, (_, i) => (
+          <div key={`empty-${i}`} style={{ flex: 1, aspectRatio: '1', borderRadius: '8px', background: 'var(--surface)', border: '1px dashed rgba(255,255,255,0.04)' }} />
+        ))}
       </div>
 
-      {shouldAnimate && (
-        <style>{`
-          @keyframes ${animName} {
-            from { transform: translateX(0); }
-            to   { transform: translateX(-${loopW + sorted.length * 6}px); }
-          }
-        `}</style>
-      )}
+      {/* Progress footer */}
+      <div style={{ padding: '8px 12px 10px', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ flex: 1, height: '4px', background: 'var(--surface)', borderRadius: '2px', overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #3ecf74, #5ee890)', borderRadius: '2px', transition: 'width .8s' }} />
+        </div>
+        <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '8px', color: doneCount > 0 ? '#3ecf74' : '#4a4438', flexShrink: 0 }}>
+          {doneCount}/{total}
+        </span>
+        {total > 6 && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '8px', color: '#4a4438', flexShrink: 0 }}>+{total - 6} MORE</span>}
+      </div>
+    </div>
+  )
+}
+
+// ── Invite code group ─────────────────────────────────────────────────────────
+function InviteCodeGroup({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false)
+  function handleCopy(e: React.MouseEvent) {
+    e.preventDefault(); e.stopPropagation()
+    navigator.clipboard.writeText(`https://tilescape.vercel.app/join?code=${code}`)
+    setCopied(true); setTimeout(() => setCopied(false), 2200)
+  }
+  return (
+    <div style={{ display: 'flex', alignItems: 'stretch', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(232,184,75,0.2)', flexShrink: 0 }}>
+      <div style={{ padding: '0 14px', background: 'rgba(232,184,75,0.06)', borderRight: '1px solid rgba(232,184,75,0.14)', display: 'flex', alignItems: 'center' }}>
+        <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#7a5c1e', letterSpacing: '1px' }}>INVITE</span>
+      </div>
+      <div style={{ padding: '12px 16px', background: 'var(--bg3)', display: 'flex', alignItems: 'center', borderRight: '1px solid rgba(232,184,75,0.14)' }}>
+        <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '14px', color: '#e8b84b', letterSpacing: '5px', lineHeight: 1 }}>{code}</span>
+      </div>
+      <button onClick={handleCopy} style={{ padding: '0 16px', background: copied ? 'rgba(62,207,116,0.12)' : 'var(--bg3)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '7px', transition: 'background .2s', color: copied ? '#3ecf74' : '#9a8f7a' }}>
+        {copied ? (
+          <><svg width="14" height="14" viewBox="0 0 13 13" fill="none"><path d="M2 7L5 10L11 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px' }}>COPIED</span></>
+        ) : (
+          <><svg width="14" height="14" viewBox="0 0 13 13" fill="none"><rect x="4.5" y="1.5" width="7" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.4"/><path d="M2.5 4.5H2A1.5 1.5 0 0 0 .5 6v5A1.5 1.5 0 0 0 2 12.5h5A1.5 1.5 0 0 0 8.5 11v-.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
+          <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px' }}>COPY</span></>
+        )}
+      </button>
     </div>
   )
 }

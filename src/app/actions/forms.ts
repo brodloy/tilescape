@@ -336,3 +336,17 @@ export async function joinEventWithRedirect(formData: FormData) {
   revalidatePath('/dashboard')
   redirect(`/events/${event.id}`)
 }
+
+export async function savePrizePool(eventId: string, formData: FormData) {
+  const supabase = await createClient()
+  const db = supabase as any
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const raw = formData.get('prize_pool') as string
+  const prize_pool = parseInt(raw.replace(/,/g, '').replace(/\D/g, '')) || 0
+  await db.from('events').update({ prize_pool }).eq('id', eventId)
+  revalidatePath(`/events/${eventId}/manage`)
+  revalidatePath(`/events/${eventId}`)
+  revalidatePath('/dashboard')
+}

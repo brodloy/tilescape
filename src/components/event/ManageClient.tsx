@@ -7,15 +7,16 @@ import { AppNav } from '@/components/ui/AppNav'
 import { Avatar } from '@/components/ui/Avatar'
 import {
   loadTemplate, removeTile, addTileAction,
-  addTeamAction, removeTeam, assignTeam, toggleMod, saveWebhook,
+  addTeamAction, removeTeam, assignTeam, toggleMod, saveWebhook, savePrizePool,
   goLive, endEvent,
 } from '@/app/actions/forms'
 import { updateTile } from '@/app/actions/tiles'
 import { deleteEventVoid } from '@/app/actions/deleteEvent'
 
 // ── OSRS catalogue ────────────────────────────────────────────────────────────
-const WIKI = 'https://oldschool.runescape.wiki/w/Special:FilePath/'
-const W = (n: string) => `${WIKI}${encodeURIComponent(n.replace(/ /g, '_'))}.png`
+const WIKI = 'https://oldschool.runescape.wiki/images/'
+// Use the wiki API to get image URLs - FilePath redirect works fine in img tags
+const W = (n: string) => `https://oldschool.runescape.wiki/w/Special:FilePath/${encodeURIComponent(n.replace(/ /g, '_'))}.png?action=raw`
 
 const OSRS_ITEMS = [
   { name: 'Twisted bow',  sprite: W('Twisted bow') },
@@ -313,7 +314,7 @@ function ItemSearchDropdown({ onSelect, takenPositions, boardTiles }: {
           value={query}
           onChange={e => { setQuery(e.target.value); setOpen(true); if (!e.target.value) setSelected(null) }}
           onFocus={() => setOpen(true)}
-          placeholder="Search any OSRS item…"
+          placeholder="Search any OSRS item — e.g. Dragon claws, Dharok, Bandos…"
           style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '15px', fontFamily: "'DM Sans',sans-serif" }}
         />
         {loading && <span style={{ fontSize: '12px', color: '#4a4438' }}>…</span>}
@@ -322,8 +323,8 @@ function ItemSearchDropdown({ onSelect, takenPositions, boardTiles }: {
 
       {open && (
         <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, background: 'var(--bg2)', border: '1px solid rgba(232,184,75,0.18)', borderRadius: '12px', boxShadow: '0 24px 64px rgba(0,0,0,0.8)', zIndex: 300, maxHeight: '340px', overflowY: 'auto' }}>
-          {!query && <div style={{ padding: '10px 14px 6px', fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1px' }}>POPULAR BINGO ITEMS · type to search all OSRS items</div>}
-          {query.length >= 2 && wikiResults.length === 0 && !loading && <div style={{ padding: '10px 14px 6px', fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438' }}>SEARCHING CURATED LIST</div>}
+          {!query && <div style={{ padding: '10px 14px 6px', fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438', letterSpacing: '1px' }}>POPULAR BINGO ITEMS · type to search all OSRS items</div>}
+          {query.length >= 2 && wikiResults.length === 0 && !loading && <div style={{ padding: '10px 14px 6px', fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438' }}>SEARCHING CURATED LIST</div>}
           {displayItems.map((item, i) => {
             const onBoard = boardNames.has(item.name.toLowerCase())
             return (
@@ -352,7 +353,7 @@ function ItemSearchDropdown({ onSelect, takenPositions, boardTiles }: {
               <div style={{ width: '32px', height: '32px', background: 'rgba(232,184,75,0.08)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', flexShrink: 0 }}>+</div>
               <div>
                 <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: '#e8b84b' }}>Add "{query}" as custom tile</div>
-                <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', marginTop: '2px' }}>OSRS wiki sprite auto-loaded</div>
+                <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438', marginTop: '2px' }}>OSRS wiki sprite auto-loaded</div>
               </div>
             </div>
           )}
@@ -559,7 +560,7 @@ function BoardTab({ tiles, eventId, isOwner }: { tiles: any[]; eventId: string; 
                         
                         {/* Edit indicator */}
                         {isOwner && isSelected && (
-                          <div style={{ position: 'absolute', top: '5px', right: '5px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#e8b84b', background: 'rgba(232,184,75,0.15)', border: '1px solid rgba(232,184,75,0.3)', borderRadius: '4px', padding: '2px 4px' }}>EDIT</div>
+                          <div style={{ position: 'absolute', top: '5px', right: '5px', fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#e8b84b', background: 'rgba(232,184,75,0.15)', border: '1px solid rgba(232,184,75,0.3)', borderRadius: '4px', padding: '2px 4px' }}>EDIT</div>
                         )}
                         {tile.sprite_url ? (
                           <img src={tile.sprite_url} alt={tile.name} style={{ width: '52%', height: '52%', objectFit: 'contain', imageRendering: 'pixelated', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.8))' }} onError={e => (e.currentTarget.style.display = 'none')} />
@@ -636,7 +637,7 @@ function TeamsTab({ teams, members, eventId, isOwner }: { teams: any[]; members:
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
                   <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: team.color, flexShrink: 0 }} />
                   <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '18px', color: 'var(--text)', flex: 1 }}>{team.name}</span>
-                  <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438' }}>{teamMembers.length} MEMBERS</span>
+                  <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438' }}>{teamMembers.length} MEMBERS</span>
                   {isOwner && (
                     <button onClick={() => handleRemove(team.id)} style={{ background: 'none', border: 'none', color: '#4a4438', cursor: 'pointer', fontSize: '14px', padding: '4px 6px', borderRadius: '6px', transition: 'all .15s' }}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#e85555' }}
@@ -650,7 +651,7 @@ function TeamsTab({ teams, members, eventId, isOwner }: { teams: any[]; members:
                     <div key={m.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', background: 'var(--bg3)', borderRadius: '8px' }}>
                       <Avatar src={m.users?.avatar_url} name={m.users?.display_name ?? '?'} color={team.color} size={26} />
                       <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text)', flex: 1 }}>{m.users?.display_name}</span>
-                      {m.role === 'owner' && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5px', color: '#7a5c1e' }}>OWNER</span>}
+                      {m.role === 'owner' && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#7a5c1e' }}>OWNER</span>}
                     </div>
                   ))}
                 </div>
@@ -763,7 +764,7 @@ function MembersTab({ members, teams, eventId, isOwner, currentUserId }: { membe
                   </select>
                   {m.role !== 'owner' && (
                     <button onClick={() => handleToggle(m.id, m.role)} disabled={pending}
-                      style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', height: '40px', padding: '0 12px', borderRadius: '8px', cursor: 'pointer', transition: 'all .15s', border: '1px solid', background: m.role === 'moderator' ? 'rgba(75,158,240,0.1)' : 'var(--surface)', borderColor: m.role === 'moderator' ? 'rgba(75,158,240,0.3)' : 'rgba(255,255,255,0.08)', color: m.role === 'moderator' ? '#4b9ef0' : '#4a4438' }}>
+                      style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', height: '40px', padding: '0 12px', borderRadius: '8px', cursor: 'pointer', transition: 'all .15s', border: '1px solid', background: m.role === 'moderator' ? 'rgba(75,158,240,0.1)' : 'var(--surface)', borderColor: m.role === 'moderator' ? 'rgba(75,158,240,0.3)' : 'rgba(255,255,255,0.08)', color: m.role === 'moderator' ? '#4b9ef0' : '#4a4438' }}>
                       {m.role === 'moderator' ? 'MOD ✓' : 'MOD'}
                     </button>
                   )}
@@ -782,13 +783,21 @@ function SettingsTab({ event, eventId, isOwner }: { event: any; eventId: string;
   const [pending, startTransition] = useTransition()
   const [deleting, startDelete] = useTransition()
   const [webhook, setWebhook] = useState(event.discord_webhook_url ?? '')
+  const [prizePool, setPrizePool] = useState(event.prize_pool ? String(event.prize_pool) : '')
   const [saved, setSaved] = useState(false)
+  const [prizeSaved, setPrizeSaved] = useState(false)
   const router = useRouter()
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
     const fd = new FormData(); fd.set('webhook_url', webhook)
     startTransition(async () => { await saveWebhook(eventId, fd); setSaved(true); setTimeout(() => setSaved(false), 2500) })
+  }
+
+  function handleSavePrize(e: React.FormEvent) {
+    e.preventDefault()
+    const fd = new FormData(); fd.set('prize_pool', prizePool)
+    startTransition(async () => { await savePrizePool(eventId, fd); setPrizeSaved(true); setTimeout(() => setPrizeSaved(false), 2500); router.refresh() })
   }
 
   function handleGoLive() {
@@ -836,6 +845,37 @@ function SettingsTab({ event, eventId, isOwner }: { event: any; eventId: string;
             )}
           </div>
         </div>
+
+        {/* Prize Pool */}
+        {isOwner && (
+          <div style={{ ...card }}>
+            <div style={{ padding: '18px 24px', borderBottom: '1px solid rgba(232,184,75,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <img src="https://oldschool.runescape.wiki/w/Special:FilePath/Coins_10000.png?action=raw" alt="GP" style={{ width: '24px', height: '24px', imageRendering: 'pixelated' }} />
+              <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '17px', color: 'var(--text)' }}>Prize Pool</div>
+            </div>
+            <form onSubmit={handleSavePrize} style={{ padding: '20px 24px' }}>
+              <div style={label}>AMOUNT (GP)</div>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  value={prizePool}
+                  onChange={e => setPrizePool(e.target.value.replace(/[^0-9]/g, ''))}
+                  placeholder="e.g. 10000000"
+                  style={{ ...input, flex: 1 }}
+                />
+                <button type="submit" disabled={pending} style={{ ...btn(prizeSaved ? 'ghost' : 'gold'), whiteSpace: 'nowrap' }}>
+                  {pending ? 'Saving…' : prizeSaved ? '✓ Saved!' : 'Save'}
+                </button>
+              </div>
+              {prizePool && (
+                <div style={{ marginTop: '10px', fontSize: '14px', color: '#e8b84b', fontWeight: 600 }}>
+                  = {formatGP(parseInt(prizePool))} GP
+                </div>
+              )}
+              <p style={{ fontSize: '13px', color: '#9a8f7a', marginTop: '10px' }}>Shown on the dashboard and board view to motivate your clan.</p>
+            </form>
+          </div>
+        )}
 
         {/* Invite code */}
         <div style={{ ...card }}>
@@ -888,10 +928,17 @@ function SettingsTab({ event, eventId, isOwner }: { event: any; eventId: string;
   )
 }
 
+function formatGP(gp: number): string {
+  if (gp >= 1_000_000_000) return `${(gp / 1_000_000_000).toFixed(1)}B`
+  if (gp >= 1_000_000) return `${(gp / 1_000_000).toFixed(1)}M`
+  if (gp >= 1_000) return `${(gp / 1_000).toFixed(0)}K`
+  return gp.toLocaleString()
+}
+
 // ── Tag helper ────────────────────────────────────────────────────────────────
 function Tag({ label, color, bg, border }: { label: string; color: string; bg: string; border: string }) {
   return (
-    <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color, padding: '3px 8px', borderRadius: '4px', background: bg, border: `1px solid ${border}` }}>{label}</span>
+    <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color, padding: '3px 8px', borderRadius: '4px', background: bg, border: `1px solid ${border}` }}>{label}</span>
   )
 }
 
@@ -913,7 +960,7 @@ export function ManageClient({ event, tiles, teams, members, isOwner, currentUse
       <Link href={`/events/${event.id}`} style={{ fontSize: '13px', color: '#9a8f7a', textDecoration: 'none', transition: 'color .15s' }}>← Board</Link>
       <span style={{ color: '#4a4438' }}>/</span>
       <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: 'var(--text)' }}>{event.name}</span>
-      <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', padding: '3px 8px', borderRadius: '3px', background: event.status === 'live' ? 'rgba(62,207,116,0.1)' : 'rgba(154,143,122,0.08)', color: event.status === 'live' ? '#3ecf74' : '#9a8f7a', border: `1px solid ${event.status === 'live' ? 'rgba(62,207,116,0.25)' : 'rgba(154,143,122,0.15)'}` }}>
+      <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', padding: '3px 8px', borderRadius: '3px', background: event.status === 'live' ? 'rgba(62,207,116,0.1)' : 'rgba(154,143,122,0.08)', color: event.status === 'live' ? '#3ecf74' : '#9a8f7a', border: `1px solid ${event.status === 'live' ? 'rgba(62,207,116,0.25)' : 'rgba(154,143,122,0.15)'}` }}>
         {event.status?.toUpperCase()}
       </div>
     </div>
@@ -927,8 +974,7 @@ export function ManageClient({ event, tiles, teams, members, isOwner, currentUse
 
   return (
     <>
-      <style>{`html,body{height:100%;overflow:hidden;margin:0;padding:0;}`}</style>
-      <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif" }}>
+      <div className="app-page">
         <AppNav displayName={displayName} avatarUrl={avatarUrl} context={navContext} actions={navActions} />
 
         {/* Tab bar */}
@@ -942,9 +988,9 @@ export function ManageClient({ event, tiles, teams, members, isOwner, currentUse
               boxShadow: tab === t ? '0 0 0 1px rgba(232,184,75,0.15)' : 'none',
             }}>
               {t}
-              {t === 'Teams' && teams.length > 0 && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438' }}>{teams.length}</span>}
-              {t === 'Members' && members.length > 0 && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438' }}>{members.length}</span>}
-              {t === 'Board' && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438' }}>{tiles.length}/25</span>}
+              {t === 'Teams' && teams.length > 0 && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#4a4438' }}>{teams.length}</span>}
+              {t === 'Members' && members.length > 0 && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#4a4438' }}>{members.length}</span>}
+              {t === 'Board' && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#4a4438' }}>{tiles.length}/25</span>}
             </button>
           ))}
         </div>

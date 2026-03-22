@@ -44,7 +44,7 @@ export default async function ProfilePage({ params }: { params: { userId: string
   const memberSince = new Date(profile.created_at).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
 
   const S = {
-    pill: { fontFamily: "'Press Start 2P',monospace", fontSize: '7px', letterSpacing: '0.5px' } as React.CSSProperties,
+    pill: { fontFamily: "'Press Start 2P',monospace", fontSize: '10px', letterSpacing: '0.5px' } as React.CSSProperties,
     sectionLabel: { fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#e8b84b', letterSpacing: '1px', marginBottom: '16px' } as React.CSSProperties,
   }
 

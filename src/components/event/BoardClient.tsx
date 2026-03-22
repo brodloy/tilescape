@@ -11,8 +11,14 @@ import { ToastArea, BingoCelebration, showToast } from '@/components/event/Celeb
 import { Avatar } from '@/components/ui/Avatar'
 import { ReviewModal } from '@/components/event/ReviewModal'
 
-const WIKI = 'https://oldschool.runescape.wiki/w/Special:FilePath/'
-const W = (n: string) => WIKI + encodeURIComponent(n.replace(/ /g, '_')) + '.png'
+const W = (n: string) => `https://oldschool.runescape.wiki/w/Special:FilePath/${encodeURIComponent(n.replace(/ /g, '_'))}.png?action=raw`
+const COINS = 'https://oldschool.runescape.wiki/w/Special:FilePath/Coins_10000.png?action=raw'
+function formatGP(gp: number): string {
+  if (gp >= 1_000_000_000) return `${(gp / 1_000_000_000).toFixed(1)}B`
+  if (gp >= 1_000_000) return `${(gp / 1_000_000).toFixed(1)}M`
+  if (gp >= 1_000) return `${Math.round(gp / 1_000)}K`
+  return gp.toLocaleString()
+}
 
 // DEV MODE: set to false to require proof URLs
 const DEV_QUICK_COMPLETE = true
@@ -165,19 +171,19 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '15px', color: 'var(--text)' }}>{event.name}</span>
       {event.status === 'live' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontFamily: "'Press Start 2P',monospace", fontSize: '6px', padding: '3px 8px', borderRadius: '3px', background: 'rgba(62,207,116,0.12)', color: '#3ecf74', border: '1px solid rgba(62,207,116,0.2)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', fontFamily: "'Press Start 2P',monospace", fontSize: '9px', padding: '3px 8px', borderRadius: '3px', background: 'rgba(62,207,116,0.12)', color: '#3ecf74', border: '1px solid rgba(62,207,116,0.2)' }}>
           <div style={{ width: '5px', height: '5px', background: '#3ecf74', borderRadius: '50%', animation: 'livepulse 1.5s infinite' }} />
           LIVE
           <style>{`@keyframes livepulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(62,207,116,0.5)}50%{opacity:.6;box-shadow:0 0 0 4px rgba(62,207,116,0)}}`}</style>
         </div>
       )}
       {event.status === 'draft' && (
-        <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', padding: '3px 8px', borderRadius: '3px', background: 'rgba(154,143,122,0.08)', color: '#9a8f7a', border: '1px solid rgba(154,143,122,0.15)' }}>DRAFT</div>
+        <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', padding: '3px 8px', borderRadius: '3px', background: 'rgba(154,143,122,0.08)', color: '#9a8f7a', border: '1px solid rgba(154,143,122,0.15)' }}>DRAFT</div>
       )}
       {connected && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <span style={{ width: '5px', height: '5px', background: '#3ecf74', borderRadius: '50%', boxShadow: '0 0 4px #3ecf74' }} />
-          <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5px', color: '#4a4438' }}>LIVE UPDATES</span>
+          <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438' }}>LIVE UPDATES</span>
         </div>
       )}
     </div>
@@ -205,8 +211,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
 
   return (
     <>
-    <style>{`html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }`}</style>
-    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif" }}>
+    <div className="app-page">
       <AppNav displayName={displayName} avatarUrl={avatarUrl} context={navContext} actions={navActions} />
 
       {/* Three-column layout below nav */}
@@ -215,14 +220,25 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
         {/* ── Sidebar ── */}
         <aside style={{ background: 'var(--bg2)', borderRight: '1px solid rgba(232,184,75,0.10)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
           {/* Invite code */}
-          <div style={{ padding: '16px 14px', borderBottom: '1px solid rgba(232,184,75,0.08)' }}>
-            <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1.5px', marginBottom: '6px' }}>INVITE CODE</div>
-            <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '13px', color: '#e8b84b', letterSpacing: '3px' }}>{event.invite_code}</div>
+          <div style={{ padding: '14px', borderBottom: '1px solid rgba(232,184,75,0.08)' }}>
+            <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '8px', color: '#4a4438', letterSpacing: '1px', marginBottom: '6px' }}>INVITE CODE</div>
+            <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '14px', color: '#e8b84b', letterSpacing: '3px' }}>{event.invite_code}</div>
           </div>
+
+          {/* Prize pool */}
+          {event.prize_pool > 0 && (
+            <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(232,184,75,0.08)', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(232,184,75,0.03)' }}>
+              <img src={COINS} alt="GP" style={{ width: '20px', height: '20px', imageRendering: 'pixelated', flexShrink: 0 }} />
+              <div>
+                <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '16px', color: '#e8b84b', letterSpacing: '-0.3px', lineHeight: 1 }}>{formatGP(event.prize_pool)}</div>
+                <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#7a5c1e', marginTop: '3px' }}>PRIZE POOL</div>
+              </div>
+            </div>
+          )}
 
           {/* Teams filter */}
           <div style={{ padding: '14px 12px 6px', flex: 1 }}>
-            <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '2px', padding: '0 4px', marginBottom: '10px' }}>TEAMS</div>
+            <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438', letterSpacing: '1px', padding: '0 4px', marginBottom: '10px' }}>TEAMS</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               {/* All teams option */}
               <button onClick={() => setSelectedTeamId(null)}
@@ -234,7 +250,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                     <div style={{ height: '100%', width: `${Math.round(totalApproved / Math.max(nonFree.length, 1) * 100)}%`, background: 'linear-gradient(90deg, #e8824b, #4b9ef0)', transition: 'width .5s' }} />
                   </div>
                 </div>
-                <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#9a8f7a' }}>{totalApproved}</span>
+                <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#9a8f7a' }}>{totalApproved}</span>
               </button>
 
               {teams.map(team => {
@@ -250,13 +266,13 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '12px', color: 'var(--text)', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '5px' }}>
                         {team.name}
-                        {isMyTeam && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5px', color: team.color }}>YOU</span>}
+                        {isMyTeam && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: team.color }}>YOU</span>}
                       </div>
                       <div style={{ height: '2px', background: 'var(--bg3)', borderRadius: '1px', overflow: 'hidden' }}>
                         <div style={{ height: '100%', width: `${pct}%`, background: team.color, transition: 'width .5s' }} />
                       </div>
                     </div>
-                    <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: team.color }}>{done}</span>
+                    <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: team.color }}>{done}</span>
                   </button>
                 )
               })}
@@ -274,7 +290,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
               ].map(s => (
                 <div key={s.label} style={{ background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.08)', borderRadius: '8px', padding: '10px' }}>
                   <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '20px', color: s.color, letterSpacing: '-0.5px', lineHeight: 1 }}>{s.value}</div>
-                  <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5.5px', color: '#4a4438', marginTop: '4px' }}>{s.label}</div>
+                  <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438', marginTop: '4px' }}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -374,7 +390,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
             {teams.length > 1 && (
               <div style={{ maxWidth: '820px', marginTop: '20px', marginBottom: '32px', background: 'var(--bg2)', border: '1px solid rgba(232,184,75,0.10)', borderRadius: '14px', overflow: 'hidden' }}>
                 <div style={{ padding: '12px 18px', borderBottom: '1px solid rgba(232,184,75,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#e8b84b', letterSpacing: '1.5px' }}>⚔ TEAM STANDINGS</span>
+                  <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#e8b84b', letterSpacing: '1.5px' }}>⚔ TEAM STANDINGS</span>
                 </div>
                 {[...teams].map(t => ({ ...t, done: nonFree.filter(tile => tile.tile_completions?.some((c:any) => c.team_id === t.id && c.status==='approved')).length, bingos: calcBingos(tiles, t.id), pct: Math.round(nonFree.filter(tile => tile.tile_completions?.some((c:any) => c.team_id===t.id && c.status==='approved')).length / Math.max(nonFree.length,1) * 100) }))
                   .sort((a,b) => b.done - a.done || b.bingos - a.bingos)
@@ -399,8 +415,8 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '5px', minWidth: '80px' }}>
                         <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '22px', letterSpacing: '-1px', color: team.color }}>{team.pct}%</span>
                         <div style={{ display: 'flex', gap: '4px' }}>
-                          <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5.5px', padding: '2px 6px', borderRadius: '3px', background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.06)', color: '#4a4438' }}>{team.done}/{nonFree.length}</span>
-                          {team.bingos > 0 && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5.5px', padding: '2px 6px', borderRadius: '3px', background: 'rgba(232,184,75,0.1)', border: '1px solid rgba(232,184,75,0.2)', color: '#e8b84b' }}>{team.bingos}✗</span>}
+                          <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', padding: '2px 6px', borderRadius: '3px', background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.06)', color: '#4a4438' }}>{team.done}/{nonFree.length}</span>
+                          {team.bingos > 0 && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', padding: '2px 6px', borderRadius: '3px', background: 'rgba(232,184,75,0.1)', border: '1px solid rgba(232,184,75,0.2)', color: '#e8b84b' }}>{team.bingos}✗</span>}
                         </div>
                       </div>
                     </div>
@@ -416,8 +432,8 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
           {isOwnerOrMod && pendingSubmissions.length > 0 && (
             <div style={{ borderBottom: '1px solid rgba(232,184,75,0.08)' }}>
               <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1.5px' }}>PENDING REVIEW</span>
-                <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#e8b84b', padding: '2px 7px', borderRadius: '3px', background: 'rgba(232,184,75,0.1)', border: '1px solid rgba(232,184,75,0.2)' }}>{pendingSubmissions.length}</span>
+                <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438', letterSpacing: '1.5px' }}>PENDING REVIEW</span>
+                <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#e8b84b', padding: '2px 7px', borderRadius: '3px', background: 'rgba(232,184,75,0.1)', border: '1px solid rgba(232,184,75,0.2)' }}>{pendingSubmissions.length}</span>
               </div>
               <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
                 {pendingSubmissions.map(sub => (
@@ -438,7 +454,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                         <span style={{ fontSize: '12px', color: '#9a8f7a' }}>{sub.teams?.name} · {sub.users?.display_name}</span>
                       </div>
                     </div>
-                    <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438', flexShrink: 0 }}>REVIEW →</span>
+                    <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#4a4438', flexShrink: 0 }}>REVIEW →</span>
                   </button>
                 ))}
               </div>
@@ -447,7 +463,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
 
           {/* Members */}
           <div style={{ padding: '12px 14px', flex: 1 }}>
-            <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1.5px', marginBottom: '10px' }}>MEMBERS ({members.length})</div>
+            <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438', letterSpacing: '1px', marginBottom: '10px' }}>MEMBERS ({members.length})</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               {[...members].sort((a,b) => a.role==='owner'?-1:b.role==='owner'?1:0).map(member => {
                 const usr = member.users
@@ -471,8 +487,8 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                       </Link>
                       {team && <div style={{ fontSize: '11px', color: '#4a4438' }}>{team.name}</div>}
                     </div>
-                    {member.role === 'owner' && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5px', color: '#7a5c1e' }}>★</span>}
-                    {member.role === 'moderator' && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5px', color: '#4b9ef0' }}>M</span>}
+                    {member.role === 'owner' && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#7a5c1e' }}>★</span>}
+                    {member.role === 'moderator' && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4b9ef0' }}>M</span>}
                   </div>
                 )
               })}
