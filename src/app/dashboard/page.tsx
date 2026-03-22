@@ -3,8 +3,6 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { joinEventAction } from '@/app/actions/forms'
 import { signOut } from '@/app/actions/auth'
-import { Button } from '@/components/ui/Button'
-import { Card, CardBody } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/Badge'
 
 export default async function DashboardPage() {
@@ -15,10 +13,7 @@ export default async function DashboardPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await db
-    .from('users')
-    .select('display_name, avatar_url')
-    .eq('id', user.id)
-    .single()
+    .from('users').select('display_name, avatar_url').eq('id', user.id).single()
 
   const { data: memberships } = await db
     .from('event_members')
@@ -26,71 +21,75 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .order('joined_at', { ascending: false })
 
-  const myEvents = (memberships ?? [])
-    .filter((m: any) => m.role === 'owner')
-    .map((m: any) => ({ ...m.events, myRole: m.role }))
-
-  const joinedEvents = (memberships ?? [])
-    .filter((m: any) => m.role !== 'owner')
-    .map((m: any) => ({ ...m.events, myRole: m.role }))
+  const myEvents = (memberships ?? []).filter((m: any) => m.role === 'owner').map((m: any) => ({ ...m.events, myRole: m.role }))
+  const joinedEvents = (memberships ?? []).filter((m: any) => m.role !== 'owner').map((m: any) => ({ ...m.events, myRole: m.role }))
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="sticky top-0 z-50 bg-bg2 border-b border-[rgba(232,184,75,0.20)] px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="font-syne font-extrabold text-lg tracking-tight">
-          Tile<span className="text-gold">Scape</span>
+      {/* Radial glow top */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] pointer-events-none" style={{background:'radial-gradient(ellipse, rgba(232,184,75,0.06) 0%, transparent 65%)'}} />
+
+      {/* Topbar */}
+      <header className="sticky top-0 z-50 bg-[rgba(12,10,8,0.85)] backdrop-blur-md border-b border-[rgba(232,184,75,0.20)] px-6 h-16 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5 no-underline">
+          <div className="grid gap-[2px]" style={{gridTemplateColumns:'repeat(3,6px)',gridTemplateRows:'repeat(3,6px)'}}>
+            {[1,0,1,1,1,0,0,1,1].map((on,i) => (
+              <span key={i} className="block rounded-[1px]" style={{background: on ? '#e8b84b' : 'transparent'}} />
+            ))}
+          </div>
+          <span className="font-syne font-extrabold text-xl tracking-tight">Tile<em className="not-italic text-gold">Scape</em></span>
         </Link>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-text-2">{profile?.display_name}</span>
-          <Link href="/account" className="text-xs text-text-3 hover:text-text-2 transition-colors">Settings</Link>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-text-2 font-medium">{profile?.display_name}</span>
+          <Link href="/account" className="font-pixel text-[6px] text-text-3 hover:text-gold transition-colors tracking-wider">SETTINGS</Link>
           <form action={signOut}>
-            <button type="submit" className="text-xs text-text-3 hover:text-text-2 transition-colors">
-              Sign out
-            </button>
+            <button type="submit" className="font-pixel text-[6px] text-text-3 hover:text-text-2 transition-colors tracking-wider">SIGN OUT</button>
           </form>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-10">
-        <div className="flex items-start justify-between mb-10">
+      <main className="max-w-5xl mx-auto px-6 py-12 relative z-10">
+        {/* Page header */}
+        <div className="flex items-start justify-between mb-12">
           <div>
-            <h1 className="font-syne font-extrabold text-3xl tracking-tight mb-1">
+            <div className="font-pixel text-[7px] text-gold tracking-widest mb-3 opacity-80">DASHBOARD</div>
+            <h1 className="font-syne font-extrabold text-4xl tracking-tight mb-2">
               Welcome back, <span className="text-gold">{profile?.display_name}</span>
             </h1>
-            <p className="text-text-2 text-sm">Manage your events or join one with an invite code.</p>
+            <p className="text-text-2 text-sm font-light">Manage your events or join one with an invite code.</p>
           </div>
-          <div className="flex gap-2 items-center">
-            {/* Join form */}
+          <div className="flex gap-2 items-center mt-1">
             <form action={joinEventAction} className="flex gap-2">
               <input
                 name="code"
                 placeholder="Invite code"
-                className="h-9 px-3 text-sm bg-surface border border-[rgba(232,184,75,0.20)] rounded text-text placeholder:text-text-3 outline-none focus:border-gold-dim w-28 uppercase"
+                className="h-10 px-3 text-sm bg-surface border border-[rgba(232,184,75,0.20)] rounded text-text placeholder:text-text-3 outline-none focus:border-gold-dim focus:shadow-[0_0_0_3px_rgba(232,184,75,0.08)] w-32 uppercase tracking-widest font-pixel text-[10px] transition-all"
                 maxLength={8}
               />
-              <Button type="submit" variant="ghost" size="sm">Join</Button>
+              <button type="submit" className="h-10 px-4 text-sm font-syne font-bold border border-[rgba(232,184,75,0.20)] rounded text-text-2 hover:text-text hover:border-gold-dim hover:bg-surface transition-all">
+                Join
+              </button>
             </form>
-
-            {/* Create event — simple link, no form needed */}
-            <Link href="/events/new">
-              <Button size="sm" variant="primary">+ Create Event</Button>
+            <Link href="/events/new" className="h-10 px-4 inline-flex items-center font-syne font-bold text-sm bg-gold text-bg rounded hover:bg-[#f0c85a] transition-all shadow-[0_0_20px_rgba(232,184,75,0.2)] hover:shadow-[0_0_32px_rgba(232,184,75,0.35)]">
+              + Create Event
             </Link>
           </div>
         </div>
 
         {/* My Events */}
-        <section className="mb-10">
-          <h2 className="font-pixel text-[8px] text-text-3 tracking-widest mb-4 uppercase">My Events</h2>
+        <section className="mb-12">
+          <div className="font-pixel text-[7px] text-text-3 tracking-widest mb-5 uppercase">My Events</div>
           {myEvents.length === 0 ? (
-            <div className="border border-dashed border-[rgba(232,184,75,0.15)] rounded-lg p-10 text-center">
-              <p className="font-syne font-bold text-text-2 mb-1">No events yet</p>
-              <p className="text-sm text-text-3">Create your first bingo event to get started.</p>
+            <div className="border border-dashed border-[rgba(232,184,75,0.15)] rounded-xl p-12 text-center">
+              <div className="font-pixel text-[8px] text-gold-dim mb-3 tracking-wider">NO EVENTS YET</div>
+              <p className="text-text-2 text-sm font-light mb-6">Create your first bingo event to get started.</p>
+              <Link href="/events/new" className="inline-flex items-center px-5 py-2.5 font-syne font-bold text-sm bg-gold text-bg rounded hover:bg-[#f0c85a] transition-all">
+                + Create Event
+              </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {myEvents.map((event: any) => (
-                <EventCard key={event.id} event={event} />
-              ))}
+              {myEvents.map((event: any) => <EventCard key={event.id} event={event} />)}
             </div>
           )}
         </section>
@@ -98,11 +97,9 @@ export default async function DashboardPage() {
         {/* Joined Events */}
         {joinedEvents.length > 0 && (
           <section>
-            <h2 className="font-pixel text-[8px] text-text-3 tracking-widest mb-4 uppercase">Joined Events</h2>
+            <div className="font-pixel text-[7px] text-text-3 tracking-widest mb-5 uppercase">Joined Events</div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {joinedEvents.map((event: any) => (
-                <EventCard key={event.id} event={event} />
-              ))}
+              {joinedEvents.map((event: any) => <EventCard key={event.id} event={event} />)}
             </div>
           </section>
         )}
@@ -118,33 +115,27 @@ function EventCard({ event }: { event: any }) {
 
   return (
     <Link href={`/events/${event.id}`} className="block group">
-      <Card hover className="h-full">
-        <CardBody className="p-5">
-          <div className="flex items-start justify-between mb-3">
-            <StatusBadge status={event.status} />
-            {event.myRole === 'owner' && (
-              <span className="font-pixel text-[6px] text-gold-dim">OWNER</span>
-            )}
-            {event.myRole === 'moderator' && (
-              <span className="font-pixel text-[6px] text-[#4b9ef0]">MOD</span>
-            )}
-          </div>
-          <h3 className="font-syne font-bold text-base tracking-tight mb-1 group-hover:text-gold transition-colors">
-            {event.name}
-          </h3>
-          {event.description && (
-            <p className="text-text-2 text-xs leading-relaxed mb-3 line-clamp-2">{event.description}</p>
+      <div className="bg-surface border border-[rgba(232,184,75,0.10)] rounded-xl p-5 h-full transition-all duration-150 hover:border-[rgba(232,184,75,0.25)] hover:bg-surface2 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+        <div className="flex items-start justify-between mb-3">
+          <StatusBadge status={event.status} />
+          {event.myRole === 'owner' && <span className="font-pixel text-[6px] text-gold-dim">OWNER</span>}
+          {event.myRole === 'moderator' && <span className="font-pixel text-[6px] text-[#4b9ef0]">MOD</span>}
+        </div>
+        <h3 className="font-syne font-bold text-base tracking-tight mb-1 group-hover:text-gold transition-colors leading-tight">
+          {event.name}
+        </h3>
+        {event.description && (
+          <p className="text-text-2 text-xs leading-relaxed mb-3 line-clamp-2 font-light">{event.description}</p>
+        )}
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-[rgba(232,184,75,0.08)]">
+          <span className="font-pixel text-[6px] text-text-3 tracking-wider">{event.invite_code}</span>
+          {daysLeft !== null && event.status === 'live' && (
+            <span className={`font-pixel text-[6px] ${daysLeft <= 1 ? 'text-red' : daysLeft <= 3 ? 'text-gold' : 'text-text-3'}`}>
+              {daysLeft <= 0 ? 'ENDING TODAY' : `${daysLeft}D LEFT`}
+            </span>
           )}
-          <div className="flex items-center justify-between mt-auto pt-3 border-t border-[rgba(232,184,75,0.08)]">
-            <span className="font-pixel text-[6px] text-text-3">{event.invite_code}</span>
-            {daysLeft !== null && event.status === 'live' && (
-              <span className={`font-pixel text-[6px] ${daysLeft <= 1 ? 'text-red' : daysLeft <= 3 ? 'text-gold' : 'text-text-3'}`}>
-                {daysLeft <= 0 ? 'ENDING TODAY' : `${daysLeft}D LEFT`}
-              </span>
-            )}
-          </div>
-        </CardBody>
-      </Card>
+        </div>
+      </div>
     </Link>
   )
 }
