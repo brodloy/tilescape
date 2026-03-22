@@ -213,27 +213,27 @@ function InviteCodeGroup({ code }: { code: string }) {
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'stretch', borderRadius: '9px', overflow: 'hidden', border: '1px solid rgba(232,184,75,0.18)', flexShrink: 0 }}>
+    <div style={{ display: 'flex', alignItems: 'stretch', borderRadius: '11px', overflow: 'hidden', border: '1px solid rgba(232,184,75,0.22)', flexShrink: 0 }}>
       {/* Label segment */}
       <div style={{
-        padding: '0 10px',
-        background: 'rgba(232,184,75,0.06)',
+        padding: '0 16px',
+        background: 'rgba(232,184,75,0.07)',
         borderRight: '1px solid rgba(232,184,75,0.14)',
         display: 'flex', alignItems: 'center',
       }}>
-        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: '#4a4438', letterSpacing: '1px', whiteSpace: 'nowrap' }}>
+        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#7a5c1e', letterSpacing: '1.5px', whiteSpace: 'nowrap' }}>
           INVITE
         </span>
       </div>
 
       {/* Code segment */}
       <div style={{
-        padding: '10px 14px',
+        padding: '14px 18px',
         background: 'var(--bg3)',
         display: 'flex', alignItems: 'center',
         borderRight: '1px solid rgba(232,184,75,0.14)',
       }}>
-        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '12px', color: '#e8b84b', letterSpacing: '4px', lineHeight: 1 }}>
+        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '16px', color: '#e8b84b', letterSpacing: '5px', lineHeight: 1 }}>
           {code}
         </span>
       </div>
@@ -243,28 +243,28 @@ function InviteCodeGroup({ code }: { code: string }) {
         onClick={handleCopy}
         title="Copy join link"
         style={{
-          padding: '0 14px',
+          padding: '0 18px',
           background: copied ? 'rgba(62,207,116,0.12)' : 'var(--bg3)',
           border: 'none', cursor: 'pointer',
-          display: 'flex', alignItems: 'center', gap: '6px',
+          display: 'flex', alignItems: 'center', gap: '8px',
           transition: 'background .2s',
           color: copied ? '#3ecf74' : '#9a8f7a',
         }}
       >
         {copied ? (
           <>
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <svg width="15" height="15" viewBox="0 0 13 13" fill="none">
               <path d="M2 7L5 10L11 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', whiteSpace: 'nowrap' }}>COPIED</span>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '9px', whiteSpace: 'nowrap' }}>COPIED</span>
           </>
         ) : (
           <>
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <svg width="15" height="15" viewBox="0 0 13 13" fill="none">
               <rect x="4.5" y="1.5" width="7" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
               <path d="M2.5 4.5H2A1.5 1.5 0 0 0 .5 6v5A1.5 1.5 0 0 0 2 12.5h5A1.5 1.5 0 0 0 8.5 11v-.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
             </svg>
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', whiteSpace: 'nowrap' }}>COPY</span>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '9px', whiteSpace: 'nowrap' }}>COPY</span>
           </>
         )}
       </button>
