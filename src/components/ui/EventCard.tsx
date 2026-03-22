@@ -275,39 +275,42 @@ function MiniBoard({ tiles, status }: { tiles: any[]; status: string }) {
   const nonFree = tiles.filter(t => !t.free_space && t.sprite_url)
   if (nonFree.length === 0) return null
 
-  // Sort: approved first, then purples, then rest
   const sorted = [...nonFree].sort((a, b) => {
-    const aApproved = a.tile_completions?.some((c: any) => c.status === 'approved') ? 2 : 0
-    const bApproved = b.tile_completions?.some((c: any) => c.status === 'approved') ? 2 : 0
-    const aPurple = a.is_purple ? 1 : 0
-    const bPurple = b.is_purple ? 1 : 0
-    return (bApproved + bPurple) - (aApproved + aPurple)
+    const aApproved = a.tile_completions?.some((c: any) => c.status === 'approved') ? 1 : 0
+    const bApproved = b.tile_completions?.some((c: any) => c.status === 'approved') ? 1 : 0
+    return bApproved - aApproved
   })
 
-  // Duplicate for seamless loop
-  const items = [...sorted, ...sorted]
-  const itemW = 40 // px per item including gap
-  const totalW = sorted.length * itemW
+  const itemW = 40 // 34px tile + 6px gap
+  const cardW = 600 // generous estimate of max card width
+  // Repeat enough times so we always have more than 2× the card width
+  const copiesNeeded = Math.ceil((cardW * 3) / (sorted.length * itemW)) + 1
+  const items = Array.from({ length: copiesNeeded }, () => sorted).flat()
+  const loopW = sorted.length * itemW // width of one full set
+
+  // Unique name per render to avoid global keyframe conflicts between cards
+  const animName = `tscroll_${sorted.length}_${loopW}`
+
+  // Don't animate if tiles fill less than the container — just show static row
+  const shouldAnimate = sorted.length * itemW > 80
 
   return (
     <div style={{ marginBottom: '16px', position: 'relative', overflow: 'hidden', height: '36px' }}>
-      {/* Left fade */}
-      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '32px', background: 'linear-gradient(90deg, var(--surface), transparent)', zIndex: 2, pointerEvents: 'none' }} />
-      {/* Right fade */}
-      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '32px', background: 'linear-gradient(270deg, var(--surface), transparent)', zIndex: 2, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '24px', background: 'linear-gradient(90deg, var(--surface), transparent)', zIndex: 2, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '24px', background: 'linear-gradient(270deg, var(--surface), transparent)', zIndex: 2, pointerEvents: 'none' }} />
 
       <div style={{
         display: 'flex', gap: '6px', alignItems: 'center',
-        animation: `tilescroll ${sorted.length * 1.4}s linear infinite`,
         width: 'max-content',
+        animation: shouldAnimate ? `${animName} ${Math.max(sorted.length * 1.6, 6)}s linear infinite` : 'none',
       }}>
-        {items.map((tile, i) => {
+        {(shouldAnimate ? items : sorted).map((tile, i) => {
           const approved = tile.tile_completions?.some((c: any) => c.status === 'approved')
           return (
             <div key={i} style={{
               width: '34px', height: '34px', flexShrink: 0, borderRadius: '6px',
-              background: approved ? 'rgba(62,207,116,0.12)' : tile.is_purple ? 'rgba(168,117,240,0.08)' : 'var(--bg3)',
-              border: `1px solid ${approved ? 'rgba(62,207,116,0.3)' : tile.is_purple ? 'rgba(168,117,240,0.2)' : 'rgba(255,255,255,0.05)'}`,
+              background: approved ? 'rgba(62,207,116,0.12)' : 'var(--bg3)',
+              border: `1px solid ${approved ? 'rgba(62,207,116,0.3)' : 'rgba(255,255,255,0.05)'}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               position: 'relative', overflow: 'hidden',
             }}>
@@ -322,20 +325,19 @@ function MiniBoard({ tiles, status }: { tiles: any[]; status: string }) {
                   </svg>
                 </div>
               )}
-              {tile.is_purple && !approved && (
-                <div style={{ position: 'absolute', top: '2px', left: '2px', width: '4px', height: '4px', background: '#a875f0', borderRadius: '1px' }} />
-              )}
             </div>
           )
         })}
       </div>
 
-      <style>{`
-        @keyframes tilescroll {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-${totalW + sorted.length * 6}px); }
-        }
-      `}</style>
+      {shouldAnimate && (
+        <style>{`
+          @keyframes ${animName} {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-${loopW + sorted.length * 6}px); }
+          }
+        `}</style>
+      )}
     </div>
   )
 }
