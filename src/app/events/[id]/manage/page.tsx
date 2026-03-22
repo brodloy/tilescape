@@ -7,6 +7,7 @@ import {
   loadTemplate, removeTile, addTileAction,
   addTeamAction, removeTeam, assignTeam, toggleMod, saveWebhook,
 } from '@/app/actions/forms'
+import { deleteEvent, deleteEventVoid } from '@/app/actions/deleteEvent'
 
 const WIKI = 'https://oldschool.runescape.wiki/w/Special:FilePath/'
 const w = (n: string) => `${WIKI}${encodeURIComponent(n.replace(/ /g, '_'))}.png`
@@ -290,6 +291,29 @@ export default async function ManagePage({ params }: { params: { id: string } })
                   />
                   <p className="text-xs text-text-3">Posts a rich embed to your Discord channel when a tile is approved.</p>
                   <Button type="submit" size="sm" variant="ghost" className="w-full">Save Webhook</Button>
+                </form>
+              </CardBody>
+            </Card>
+          )}
+
+          {/* Delete Event — owner only */}
+          {isOwner && (
+            <Card>
+              <CardHeader>
+                <span className="font-pixel text-[7px] text-red tracking-widest">DANGER ZONE</span>
+              </CardHeader>
+              <CardBody className="p-4">
+                <p className="text-sm text-text-2 font-light mb-4">
+                  Permanently delete this event. All tiles, teams, members and submissions will be removed. This cannot be undone.
+                </p>
+                <form action={deleteEventVoid.bind(null, eventId)}
+                  onSubmit={(e) => {
+                    if (!confirm(`Delete "${event.name}"? This cannot be undone.`)) e.preventDefault()
+                  }}>
+                  <button type="submit"
+                    className="font-pixel text-[6px] px-4 py-2.5 rounded bg-[rgba(232,85,85,0.08)] border border-[rgba(232,85,85,0.25)] text-red hover:bg-[rgba(232,85,85,0.18)] transition-colors">
+                    DELETE EVENT PERMANENTLY
+                  </button>
                 </form>
               </CardBody>
             </Card>
