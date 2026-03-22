@@ -10,10 +10,11 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; border: string;
   ended: { bg: 'rgba(74,68,56,0.25)',    color: '#4a4438', border: 'rgba(74,68,56,0.35)',   label: 'ENDED', dot: false },
 }
 
-export function EventCard({ event, stats, isOwner }: {
+export function EventCard({ event, stats, isOwner, tiles = [] }: {
   event: any
   stats?: { total: number; done: number; purples: number; teams: number }
   isOwner?: boolean
+  tiles?: any[]
 }) {
   const [hovered, setHovered] = useState(false)
   const [deleting, startDelete] = useTransition()
@@ -94,6 +95,9 @@ export function EventCard({ event, stats, isOwner }: {
             </p>
           )}
         </div>
+
+        {/* Mini board preview */}
+        {tiles.length > 0 && <MiniBoard tiles={tiles} status={event.status} />}
 
         {/* Progress bar */}
         {stats && stats.total > 0 && (
@@ -222,5 +226,64 @@ function CopyCodeButton({ code }: { code: string }) {
     }}>
       {copied ? '✓ COPIED' : '📋 COPY'}
     </button>
+  )
+}
+
+const WIKI_SPRITE = (n: string) => `https://oldschool.runescape.wiki/w/Special:FilePath/${encodeURIComponent(n.replace(/ /g, '_'))}.png`
+
+function MiniBoard({ tiles, status }: { tiles: any[]; status: string }) {
+  const tileMap = new Map(tiles.map(t => [t.position, t]))
+
+  return (
+    <div style={{ marginBottom: '16px' }}>
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)',
+        gap: '3px',
+      }}>
+        {Array.from({ length: 25 }, (_, pos) => {
+          const tile = tileMap.get(pos)
+          const approved = tile?.tile_completions?.some((c: any) => c.status === 'approved')
+          const pending = !approved && tile?.tile_completions?.some((c: any) => c.status === 'pending')
+          const isFree = tile?.free_space
+
+          let bg = 'var(--bg3)'
+          let border = 'rgba(255,255,255,0.04)'
+          if (isFree) { bg = 'rgba(232,184,75,0.06)'; border = 'rgba(232,184,75,0.2)' }
+          else if (approved) { bg = 'rgba(62,207,116,0.15)'; border = 'rgba(62,207,116,0.4)' }
+          else if (pending) { bg = 'rgba(232,184,75,0.08)'; border = 'rgba(232,184,75,0.25)' }
+          else if (tile?.is_purple) { bg = 'rgba(168,117,240,0.08)'; border = 'rgba(168,117,240,0.2)' }
+          else if (!tile) { bg = 'rgba(255,255,255,0.02)'; border = 'rgba(255,255,255,0.03)' }
+
+          return (
+            <div key={pos} style={{
+              aspectRatio: '1', borderRadius: '4px',
+              background: bg, border: `1px solid ${border}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              position: 'relative', overflow: 'hidden',
+              transition: 'all .2s',
+            }}>
+              {tile?.is_purple && !isFree && (
+                <div style={{ position: 'absolute', top: '1px', left: '1px', width: '3px', height: '3px', background: '#a875f0', borderRadius: '0.5px' }} />
+              )}
+              {isFree ? (
+                <span style={{ fontSize: '8px' }}>⭐</span>
+              ) : tile?.sprite_url ? (
+                <img
+                  src={tile.sprite_url}
+                  alt={tile.name}
+                  style={{ width: '70%', height: '70%', objectFit: 'contain', imageRendering: 'pixelated', filter: approved ? 'brightness(1.1)' : 'grayscale(0.6) brightness(0.6)', transition: 'filter .2s' }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+                />
+              ) : null}
+              {approved && (
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(62,207,116,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '8px', color: '#3ecf74', fontWeight: 900 }}>✓</span>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }

@@ -29,14 +29,17 @@ export default async function DashboardPage() {
   // For each event get tile stats
   const eventIds = allEvents.map((e: any) => e.id).filter(Boolean)
   let tileStats: Record<string, { total: number; done: number; teams: number; purples: number }> = {}
+  let tilesByEvent: Record<string, any[]> = {}
+
   if (eventIds.length > 0) {
     const { data: tiles } = await db
       .from('tiles')
-      .select('event_id, free_space, is_purple, tile_completions(status)')
+      .select('event_id, free_space, is_purple, position, sprite_url, name, tile_completions(status, team_id)')
       .in('event_id', eventIds)
+      .order('position')
     const { data: teams } = await db
       .from('teams')
-      .select('event_id, color')
+      .select('event_id, color, id')
       .in('event_id', eventIds)
 
     eventIds.forEach((id: string) => {
@@ -45,6 +48,7 @@ export default async function DashboardPage() {
       const purples = done.filter((t: any) => t.is_purple)
       const evTeams = (teams ?? []).filter((t: any) => t.event_id === id)
       tileStats[id] = { total: evTiles.length, done: done.length, purples: purples.length, teams: evTeams.length }
+      tilesByEvent[id] = (tiles ?? []).filter((t: any) => t.event_id === id)
     })
   }
 
@@ -237,7 +241,7 @@ export default async function DashboardPage() {
                 <section style={{ marginBottom: '48px' }}>
                   <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px', color: '#f0e8d8', marginBottom: '20px' }}>My Events</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {myEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={true} />)}
+                    {myEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={true} tiles={tilesByEvent[event.id] ?? []} />)}
                   </div>
                 </section>
               )}
@@ -245,7 +249,7 @@ export default async function DashboardPage() {
                 <section>
                   <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px', color: '#f0e8d8', marginBottom: '20px' }}>Joined Events</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {joinedEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={false} />)}
+                    {joinedEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={false} tiles={tilesByEvent[event.id] ?? []} />)}
                   </div>
                 </section>
               )}

@@ -186,3 +186,70 @@ async function fireDiscordWebhook(
     // Webhook failure is non-fatal
   }
 }
+
+// Dev mode: instant approval without proof
+export async function quickCompleteTile(tileId: string, teamId: string) {
+  const supabase = await createClient()
+  const db = supabase as any
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data: tile } = await db
+    .from('tiles').select('id, event_id, free_space, name, is_purple')
+    .eq('id', tileId).single()
+
+  if (!tile || tile.free_space) return { error: 'Invalid tile' }
+
+  const { data: member } = await db
+    .from('event_members').select('id')
+    .eq('event_id', tile.event_id).eq('user_id', user.id).single()
+
+  if (!member) return { error: 'Not a member' }
+
+  const { data: teamMembership } = await db
+    .from('team_members').select('id')
+    .eq('team_id', teamId).eq('event_member_id', member.id).single()
+
+  if (!teamMembership) return { error: 'Not on this team' }
+
+  const { data: existing } = await db
+    .from('tile_completions').select('id, status')
+    .eq('tile_id', tileId).eq('team_id', teamId).single()
+
+  if (existing?.status === 'approved') return { error: 'Already approved' }
+
+  const completionData = {
+    tile_id: tileId, team_id: teamId,
+    submitted_by: user.id, proof_url: '',
+    status: 'approved',
+    reviewed_at: new Date().toISOString(),
+    reviewed_by: user.id,
+  }
+
+  if (existing) {
+    await db.from('tile_completions').update(completionData).eq('id', existing.id)
+  } else {
+    await db.from('tile_completions').insert(completionData)
+  }
+
+  revalidatePath(`/events/${tile.event_id}`)
+  return { success: true, tileName: tile.name, isPurple: tile.is_purple }
+}
+
+// Undo a quick completion
+export async function uncompleteTeamTile(tileId: string, teamId: string) {
+  const supabase = await createClient()
+  const db = supabase as any
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { data: tile } = await db.from('tiles').select('event_id').eq('id', tileId).single()
+  if (!tile) return { error: 'Tile not found' }
+
+  await db.from('tile_completions')
+    .delete().eq('tile_id', tileId).eq('team_id', teamId)
+
+  revalidatePath(`/events/${tile.event_id}`)
+  return { success: true }
+}

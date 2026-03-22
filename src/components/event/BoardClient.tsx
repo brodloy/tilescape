@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AppNav } from '@/components/ui/AppNav'
-import { submitCompletion, reviewCompletion } from '@/app/actions/completions'
+import { submitCompletion, reviewCompletion, quickCompleteTile, uncompleteTeamTile } from '@/app/actions/completions'
 import { goLive, endEvent } from '@/app/actions/forms'
 import { useRouter } from 'next/navigation'
+import { ToastArea, BingoCelebration, showToast } from '@/components/event/Celebrations'
 
 const WIKI = 'https://oldschool.runescape.wiki/w/Special:FilePath/'
 const W = (n: string) => WIKI + encodeURIComponent(n.replace(/ /g, '_')) + '.png'
@@ -16,6 +17,9 @@ const RAID_COLORS: Record<string, string> = {
   Nex: '#4b9ef0', NM: '#3ecf74', DT2: '#e8824b',
   Inferno: '#ff7755', Liz: '#88dd66', GWD: '#f0c85a', Slayer: '#4bd4e8',
 }
+
+// DEV MODE: set to false to require proof URLs
+const DEV_QUICK_COMPLETE = true
 
 interface Props {
   event: any; initialTiles: any[]; teams: any[]; members: any[]
@@ -48,6 +52,9 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
   const [connected, setConnected] = useState(false)
   const [reviewingId, setReviewingId] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
+  const [bingoCelebration, setBingoCelebration] = useState<{ teamName: string; teamColor: string; count: number } | null>(null)
+  const [completingTileId, setCompletingTileId] = useState<string | null>(null)
+  const prevBingosRef = useRef<Record<string, number>>({})
   const router = useRouter()
   const supabase = createClient()
 
@@ -65,6 +72,51 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
       .subscribe(status => setConnected(status === 'SUBSCRIBED'))
     return () => { supabase.removeChannel(channel) }
   }, [eventId, supabase, refreshTiles])
+
+  // Check for new bingos after tiles update
+  useEffect(() => {
+    if (!userTeamId) return
+    const userTeam = teams.find(t => t.id === userTeamId)
+    if (!userTeam) return
+    const newBingos = calcBingos(tiles, userTeamId)
+    const prev = prevBingosRef.current[userTeamId] ?? 0
+    if (newBingos > prev && prev >= 0) {
+      setBingoCelebration({ teamName: userTeam.name, teamColor: userTeam.color, count: newBingos })
+    }
+    prevBingosRef.current[userTeamId] = newBingos
+  }, [tiles, userTeamId, teams])
+
+  async function handleQuickComplete(tile: any) {
+    if (!userTeamId || !tile || tile.free_space) return
+    const state = getTileState(tile, userTeamId)
+
+    // If already approved — undo it
+    if (state === 'approved') {
+      setCompletingTileId(tile.id)
+      await uncompleteTeamTile(tile.id, userTeamId)
+      await refreshTiles()
+      setCompletingTileId(null)
+      showToast({ type: 'undo', title: 'Tile uncompleted', subtitle: tile.name })
+      return
+    }
+
+    // Complete it
+    setCompletingTileId(tile.id)
+    const result = await quickCompleteTile(tile.id, userTeamId)
+    await refreshTiles()
+    setCompletingTileId(null)
+    setSelectedTile(null)
+
+    if (result?.error) {
+      showToast({ type: 'error', title: 'Error', subtitle: result.error })
+    } else {
+      showToast({
+        type: tile.is_purple ? 'purple' : 'complete',
+        title: tile.is_purple ? '⬥ Purple Drop!' : 'Tile Completed!',
+        subtitle: tile.name,
+      })
+    }
+  }
 
   const nonFree = tiles.filter(t => !t.free_space)
   const totalApproved = nonFree.filter(t => t.tile_completions?.some((c: any) => c.status === 'approved')).length
@@ -159,8 +211,15 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
     <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif" }}>
       <AppNav displayName={displayName} context={navContext} actions={navActions} />
 
+      {/* Dev mode banner */}
+      {DEV_QUICK_COMPLETE && event.status === 'live' && userTeamId && (
+        <div style={{ position: 'fixed', top: '64px', left: 0, right: 0, zIndex: 50, height: '28px', background: 'rgba(232,184,75,0.08)', borderBottom: '1px solid rgba(232,184,75,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+          <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#7a5c1e', letterSpacing: '1px' }}>⚡ DEV MODE · Click tiles to instantly complete · Click again to undo</div>
+        </div>
+      )}
+
       {/* Three-column layout below nav */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '220px 1fr 260px', marginTop: '64px', minHeight: 0, overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '220px 1fr 260px', marginTop: DEV_QUICK_COMPLETE && event.status === 'live' && userTeamId ? '92px' : '64px', minHeight: 0, overflow: 'hidden' }}>
 
         {/* ── Sidebar ── */}
         <aside style={{ background: 'var(--bg2)', borderRight: '1px solid rgba(232,184,75,0.10)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
@@ -262,8 +321,20 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                 const imgFilter = isTeamMode && state === 'none' ? 'grayscale(1) brightness(0.35)' : isTeamMode && state === 'approved' ? 'drop-shadow(0 0 8px rgba(62,207,116,0.4)) brightness(1.1)' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.9))'
 
                 return (
-                  <button key={tile.id} onClick={() => !tile.free_space && setSelectedTile(tile)}
-                    style={{ aspectRatio: '1', background: bg, border: `1px solid ${border}`, borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', cursor: tile.free_space ? 'default' : 'pointer', position: 'relative', overflow: 'hidden', padding: '8px 4px 6px', transition: 'all .15s', boxShadow: isTeamMode && state === 'approved' ? '0 0 16px rgba(62,207,116,0.08)' : 'none' }}>
+                  <button key={tile.id}
+                    onClick={() => {
+                      if (tile.free_space) return
+                      if (DEV_QUICK_COMPLETE && userTeamId && event.status === 'live') {
+                        handleQuickComplete(tile)
+                      } else {
+                        setSelectedTile(tile)
+                      }
+                    }}
+                    style={{ aspectRatio: '1', background: bg, border: `1px solid ${border}`, borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', cursor: tile.free_space ? 'default' : 'pointer', position: 'relative', overflow: 'hidden', padding: '8px 4px 6px', transition: 'all .2s',
+                      boxShadow: isTeamMode && state === 'approved' ? '0 0 16px rgba(62,207,116,0.08)' : 'none',
+                      transform: completingTileId === tile.id ? 'scale(1.08)' : 'scale(1)',
+                      opacity: completingTileId && completingTileId !== tile.id ? 0.7 : 1,
+                    }}>
 
                     {/* Top colour bar */}
                     {!isTeamMode && approvedTeams.length > 0 && (
@@ -472,6 +543,19 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
         </div>
       )}
     </div>
+
+    {/* Toast notifications */}
+    <ToastArea />
+
+    {/* Bingo celebration */}
+    {bingoCelebration && (
+      <BingoCelebration
+        teamName={bingoCelebration.teamName}
+        teamColor={bingoCelebration.teamColor}
+        bingoCount={bingoCelebration.count}
+        onDismiss={() => setBingoCelebration(null)}
+      />
+    )}
     </>
   )
 }
