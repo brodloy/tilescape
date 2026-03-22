@@ -198,7 +198,7 @@ export default async function DashboardPage() {
                 <section style={{ marginBottom: '48px' }}>
                   <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px', color: '#f0e8d8', marginBottom: '20px' }}>My Events</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {myEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={true} tiles={tilesByEvent[event.id] ?? []} teams={teamsByEvent[event.id] ?? []} />)}
+                    {myEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={true} teams={teamsByEvent[event.id] ?? []} />)}
                   </div>
                 </section>
               )}
@@ -206,7 +206,7 @@ export default async function DashboardPage() {
                 <section>
                   <div style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px', color: '#f0e8d8', marginBottom: '20px' }}>Joined Events</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {joinedEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={false} tiles={tilesByEvent[event.id] ?? []} teams={teamsByEvent[event.id] ?? []} />)}
+                    {joinedEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} isOwner={false} teams={teamsByEvent[event.id] ?? []} />)}
                   </div>
                 </section>
               )}

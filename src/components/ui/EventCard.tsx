@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { deleteEventVoid } from '@/app/actions/deleteEvent'
 
@@ -13,11 +13,10 @@ function formatGP(gp: number): string {
   return gp.toLocaleString()
 }
 
-export function EventCard({ event, stats, isOwner, tiles = [], teams = [] }: {
+export function EventCard({ event, stats, isOwner, teams = [] }: {
   event: any
   stats?: { total: number; done: number; purples: number; teams: number }
   isOwner?: boolean
-  tiles?: any[]
   teams?: { id: string; name: string; color: string; done: number; pct: number }[]
 }) {
   const [deleting, startDelete] = useTransition()
@@ -76,15 +75,14 @@ export function EventCard({ event, stats, isOwner, tiles = [], teams = [] }: {
 
         {/* Prize pool */}
         {prizePool > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: 'rgba(232,184,75,0.06)', border: '1px solid rgba(232,184,75,0.15)', borderRadius: '10px', marginBottom: '16px' }}>
-            <img src={COINS} alt="GP" style={{ width: '22px', height: '22px', imageRendering: 'pixelated', flexShrink: 0 }} />
-            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '18px', color: '#e8b84b', letterSpacing: '-0.5px' }}>{formatGP(prizePool)}</span>
-            <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#7a5c1e' }}>PRIZE POOL</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 18px', background: 'rgba(232,184,75,0.05)', border: '1px solid rgba(232,184,75,0.18)', borderRadius: '12px', marginBottom: '18px' }}>
+            <img src={COINS} alt="GP" style={{ width: '44px', height: '44px', imageRendering: 'pixelated', flexShrink: 0, filter: 'drop-shadow(0 2px 8px rgba(232,184,75,0.35))' }} />
+            <div>
+              <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '28px', color: '#e8b84b', letterSpacing: '-1px', lineHeight: 1 }}>{formatGP(prizePool)}</div>
+              <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#7a5c1e', marginTop: '5px', letterSpacing: '1px' }}>PRIZE POOL</div>
+            </div>
           </div>
         )}
-
-        {/* Tile preview */}
-        {tiles.length > 0 && <TileShowcase tiles={tiles} />}
 
         {/* Team progress */}
         {teams.length > 0 && stats && stats.total > 0 && (
@@ -169,79 +167,6 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 // ── Tile showcase — replaces the tiny scrolling icons ─────────────────────────
-function TileShowcase({ tiles }: { tiles: any[] }) {
-  const nonFree = tiles.filter(t => !t.free_space && t.sprite_url)
-  const COLS = 6
-
-  const [slots, setSlots] = useState<number[]>(() =>
-    Array.from({ length: COLS }, (_, i) => i % Math.max(nonFree.length, 1))
-  )
-  const [fading, setFading] = useState<boolean[]>(Array(COLS).fill(false))
-
-  useEffect(() => {
-    if (nonFree.length <= COLS) return
-    let cellIdx = 0
-    const interval = setInterval(() => {
-      const col = cellIdx % COLS
-      cellIdx++
-      setFading(f => { const n = [...f]; n[col] = true; return n })
-      setTimeout(() => {
-        setSlots(s => {
-          const n = [...s]
-          const showing = new Set(s)
-          let next = (s[col] + 1) % nonFree.length
-          let tries = 0
-          while (showing.has(next) && tries < nonFree.length) { next = (next + 1) % nonFree.length; tries++ }
-          n[col] = next
-          return n
-        })
-        setFading(f => { const n = [...f]; n[col] = false; return n })
-      }, 400)
-    }, 600)
-    return () => clearInterval(interval)
-  }, [nonFree.length])
-
-  if (nonFree.length === 0) return null
-
-  const doneCount = nonFree.filter(t => t.tile_completions?.some((c: any) => c.status === 'approved')).length
-  const total = nonFree.length
-  const pct = Math.round(doneCount / Math.max(total, 1) * 100)
-
-  return (
-    <div style={{ marginBottom: '16px', background: 'var(--bg3)', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.04)' }}>
-      <div style={{ display: 'flex', gap: '4px', padding: '10px 10px 8px' }}>
-        {slots.map((tileIdx, col) => {
-          const tile = nonFree[tileIdx]
-          if (!tile) return null
-          const isDone = tile.tile_completions?.some((c: any) => c.status === 'approved')
-          const isFading = fading[col]
-          return (
-            <div key={col} style={{ flex: 1, aspectRatio: '1', borderRadius: '8px', background: isDone ? 'rgba(62,207,116,0.1)' : 'var(--surface)', border: `1px solid ${isDone ? 'rgba(62,207,116,0.22)' : 'rgba(255,255,255,0.05)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden', padding: '6px', transition: 'background .4s, border-color .4s' }}>
-              <img
-                src={tile.sprite_url}
-                alt={tile.name}
-                style={{ width: '100%', height: '100%', objectFit: 'contain', imageRendering: 'pixelated', filter: isDone ? 'brightness(1.1)' : 'grayscale(0.5) brightness(0.6)', opacity: isFading ? 0 : 1, transition: 'opacity 0.35s ease, filter .4s' }}
-                onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0.08' }}
-              />
-              {isDone && !isFading && (
-                <div style={{ position: 'absolute', bottom: '3px', right: '3px', width: '11px', height: '11px', borderRadius: '50%', background: '#3ecf74', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="6" height="5" viewBox="0 0 6 5" fill="none"><path d="M1 2.5L2.5 4L5 1" stroke="#041a0c" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
-      <div style={{ padding: '6px 10px 9px', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ flex: 1, height: '3px', background: 'var(--surface)', borderRadius: '2px', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #3ecf74, #5ee890)', borderRadius: '2px', transition: 'width .8s' }} />
-        </div>
-        <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '8px', color: doneCount > 0 ? '#3ecf74' : '#4a4438', flexShrink: 0 }}>{doneCount}/{total}</span>
-      </div>
-    </div>
-  )
-}
-
 
 // ── Invite code group ─────────────────────────────────────────────────────────
 function InviteCodeGroup({ code }: { code: string }) {
