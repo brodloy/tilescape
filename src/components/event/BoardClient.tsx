@@ -9,6 +9,7 @@ import { goLive, endEvent } from '@/app/actions/forms'
 import { useRouter } from 'next/navigation'
 import { ToastArea, BingoCelebration, showToast } from '@/components/event/Celebrations'
 import { Avatar } from '@/components/ui/Avatar'
+import { ReviewModal } from '@/components/event/ReviewModal'
 
 const WIKI = 'https://oldschool.runescape.wiki/w/Special:FilePath/'
 const W = (n: string) => WIKI + encodeURIComponent(n.replace(/ /g, '_')) + '.png'
@@ -49,6 +50,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
   const [pending, setPending] = useState(false)
   const [bingoCelebration, setBingoCelebration] = useState<{ teamName: string; teamColor: string; count: number } | null>(null)
   const [completingTileId, setCompletingTileId] = useState<string | null>(null)
+  const [reviewingSubmission, setReviewingSubmission] = useState<any | null>(null)
   const prevBingosRef = useRef<Record<string, number>>({})
   const router = useRouter()
   const supabase = createClient()
@@ -417,34 +419,27 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                 <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1.5px' }}>PENDING REVIEW</span>
                 <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#e8b84b', padding: '2px 7px', borderRadius: '3px', background: 'rgba(232,184,75,0.1)', border: '1px solid rgba(232,184,75,0.2)' }}>{pendingSubmissions.length}</span>
               </div>
-              <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
+              <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
                 {pendingSubmissions.map(sub => (
-                  <div key={sub.id} style={{ padding: '12px 14px', borderTop: '1px solid rgba(232,184,75,0.06)' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '8px' }}>
-                      {sub.proof_url && (
-                        <a href={sub.proof_url} target="_blank" rel="noopener noreferrer" style={{ flexShrink: 0 }}>
-                          <img src={sub.proof_url} alt="proof" style={{ width: '48px', height: '36px', objectFit: 'cover', borderRadius: '6px', border: '1px solid rgba(232,184,75,0.1)' }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
-                        </a>
-                      )}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px', color: 'var(--text)', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub.tiles?.name}</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                          <div style={{ width: '7px', height: '7px', borderRadius: '2px', background: sub.teams?.color ?? '#4a4438', flexShrink: 0 }} />
-                          <span style={{ fontSize: '12px', color: '#9a8f7a' }}>{sub.teams?.name} · {sub.users?.display_name}</span>
-                        </div>
+                  <button key={sub.id} onClick={() => setReviewingSubmission(sub)}
+                    style={{ width: '100%', padding: '12px 14px', borderTop: '1px solid rgba(232,184,75,0.06)', display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', transition: 'background .15s' }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--surface)'}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'none'}>
+                    {sub.proof_url ? (
+                      <img src={sub.proof_url} alt="proof" style={{ width: '44px', height: '36px', objectFit: 'cover', borderRadius: '6px', border: '1px solid rgba(232,184,75,0.1)', flexShrink: 0 }}
+                        onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
+                    ) : (
+                      <div style={{ width: '44px', height: '36px', borderRadius: '6px', background: 'var(--bg3)', border: '1px solid rgba(232,184,75,0.08)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>📎</div>
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub.tiles?.name}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
+                        <div style={{ width: '7px', height: '7px', borderRadius: '2px', background: sub.teams?.color ?? '#4a4438', flexShrink: 0 }} />
+                        <span style={{ fontSize: '12px', color: '#9a8f7a' }}>{sub.teams?.name} · {sub.users?.display_name}</span>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      <button onClick={() => handleReview(sub.id, 'approve')} disabled={reviewingId === sub.id}
-                        style={{ flex: 1, padding: '7px', fontFamily: "'Press Start 2P',monospace", fontSize: '6px', borderRadius: '6px', background: 'rgba(62,207,116,0.1)', border: '1px solid rgba(62,207,116,0.25)', color: '#3ecf74', cursor: 'pointer', transition: 'all .15s' }}>
-                        {reviewingId === sub.id ? '…' : '✓ APPROVE'}
-                      </button>
-                      <button onClick={() => handleReview(sub.id, 'reject')} disabled={reviewingId === sub.id}
-                        style={{ flex: 1, padding: '7px', fontFamily: "'Press Start 2P',monospace", fontSize: '6px', borderRadius: '6px', background: 'rgba(232,85,85,0.08)', border: '1px solid rgba(232,85,85,0.2)', color: '#e85555', cursor: 'pointer', transition: 'all .15s' }}>
-                        ✕ REJECT
-                      </button>
-                    </div>
-                  </div>
+                    <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438', flexShrink: 0 }}>REVIEW →</span>
+                  </button>
                 ))}
               </div>
             </div>
@@ -469,7 +464,11 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                       size={28}
                     />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '13px', fontWeight: 500, color: isMe ? '#e8b84b' : 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{usr?.display_name}</div>
+                      <Link href={`/profile/${usr?.id}`} style={{ fontSize: '13px', fontWeight: 500, color: isMe ? '#e8b84b' : 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', textDecoration: 'none' }}
+                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.textDecoration = 'underline'}
+                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.textDecoration = 'none'}>
+                        {usr?.display_name}
+                      </Link>
                       {team && <div style={{ fontSize: '11px', color: '#4a4438' }}>{team.name}</div>}
                     </div>
                     {member.role === 'owner' && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5px', color: '#7a5c1e' }}>★</span>}
@@ -595,6 +594,15 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
         </div>
       )}
     </div>
+
+    {/* Review modal */}
+    {reviewingSubmission && (
+      <ReviewModal
+        submission={reviewingSubmission}
+        onClose={() => setReviewingSubmission(null)}
+        onDone={() => { setReviewingSubmission(null); refreshTiles() }}
+      />
+    )}
 
     {/* Toast notifications */}
     <ToastArea />
