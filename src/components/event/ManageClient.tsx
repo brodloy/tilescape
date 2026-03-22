@@ -336,8 +336,9 @@ function BoardTab({ tiles, eventId, isOwner }: { tiles: any[]; eventId: string; 
   function handleDone() { setSelectedPos(null); router.refresh() }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: selectedPos !== null ? '1fr 400px' : '1fr', height: '100%', minHeight: 0, overflow: 'hidden' }}>
-      <div style={{ overflowY: 'auto', padding: '32px 40px', height: '100%' }}>
+    <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
+      {/* Main scrollable area */}
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '32px 40px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px', gap: '16px' }}>
           <div>
             <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '24px', letterSpacing: '-0.5px', color: 'var(--text)', marginBottom: '6px' }}>Bingo Board</h2>
@@ -460,7 +461,7 @@ function TeamsTab({ teams, members, eventId, isOwner }: { teams: any[]; members:
   }
 
   return (
-    <div style={{ overflowY: 'auto', padding: '32px 40px', height: '100%' }}>
+    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '32px 40px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px', gap: '16px' }}>
         <div>
           <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '24px', letterSpacing: '-0.5px', color: 'var(--text)', marginBottom: '6px' }}>Teams</h2>
@@ -576,7 +577,7 @@ function MembersTab({ members, teams, eventId, isOwner, currentUserId }: { membe
   }
 
   return (
-    <div style={{ overflowY: 'auto', padding: '32px 40px', height: '100%' }}>
+    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '32px 40px' }}>
       <div style={{ marginBottom: '28px' }}>
         <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '24px', letterSpacing: '-0.5px', color: 'var(--text)', marginBottom: '6px' }}>Members</h2>
         <p style={{ fontSize: '14px', color: '#9a8f7a' }}>{members.length} member{members.length !== 1 ? 's' : ''}</p>
@@ -657,7 +658,7 @@ function SettingsTab({ event, eventId, isOwner }: { event: any; eventId: string;
   const statusLabel = event.status?.toUpperCase() ?? 'DRAFT'
 
   return (
-    <div style={{ overflowY: 'auto', padding: '32px 40px', height: '100%' }}>
+    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '32px 40px' }}>
       <div style={{ marginBottom: '28px' }}>
         <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '24px', letterSpacing: '-0.5px', color: 'var(--text)', marginBottom: '6px' }}>Settings</h2>
         <p style={{ fontSize: '14px', color: '#9a8f7a' }}>Event configuration and controls</p>
@@ -775,38 +776,36 @@ export function ManageClient({ event, tiles, teams, members, isOwner, currentUse
 
   return (
     <>
-      <style>{`
-        html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }
-      `}</style>
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif", overflow: 'hidden', width: '100%' }}>
-      <AppNav displayName={displayName} context={navContext} actions={navActions} />
+      <style>{`html,body{height:100%;overflow:hidden;margin:0;padding:0;}`}</style>
+      <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif" }}>
+        <AppNav displayName={displayName} context={navContext} actions={navActions} />
 
-      {/* Tab bar */}
-      <div style={{ height: '52px', marginTop: '64px', background: 'var(--bg2)', borderBottom: '1px solid rgba(232,184,75,0.10)', display: 'flex', alignItems: 'center', padding: '0 40px', gap: '4px', flexShrink: 0, zIndex: 10 }}>
-        {TABS.map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{
-            fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px',
-            padding: '6px 18px', borderRadius: '8px', cursor: 'pointer', transition: 'all .15s', border: 'none',
-            background: tab === t ? 'var(--surface)' : 'none',
-            color: tab === t ? '#e8b84b' : '#9a8f7a',
-            boxShadow: tab === t ? '0 0 0 1px rgba(232,184,75,0.15)' : 'none',
-          }}>
-            {t}
-            {t === 'Teams' && teams.length > 0 && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438' }}>{teams.length}</span>}
-            {t === 'Members' && members.length > 0 && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438' }}>{members.length}</span>}
-            {t === 'Board' && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438' }}>{tiles.length}/25</span>}
-          </button>
-        ))}
-      </div>
+        {/* Tab bar */}
+        <div style={{ height: '52px', marginTop: '64px', background: 'var(--bg2)', borderBottom: '1px solid rgba(232,184,75,0.10)', display: 'flex', alignItems: 'center', padding: '0 40px', gap: '4px', flexShrink: 0, zIndex: 10 }}>
+          {TABS.map(t => (
+            <button key={t} onClick={() => setTab(t)} style={{
+              fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px',
+              padding: '6px 18px', borderRadius: '8px', cursor: 'pointer', transition: 'all .15s', border: 'none',
+              background: tab === t ? 'var(--surface)' : 'none',
+              color: tab === t ? '#e8b84b' : '#9a8f7a',
+              boxShadow: tab === t ? '0 0 0 1px rgba(232,184,75,0.15)' : 'none',
+            }}>
+              {t}
+              {t === 'Teams' && teams.length > 0 && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438' }}>{teams.length}</span>}
+              {t === 'Members' && members.length > 0 && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438' }}>{members.length}</span>}
+              {t === 'Board' && <span style={{ marginLeft: '6px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438' }}>{tiles.length}/25</span>}
+            </button>
+          ))}
+        </div>
 
-      {/* Tab content — fills remaining height */}
-      <div style={{ height: 'calc(100vh - 64px - 52px)', overflow: 'hidden', width: '100%' }}>
-        {tab === 'Board'    && <BoardTab   tiles={tiles}   eventId={event.id} isOwner={isOwner} />}
-        {tab === 'Teams'    && <TeamsTab   teams={teams}   members={members} eventId={event.id} isOwner={isOwner} />}
-        {tab === 'Members'  && <MembersTab members={members} teams={teams} eventId={event.id} isOwner={isOwner} currentUserId={currentUserId} />}
-        {tab === 'Settings' && <SettingsTab event={event} eventId={event.id} isOwner={isOwner} />}
+        {/* Tab content — fills everything below nav + tabbar */}
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+          {tab === 'Board'    && <BoardTab   tiles={tiles}   eventId={event.id} isOwner={isOwner} />}
+          {tab === 'Teams'    && <TeamsTab   teams={teams}   members={members} eventId={event.id} isOwner={isOwner} />}
+          {tab === 'Members'  && <MembersTab members={members} teams={teams} eventId={event.id} isOwner={isOwner} currentUserId={currentUserId} />}
+          {tab === 'Settings' && <SettingsTab event={event} eventId={event.id} isOwner={isOwner} />}
+        </div>
       </div>
-    </div>
     </>
   )
 }
