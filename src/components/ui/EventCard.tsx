@@ -232,58 +232,56 @@ function CopyCodeButton({ code }: { code: string }) {
 const WIKI_SPRITE = (n: string) => `https://oldschool.runescape.wiki/w/Special:FilePath/${encodeURIComponent(n.replace(/ /g, '_'))}.png`
 
 function MiniBoard({ tiles, status }: { tiles: any[]; status: string }) {
-  const tileMap = new Map(tiles.map(t => [t.position, t]))
+  if (tiles.length === 0) return null
+
+  // Sort: purples first, then completed, then rest — take top 9
+  const sorted = [...tiles].sort((a, b) => {
+    const aApproved = a.tile_completions?.some((c: any) => c.status === 'approved') ? 1 : 0
+    const bApproved = b.tile_completions?.some((c: any) => c.status === 'approved') ? 1 : 0
+    const aPurple = a.is_purple ? 1 : 0
+    const bPurple = b.is_purple ? 1 : 0
+    return (bPurple + bApproved) - (aPurple + aApproved)
+  })
+
+  const preview = sorted.slice(0, 9)
+  const totalApproved = tiles.filter(t => !t.free_space && t.tile_completions?.some((c: any) => c.status === 'approved')).length
+  const total = tiles.filter(t => !t.free_space).length
 
   return (
-    <div style={{ marginBottom: '16px' }}>
-      <div style={{
-        display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)',
-        gap: '3px',
-      }}>
-        {Array.from({ length: 25 }, (_, pos) => {
-          const tile = tileMap.get(pos)
-          const approved = tile?.tile_completions?.some((c: any) => c.status === 'approved')
-          const pending = !approved && tile?.tile_completions?.some((c: any) => c.status === 'pending')
-          const isFree = tile?.free_space
-
-          let bg = 'var(--bg3)'
-          let border = 'rgba(255,255,255,0.04)'
-          if (isFree) { bg = 'rgba(232,184,75,0.06)'; border = 'rgba(232,184,75,0.2)' }
-          else if (approved) { bg = 'rgba(62,207,116,0.15)'; border = 'rgba(62,207,116,0.4)' }
-          else if (pending) { bg = 'rgba(232,184,75,0.08)'; border = 'rgba(232,184,75,0.25)' }
-          else if (tile?.is_purple) { bg = 'rgba(168,117,240,0.08)'; border = 'rgba(168,117,240,0.2)' }
-          else if (!tile) { bg = 'rgba(255,255,255,0.02)'; border = 'rgba(255,255,255,0.03)' }
+    <div style={{ marginBottom: '14px', position: 'relative' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(9, 1fr)', gap: '3px' }}>
+        {preview.map((tile, i) => {
+          const approved = tile.tile_completions?.some((c: any) => c.status === 'approved')
+          const isFree = tile.free_space
 
           return (
-            <div key={pos} style={{
-              aspectRatio: '1', borderRadius: '4px',
-              background: bg, border: `1px solid ${border}`,
+            <div key={i} style={{
+              aspectRatio: '1', borderRadius: '3px',
+              background: isFree ? 'rgba(232,184,75,0.06)'
+                : approved ? 'rgba(62,207,116,0.15)'
+                : tile.is_purple ? 'rgba(168,117,240,0.08)'
+                : 'var(--bg3)',
+              border: `1px solid ${isFree ? 'rgba(232,184,75,0.2)' : approved ? 'rgba(62,207,116,0.35)' : tile.is_purple ? 'rgba(168,117,240,0.2)' : 'rgba(255,255,255,0.04)'}`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              position: 'relative', overflow: 'hidden',
-              transition: 'all .2s',
+              overflow: 'hidden', position: 'relative',
             }}>
-              {tile?.is_purple && !isFree && (
-                <div style={{ position: 'absolute', top: '1px', left: '1px', width: '3px', height: '3px', background: '#a875f0', borderRadius: '0.5px' }} />
-              )}
-              {isFree ? (
-                <span style={{ fontSize: '8px' }}>⭐</span>
-              ) : tile?.sprite_url ? (
-                <img
-                  src={tile.sprite_url}
-                  alt={tile.name}
-                  style={{ width: '70%', height: '70%', objectFit: 'contain', imageRendering: 'pixelated', filter: approved ? 'brightness(1.1)' : 'grayscale(0.6) brightness(0.6)', transition: 'filter .2s' }}
-                  onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
-                />
+              {tile.sprite_url && !isFree ? (
+                <img src={tile.sprite_url} alt="" style={{ width: '75%', height: '75%', objectFit: 'contain', imageRendering: 'pixelated', filter: approved ? 'brightness(1.1)' : 'grayscale(0.5) brightness(0.6)' }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
+              ) : isFree ? (
+                <span style={{ fontSize: '7px' }}>⭐</span>
               ) : null}
               {approved && (
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(62,207,116,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: '8px', color: '#3ecf74', fontWeight: 900 }}>✓</span>
+                <div style={{ position: 'absolute', inset: 0, background: 'rgba(62,207,116,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '7px', color: '#3ecf74', fontWeight: 900 }}>✓</span>
                 </div>
               )}
             </div>
           )
         })}
       </div>
+      {/* Fade overlay on right edge */}
+      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: '30px', background: 'linear-gradient(90deg, transparent, var(--surface))', pointerEvents: 'none', borderRadius: '0 3px 3px 0' }} />
     </div>
   )
 }

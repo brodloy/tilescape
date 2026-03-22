@@ -211,15 +211,8 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
     <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif" }}>
       <AppNav displayName={displayName} context={navContext} actions={navActions} />
 
-      {/* Dev mode banner */}
-      {DEV_QUICK_COMPLETE && event.status === 'live' && userTeamId && (
-        <div style={{ position: 'fixed', top: '64px', left: 0, right: 0, zIndex: 50, height: '28px', background: 'rgba(232,184,75,0.08)', borderBottom: '1px solid rgba(232,184,75,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-          <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#7a5c1e', letterSpacing: '1px' }}>⚡ DEV MODE · Click tiles to instantly complete · Click again to undo</div>
-        </div>
-      )}
-
       {/* Three-column layout below nav */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '220px 1fr 260px', marginTop: DEV_QUICK_COMPLETE && event.status === 'live' && userTeamId ? '92px' : '64px', minHeight: 0, overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '220px 1fr 260px', marginTop: '64px', minHeight: 0, overflow: 'hidden' }}>
 
         {/* ── Sidebar ── */}
         <aside style={{ background: 'var(--bg2)', borderRight: '1px solid rgba(232,184,75,0.10)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
@@ -322,18 +315,10 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
 
                 return (
                   <button key={tile.id}
-                    onClick={() => {
-                      if (tile.free_space) return
-                      if (DEV_QUICK_COMPLETE && userTeamId && event.status === 'live') {
-                        handleQuickComplete(tile)
-                      } else {
-                        setSelectedTile(tile)
-                      }
-                    }}
+                    onClick={() => { if (tile.free_space) return; setSelectedTile(tile) }}
                     style={{ aspectRatio: '1', background: bg, border: `1px solid ${border}`, borderRadius: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', cursor: tile.free_space ? 'default' : 'pointer', position: 'relative', overflow: 'hidden', padding: '8px 4px 6px', transition: 'all .2s',
                       boxShadow: isTeamMode && state === 'approved' ? '0 0 16px rgba(62,207,116,0.08)' : 'none',
                       transform: completingTileId === tile.id ? 'scale(1.08)' : 'scale(1)',
-                      opacity: completingTileId && completingTileId !== tile.id ? 0.7 : 1,
                     }}>
 
                     {/* Top colour bar */}
@@ -498,46 +483,102 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
         </aside>
       </div>
 
-      {/* ── Tile submit modal ── */}
+      {/* ── Tile modal ── */}
       {selectedTile && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', zIndex: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
           onClick={e => e.target === e.currentTarget && setSelectedTile(null)}>
-          <div style={{ background: 'var(--bg2)', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '16px', width: '100%', maxWidth: '460px', overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.8)' }}>
+          <div style={{ background: 'var(--bg2)', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '16px', width: '100%', maxWidth: '400px', overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.8)' }}>
+
+            {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid rgba(232,184,75,0.08)' }}>
               <div>
-                {selectedTile.source_raid && <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: RAID_COLORS[selectedTile.source_raid] ?? '#4a4438', marginBottom: '5px' }}>{selectedTile.source_raid}</div>}
+                {selectedTile.source_raid && (
+                  <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '8px', color: RAID_COLORS[selectedTile.source_raid] ?? '#4a4438', marginBottom: '5px' }}>{selectedTile.source_raid}</div>
+                )}
+                {selectedTile.is_purple && (
+                  <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '8px', color: '#a875f0', marginBottom: '5px' }}>⬥ PURPLE DROP</div>
+                )}
                 <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '20px', color: 'var(--text)', letterSpacing: '-0.5px' }}>{selectedTile.name}</div>
               </div>
               <button onClick={() => setSelectedTile(null)} style={{ width: '32px', height: '32px', background: 'var(--surface)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#9a8f7a', cursor: 'pointer', fontSize: '16px' }}>✕</button>
             </div>
-            <div style={{ padding: '20px' }}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+
+            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Sprite */}
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
                 <div style={{ width: '96px', height: '96px', borderRadius: '16px', border: `1px solid ${selectedTile.is_purple ? 'rgba(168,117,240,0.3)' : 'rgba(232,184,75,0.15)'}`, background: selectedTile.is_purple ? 'rgba(168,117,240,0.08)' : 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: selectedTile.is_purple ? '0 0 24px rgba(168,117,240,0.15)' : 'none' }}>
-                  <img src={selectedTile.sprite_url || W(selectedTile.name)} alt={selectedTile.name} style={{ width: '64px', height: '64px', objectFit: 'contain', imageRendering: 'pixelated', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.9))' }} />
+                  <img src={selectedTile.sprite_url || W(selectedTile.name)} alt={selectedTile.name}
+                    style={{ width: '64px', height: '64px', objectFit: 'contain', imageRendering: 'pixelated', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.9))' }} />
                 </div>
               </div>
 
-              {!userTeamId ? (
-                <p style={{ textAlign: 'center', color: '#9a8f7a', fontSize: '14px' }}>You need to be assigned to a team to submit proof.</p>
-              ) : event.status !== 'live' ? (
-                <p style={{ textAlign: 'center', color: '#9a8f7a', fontSize: '14px' }}>This event is not currently live.</p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  <div>
-                    <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438', letterSpacing: '1.5px', marginBottom: '8px' }}>PROOF URL</div>
-                    <input type="url" value={proofUrl} onChange={e => setProofUrl(e.target.value)} placeholder="https://imgur.com/… or Discord CDN link"
-                      style={{ width: '100%', height: '44px', padding: '0 14px', background: 'var(--bg3)', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '8px', color: 'var(--text)', fontSize: '14px', outline: 'none', fontFamily: "'DM Sans',sans-serif" }} />
-                    <div style={{ fontSize: '12px', color: '#4a4438', marginTop: '6px' }}>Paste a public image URL — Imgur, Discord CDN, etc.</div>
+              {/* State / actions */}
+              {(() => {
+                const state = getTileState(selectedTile, userTeamId)
+
+                if (!userTeamId) return (
+                  <p style={{ textAlign: 'center', color: '#9a8f7a', fontSize: '14px', lineHeight: 1.6 }}>
+                    You need to be assigned to a team before you can complete tiles.
+                  </p>
+                )
+
+                if (event.status !== 'live') return (
+                  <p style={{ textAlign: 'center', color: '#9a8f7a', fontSize: '14px' }}>
+                    This event is not currently live.
+                  </p>
+                )
+
+                if (state === 'approved') return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', background: 'rgba(62,207,116,0.08)', border: '1px solid rgba(62,207,116,0.25)', borderRadius: '10px' }}>
+                      <span style={{ fontSize: '20px' }}>✓</span>
+                      <div>
+                        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: '#3ecf74' }}>Completed!</div>
+                        <div style={{ fontSize: '12px', color: '#9a8f7a', marginTop: '2px' }}>Your team has completed this tile.</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => setSelectedTile(null)} style={{ flex: 1, height: '42px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '8px', color: '#9a8f7a', cursor: 'pointer' }}>Close</button>
+                      <button onClick={() => { handleQuickComplete(selectedTile); setSelectedTile(null) }} disabled={!!completingTileId}
+                        style={{ flex: 1, height: '42px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: 'none', border: '1px solid rgba(232,85,85,0.25)', borderRadius: '8px', color: '#e85555', cursor: 'pointer' }}>
+                        Undo
+                      </button>
+                    </div>
                   </div>
-                  {submitError && <div style={{ fontSize: '13px', color: '#e85555' }}>{submitError}</div>}
-                  <div style={{ display: 'flex', gap: '10px' }}>
-                    <button onClick={() => setSelectedTile(null)} style={{ flex: 1, height: '44px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '8px', color: '#9a8f7a', cursor: 'pointer' }}>Cancel</button>
-                    <button onClick={handleSubmit} disabled={submitting || !proofUrl.trim()} style={{ flex: 1, height: '44px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: '#e8b84b', border: 'none', borderRadius: '8px', color: '#0c0a08', cursor: submitting || !proofUrl.trim() ? 'not-allowed' : 'pointer', opacity: (!proofUrl.trim()) ? 0.5 : 1, boxShadow: '0 0 20px rgba(232,184,75,0.2)' }}>
-                      {submitting ? 'Submitting…' : 'Submit Proof'}
-                    </button>
+                )
+
+                if (state === 'pending') return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', background: 'rgba(232,184,75,0.06)', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '10px' }}>
+                      <span style={{ fontSize: '20px' }}>⏳</span>
+                      <div>
+                        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: '#e8b84b' }}>Pending Review</div>
+                        <div style={{ fontSize: '12px', color: '#9a8f7a', marginTop: '2px' }}>Waiting for a moderator to approve.</div>
+                      </div>
+                    </div>
+                    <button onClick={() => setSelectedTile(null)} style={{ height: '42px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '8px', color: '#9a8f7a', cursor: 'pointer' }}>Close</button>
                   </div>
-                </div>
-              )}
+                )
+
+                // Not completed — show Mark as Completed
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {submitError && <div style={{ fontSize: '13px', color: '#e85555', textAlign: 'center' }}>{submitError}</div>}
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => setSelectedTile(null)}
+                        style={{ flex: 1, height: '48px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '10px', color: '#9a8f7a', cursor: 'pointer' }}>
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => { handleQuickComplete(selectedTile); setSelectedTile(null) }}
+                        disabled={!!completingTileId}
+                        style={{ flex: 2, height: '48px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '15px', background: selectedTile.is_purple ? '#a875f0' : '#e8b84b', border: 'none', borderRadius: '10px', color: '#0c0a08', cursor: completingTileId ? 'not-allowed' : 'pointer', boxShadow: `0 0 24px ${selectedTile.is_purple ? 'rgba(168,117,240,0.25)' : 'rgba(232,184,75,0.25)'}`, opacity: completingTileId ? 0.6 : 1 }}>
+                        {completingTileId ? 'Completing…' : '✓ Mark as Completed'}
+                      </button>
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
           </div>
         </div>
