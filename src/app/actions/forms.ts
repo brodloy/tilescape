@@ -283,6 +283,18 @@ export async function joinEventAction(formData: FormData) {
     .single()
 
   if (!existing) {
+    // Ensure public.users row exists for brand-new Discord users
+    const { data: existingUser } = await db.from('users').select('id').eq('id', user.id).single()
+    if (!existingUser) {
+      const identity = user.identities?.find((i: any) => i.provider === 'discord')
+      await db.from('users').insert({
+        id: user.id,
+        email: user.email ?? '',
+        display_name: identity?.identity_data?.full_name ?? identity?.identity_data?.name ?? user.email?.split('@')[0] ?? 'Adventurer',
+        avatar_url: identity?.identity_data?.avatar_url ?? null,
+      })
+    }
+
     await db
       .from('event_members')
       .insert({ event_id: event.id, user_id: user.id, role: 'member' })
@@ -317,6 +329,21 @@ export async function joinEventWithRedirect(formData: FormData) {
     redirect(`/join?error=${encodeURIComponent('This event has ended')}&code=${code}`)
   }
 
+  // Ensure public.users row exists (trigger may not have fired yet for brand-new Discord users)
+  const { data: existingUser } = await db.from('users').select('id').eq('id', user.id).single()
+  if (!existingUser) {
+    const identity = user.identities?.find((i: any) => i.provider === 'discord')
+    await db.from('users').insert({
+      id: user.id,
+      email: user.email ?? '',
+      display_name: identity?.identity_data?.full_name
+        ?? identity?.identity_data?.name
+        ?? user.email?.split('@')[0]
+        ?? 'Adventurer',
+      avatar_url: identity?.identity_data?.avatar_url ?? null,
+    })
+  }
+
   const { data: existing } = await db
     .from('event_members')
     .select('id')
@@ -325,9 +352,13 @@ export async function joinEventWithRedirect(formData: FormData) {
     .single()
 
   if (!existing) {
-    await db
+    const { error: joinError } = await db
       .from('event_members')
       .insert({ event_id: event.id, user_id: user.id, role: 'member' })
+
+    if (joinError) {
+      redirect(`/join?error=${encodeURIComponent('Failed to join event. Please try again.')}&code=${code}`)
+    }
   }
 
   revalidatePath('/dashboard')
