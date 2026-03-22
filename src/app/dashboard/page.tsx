@@ -106,7 +106,7 @@ export default async function DashboardPage() {
                   borderRadius: '999px', padding: '5px 14px', marginBottom: '20px',
                 }}>
                   <div style={{ width: '6px', height: '6px', background: '#3ecf74', borderRadius: '50%', boxShadow: '0 0 6px #3ecf74' }} />
-                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: '#e8b84b', letterSpacing: '1px' }}>
+                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '11px', color: '#e8b84b', letterSpacing: '1px' }}>
                     {liveEvents.length > 0 ? `${liveEvents.length} EVENT${liveEvents.length > 1 ? 'S' : ''} LIVE` : 'DASHBOARD'}
                   </span>
                 </div>
@@ -172,7 +172,7 @@ export default async function DashboardPage() {
             padding: '0 48px',
           }}>
             <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px 0' }}>
-              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '2px', marginBottom: '14px' }}>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#4a4438', letterSpacing: '2px', marginBottom: '14px' }}>
                 LIVE EVENT CODES — SHARE WITH YOUR CLAN
               </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -184,7 +184,7 @@ export default async function DashboardPage() {
                     flex: '1', minWidth: '280px',
                   }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1px', marginBottom: '6px' }}>
+                      <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#4a4438', letterSpacing: '1px', marginBottom: '6px' }}>
                         {event.name}
                       </div>
                       <div style={{
@@ -197,7 +197,7 @@ export default async function DashboardPage() {
                     </div>
                     <CopyButton text={`Join my TileScape bingo at tilescape.vercel.app/join?code=${event.invite_code} — Code: ${event.invite_code}`} label="COPY LINK" />
                     <Link href={`/events/${event.id}`} style={{
-                      fontFamily: "'Press Start 2P', monospace", fontSize: '7px',
+                      fontFamily: "'Press Start 2P', monospace", fontSize: '11px',
                       padding: '8px 14px', borderRadius: '6px',
                       background: 'rgba(232,184,75,0.1)', border: '1px solid rgba(232,184,75,0.25)',
                       color: '#e8b84b', textDecoration: 'none',
@@ -220,7 +220,7 @@ export default async function DashboardPage() {
               border: '1px dashed rgba(232,184,75,0.15)', borderRadius: '16px',
               padding: '80px 40px', textAlign: 'center',
             }}>
-              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '8px', color: '#7a5c1e', marginBottom: '16px', letterSpacing: '1px' }}>NO EVENTS YET</div>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '12px', color: '#7a5c1e', marginBottom: '16px', letterSpacing: '1px' }}>NO EVENTS YET</div>
               <p style={{ color: '#9a8f7a', fontSize: '15px', fontWeight: 300, marginBottom: '28px' }}>Create your first bingo event to get started.</p>
               <Link href="/events/new" style={{
                 display: 'inline-flex', alignItems: 'center', padding: '14px 32px',

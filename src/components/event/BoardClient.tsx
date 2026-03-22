@@ -156,11 +156,11 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
   return (
     <>
     <style>{`html, body { height: 100%; overflow: hidden; margin: 0; padding: 0; }`}</style>
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif", overflow: 'hidden', width: '100%' }}>
+    <div style={{ position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg)', fontFamily: "'DM Sans',sans-serif" }}>
       <AppNav displayName={displayName} context={navContext} actions={navActions} />
 
-      {/* Main layout */}
-      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '220px 1fr 260px', marginTop: '64px', minHeight: 0 }}>
+      {/* Three-column layout below nav */}
+      <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '220px 1fr 260px', marginTop: '64px', minHeight: 0, overflow: 'hidden' }}>
 
         {/* ── Sidebar ── */}
         <aside style={{ background: 'var(--bg2)', borderRight: '1px solid rgba(232,184,75,0.10)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
@@ -232,7 +232,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
         </aside>
 
         {/* ── Main board ── */}
-        <main style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column', backgroundImage: 'linear-gradient(rgba(232,184,75,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(232,184,75,0.018) 1px,transparent 1px)', backgroundSize: '48px 48px' }}>
+        <main style={{ overflowY: 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column', backgroundImage: 'linear-gradient(rgba(232,184,75,0.018) 1px,transparent 1px),linear-gradient(90deg,rgba(232,184,75,0.018) 1px,transparent 1px)', backgroundSize: '48px 48px' }}>
           <div style={{ padding: '20px 24px', flexShrink: 0 }}>
             <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '20px', letterSpacing: '-0.5px', color: 'var(--text)', marginBottom: '3px' }}>
               {displayTeamId ? teams.find(t => t.id === displayTeamId)?.name ?? 'All Teams' : 'All Teams'}

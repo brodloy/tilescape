@@ -57,7 +57,7 @@ export function EventCard({ event, stats, isOwner }: {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: '6px',
-            fontFamily: "'Press Start 2P', monospace", fontSize: '8px',
+            fontFamily: "'Press Start 2P', monospace", fontSize: '12px',
             padding: '5px 12px', borderRadius: '4px',
             background: st.bg, color: st.color, border: `1px solid ${st.border}`,
           }}>
@@ -65,13 +65,13 @@ export function EventCard({ event, stats, isOwner }: {
             {st.label}
           </div>
           {event.myRole === 'owner' && (
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: '#7a5c1e', padding: '4px 10px', borderRadius: '4px', background: 'rgba(232,184,75,0.07)', border: '1px solid rgba(232,184,75,0.15)' }}>OWNER</span>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '11px', color: '#7a5c1e', padding: '4px 10px', borderRadius: '4px', background: 'rgba(232,184,75,0.07)', border: '1px solid rgba(232,184,75,0.15)' }}>OWNER</span>
           )}
           {event.myRole === 'moderator' && (
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: '#4b9ef0', padding: '4px 10px', borderRadius: '4px', background: 'rgba(75,158,240,0.08)', border: '1px solid rgba(75,158,240,0.2)' }}>MOD</span>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '11px', color: '#4b9ef0', padding: '4px 10px', borderRadius: '4px', background: 'rgba(75,158,240,0.08)', border: '1px solid rgba(75,158,240,0.2)' }}>MOD</span>
           )}
           {daysLeft !== null && event.status === 'live' && (
-            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', marginLeft: 'auto', color: daysLeft <= 1 ? '#e85555' : daysLeft <= 3 ? '#e8b84b' : '#9a8f7a' }}>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '11px', marginLeft: 'auto', color: daysLeft <= 1 ? '#e85555' : daysLeft <= 3 ? '#e8b84b' : '#9a8f7a' }}>
               {daysLeft <= 0 ? 'ENDS TODAY' : `${daysLeft}D LEFT`}
             </span>
           )}
@@ -132,15 +132,18 @@ export function EventCard({ event, stats, isOwner }: {
           </div>
         )}
 
-        {/* Footer — invite code + action buttons */}
+        {/* Footer — invite code + copy + action buttons */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           paddingTop: '16px', borderTop: '1px solid rgba(232,184,75,0.08)',
           gap: '12px',
         }}>
-          <div>
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1px', marginBottom: '5px' }}>INVITE CODE</div>
-            <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '13px', color: '#e8b84b', letterSpacing: '4px' }}>{event.invite_code}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#4a4438', letterSpacing: '1px', marginBottom: '5px' }}>INVITE CODE</div>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '13px', color: '#e8b84b', letterSpacing: '4px' }}>{event.invite_code}</div>
+            </div>
+            <CopyCodeButton code={event.invite_code} />
           </div>
 
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -198,5 +201,26 @@ function Chip({ label, color = '#9a8f7a', border = 'rgba(232,184,75,0.12)', bg =
     }}>
       {label}
     </span>
+  )
+}
+
+function CopyCodeButton({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false)
+  function handleCopy(e: React.MouseEvent) {
+    e.preventDefault(); e.stopPropagation()
+    navigator.clipboard.writeText(`https://tilescape.vercel.app/join?code=${code}`)
+    setCopied(true); setTimeout(() => setCopied(false), 2000)
+  }
+  return (
+    <button onClick={handleCopy} style={{
+      fontFamily: "'Press Start 2P', monospace", fontSize: '9px',
+      padding: '7px 12px', borderRadius: '6px', cursor: 'pointer',
+      border: copied ? '1px solid rgba(62,207,116,0.4)' : '1px solid rgba(232,184,75,0.2)',
+      background: copied ? 'rgba(62,207,116,0.08)' : 'rgba(232,184,75,0.06)',
+      color: copied ? '#3ecf74' : '#9a8f7a',
+      transition: 'all .2s', whiteSpace: 'nowrap', flexShrink: 0,
+    }}>
+      {copied ? '✓ COPIED' : '📋 COPY'}
+    </button>
   )
 }
