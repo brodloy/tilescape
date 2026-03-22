@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { joinEventAction } from '@/app/actions/forms'
-import { signOut } from '@/app/actions/auth'
-import { StatusBadge } from '@/components/ui/Badge'
+import { UserMenu } from '@/components/ui/UserMenu'
+import { CopyButton } from '@/components/ui/CopyButton'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -21,119 +21,372 @@ export default async function DashboardPage() {
     .eq('user_id', user.id)
     .order('joined_at', { ascending: false })
 
-  const myEvents = (memberships ?? []).filter((m: any) => m.role === 'owner').map((m: any) => ({ ...m.events, myRole: m.role }))
-  const joinedEvents = (memberships ?? []).filter((m: any) => m.role !== 'owner').map((m: any) => ({ ...m.events, myRole: m.role }))
+  const allEvents = (memberships ?? []).map((m: any) => ({ ...m.events, myRole: m.role }))
+  const myEvents = allEvents.filter((e: any) => e.myRole === 'owner')
+  const joinedEvents = allEvents.filter((e: any) => e.myRole !== 'owner')
+
+  // For each event get tile stats
+  const eventIds = allEvents.map((e: any) => e.id).filter(Boolean)
+  let tileStats: Record<string, { total: number; done: number; teams: number; purples: number }> = {}
+  if (eventIds.length > 0) {
+    const { data: tiles } = await db
+      .from('tiles')
+      .select('event_id, free_space, is_purple, tile_completions(status)')
+      .in('event_id', eventIds)
+    const { data: teams } = await db
+      .from('teams')
+      .select('event_id, color')
+      .in('event_id', eventIds)
+
+    eventIds.forEach((id: string) => {
+      const evTiles = (tiles ?? []).filter((t: any) => t.event_id === id && !t.free_space)
+      const done = evTiles.filter((t: any) => t.tile_completions?.some((c: any) => c.status === 'approved'))
+      const purples = done.filter((t: any) => t.is_purple)
+      const evTeams = (teams ?? []).filter((t: any) => t.event_id === id)
+      tileStats[id] = { total: evTiles.length, done: done.length, purples: purples.length, teams: evTeams.length }
+    })
+  }
+
+  const displayName = profile?.display_name ?? 'Adventurer'
+  const liveEvents = allEvents.filter((e: any) => e.status === 'live')
 
   return (
-    <div className="min-h-screen bg-bg">
-      {/* Radial glow top */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] pointer-events-none" style={{background:'radial-gradient(ellipse, rgba(232,184,75,0.06) 0%, transparent 65%)'}} />
+    <div className="min-h-screen bg-bg" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      {/* Radial glow */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 pointer-events-none" style={{ width: '900px', height: '500px', background: 'radial-gradient(ellipse, rgba(232,184,75,0.07) 0%, transparent 65%)' }} />
+      {/* Grid */}
+      <div className="fixed inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(232,184,75,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(232,184,75,0.025) 1px,transparent 1px)', backgroundSize: '48px 48px', maskImage: 'linear-gradient(to bottom, black 0%, transparent 40%)' }} />
 
-      {/* Topbar */}
-      <header className="sticky top-0 z-50 bg-[rgba(12,10,8,0.85)] backdrop-blur-md border-b border-[rgba(232,184,75,0.20)] px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 no-underline">
-          <div className="grid gap-[2px]" style={{gridTemplateColumns:'repeat(3,6px)',gridTemplateRows:'repeat(3,6px)'}}>
-            {[1,0,1,1,1,0,0,1,1].map((on,i) => (
-              <span key={i} className="block rounded-[1px]" style={{background: on ? '#e8b84b' : 'transparent'}} />
+      {/* ── NAV ── matches public pages exactly */}
+      <nav style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 48px', height: '64px',
+        background: 'rgba(12,10,8,0.88)', backdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(232,184,75,0.12)',
+      }}>
+        {/* Logo */}
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,6px)', gridTemplateRows: 'repeat(3,6px)', gap: '2px' }}>
+            {[1,0,1,1,1,0,0,1,1].map((on, i) => (
+              <span key={i} style={{ display: 'block', background: on ? '#e8b84b' : 'transparent', borderRadius: '1px' }} />
             ))}
           </div>
-          <span className="font-syne font-extrabold text-xl tracking-tight">Tile<em className="not-italic text-gold">Scape</em></span>
+          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '20px', color: 'var(--text)', letterSpacing: '-0.5px' }}>
+            Tile<em style={{ color: '#e8b84b', fontStyle: 'normal' }}>Scape</em>
+          </span>
         </Link>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-text-2 font-medium">{profile?.display_name}</span>
-          <Link href="/account" className="font-pixel text-[6px] text-text-3 hover:text-gold transition-colors tracking-wider">SETTINGS</Link>
-          <form action={signOut}>
-            <button type="submit" className="font-pixel text-[6px] text-text-3 hover:text-text-2 transition-colors tracking-wider">SIGN OUT</button>
-          </form>
-        </div>
-      </header>
 
-      <main className="max-w-5xl mx-auto px-6 py-12 relative z-10">
-        {/* Page header */}
-        <div className="flex items-start justify-between mb-12">
-          <div>
-            <div className="font-pixel text-[7px] text-gold tracking-widest mb-3 opacity-80">DASHBOARD</div>
-            <h1 className="font-syne font-extrabold text-4xl tracking-tight mb-2">
-              Welcome back, <span className="text-gold">{profile?.display_name}</span>
-            </h1>
-            <p className="text-text-2 text-sm font-light">Manage your events or join one with an invite code.</p>
-          </div>
-          <div className="flex gap-2 items-center mt-1">
-            <form action={joinEventAction} className="flex gap-2">
-              <input
-                name="code"
-                placeholder="Invite code"
-                className="h-10 px-3 text-sm bg-surface border border-[rgba(232,184,75,0.20)] rounded text-text placeholder:text-text-3 outline-none focus:border-gold-dim focus:shadow-[0_0_0_3px_rgba(232,184,75,0.08)] w-32 uppercase tracking-widest font-pixel text-[10px] transition-all"
-                maxLength={8}
-              />
-              <button type="submit" className="h-10 px-4 text-sm font-syne font-bold border border-[rgba(232,184,75,0.20)] rounded text-text-2 hover:text-text hover:border-gold-dim hover:bg-surface transition-all">
-                Join
-              </button>
-            </form>
-            <Link href="/events/new" className="h-10 px-4 inline-flex items-center font-syne font-bold text-sm bg-gold text-bg rounded hover:bg-[#f0c85a] transition-all shadow-[0_0_20px_rgba(232,184,75,0.2)] hover:shadow-[0_0_32px_rgba(232,184,75,0.35)]">
-              + Create Event
-            </Link>
-          </div>
+        {/* Nav links */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+          <Link href="/dashboard" style={{ fontSize: '14px', color: '#e8b84b', textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
+          <Link href="/events/new" style={{ fontSize: '14px', color: '#9a8f7a', textDecoration: 'none', transition: 'color .2s' }}
+            onMouseEnter={undefined}>New Event</Link>
         </div>
 
-        {/* My Events */}
-        <section className="mb-12">
-          <div className="font-pixel text-[7px] text-text-3 tracking-widest mb-5 uppercase">My Events</div>
-          {myEvents.length === 0 ? (
-            <div className="border border-dashed border-[rgba(232,184,75,0.15)] rounded-xl p-12 text-center">
-              <div className="font-pixel text-[8px] text-gold-dim mb-3 tracking-wider">NO EVENTS YET</div>
-              <p className="text-text-2 text-sm font-light mb-6">Create your first bingo event to get started.</p>
-              <Link href="/events/new" className="inline-flex items-center px-5 py-2.5 font-syne font-bold text-sm bg-gold text-bg rounded hover:bg-[#f0c85a] transition-all">
-                + Create Event
+        {/* User menu */}
+        <UserMenu displayName={displayName} />
+      </nav>
+
+      <main style={{ paddingTop: '64px', position: 'relative', zIndex: 10 }}>
+
+        {/* ── HERO HEADER ── inspired by landing page hero */}
+        <div style={{
+          padding: '64px 48px 48px',
+          borderBottom: '1px solid rgba(232,184,75,0.08)',
+          position: 'relative', overflow: 'hidden',
+        }}>
+          <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' }}>
+              <div>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '8px',
+                  background: 'rgba(232,184,75,0.08)', border: '1px solid rgba(232,184,75,0.22)',
+                  borderRadius: '999px', padding: '5px 14px', marginBottom: '20px',
+                }}>
+                  <div style={{ width: '6px', height: '6px', background: '#3ecf74', borderRadius: '50%', boxShadow: '0 0 6px #3ecf74' }} />
+                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: '#e8b84b', letterSpacing: '1px' }}>
+                    {liveEvents.length > 0 ? `${liveEvents.length} EVENT${liveEvents.length > 1 ? 'S' : ''} LIVE` : 'DASHBOARD'}
+                  </span>
+                </div>
+                <h1 style={{
+                  fontFamily: "'Syne', sans-serif", fontWeight: 800,
+                  fontSize: 'clamp(36px, 5vw, 64px)',
+                  letterSpacing: '-2px', lineHeight: 0.95,
+                  color: '#f0e8d8', marginBottom: '16px',
+                }}>
+                  Welcome back,<br />
+                  <span style={{ color: '#e8b84b' }}>{displayName}</span>
+                </h1>
+                <p style={{ fontSize: '16px', color: '#9a8f7a', fontWeight: 300, maxWidth: '480px' }}>
+                  {allEvents.length === 0
+                    ? 'Create your first event or join one with an invite code.'
+                    : `You have ${allEvents.length} event${allEvents.length > 1 ? 's' : ''} — ${liveEvents.length} currently live.`}
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
+                <form action={joinEventAction} style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    name="code"
+                    placeholder="INVITE CODE"
+                    maxLength={8}
+                    style={{
+                      height: '44px', padding: '0 14px',
+                      background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.20)',
+                      borderRadius: '6px', color: 'var(--text)',
+                      fontFamily: "'Press Start 2P', monospace", fontSize: '9px',
+                      letterSpacing: '2px', width: '160px', outline: 'none',
+                    }}
+                  />
+                  <button type="submit" style={{
+                    height: '44px', padding: '0 18px',
+                    fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '13px',
+                    background: 'none', border: '1px solid rgba(232,184,75,0.22)',
+                    borderRadius: '6px', color: '#9a8f7a', cursor: 'pointer', transition: 'all .2s',
+                  }}>
+                    Join
+                  </button>
+                </form>
+                <Link href="/events/new" style={{
+                  height: '44px', padding: '0 22px',
+                  display: 'inline-flex', alignItems: 'center',
+                  fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '14px',
+                  background: '#e8b84b', color: '#0c0a08',
+                  borderRadius: '6px', textDecoration: 'none',
+                  boxShadow: '0 0 32px rgba(232,184,75,0.25)',
+                  transition: 'all .2s',
+                }}>
+                  + Create Event
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── INVITE CODES BANNER ── full width, for live events */}
+        {liveEvents.length > 0 && (
+          <div style={{
+            background: 'rgba(232,184,75,0.04)',
+            borderBottom: '1px solid rgba(232,184,75,0.10)',
+            padding: '0 48px',
+          }}>
+            <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px 0' }}>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '2px', marginBottom: '14px' }}>
+                LIVE EVENT CODES — SHARE WITH YOUR CLAN
+              </div>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                {liveEvents.map((event: any) => (
+                  <div key={event.id} style={{
+                    display: 'flex', alignItems: 'center', gap: '16px',
+                    background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.18)',
+                    borderRadius: '10px', padding: '14px 20px',
+                    flex: '1', minWidth: '280px',
+                  }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1px', marginBottom: '6px' }}>
+                        {event.name}
+                      </div>
+                      <div style={{
+                        fontFamily: "'Press Start 2P', monospace",
+                        fontSize: '20px', color: '#e8b84b',
+                        letterSpacing: '6px', lineHeight: 1,
+                      }}>
+                        {event.invite_code}
+                      </div>
+                    </div>
+                    <CopyButton text={`Join my TileScape bingo at tilescape.vercel.app/join?code=${event.invite_code} — Code: ${event.invite_code}`} label="COPY LINK" />
+                    <Link href={`/events/${event.id}`} style={{
+                      fontFamily: "'Press Start 2P', monospace", fontSize: '7px',
+                      padding: '8px 14px', borderRadius: '6px',
+                      background: 'rgba(232,184,75,0.1)', border: '1px solid rgba(232,184,75,0.25)',
+                      color: '#e8b84b', textDecoration: 'none',
+                      whiteSpace: 'nowrap', letterSpacing: '0.5px',
+                    }}>
+                      VIEW →
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── EVENTS GRID ── */}
+        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 48px 80px' }}>
+
+          {allEvents.length === 0 ? (
+            <div style={{
+              border: '1px dashed rgba(232,184,75,0.15)', borderRadius: '16px',
+              padding: '80px 40px', textAlign: 'center',
+            }}>
+              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '8px', color: '#7a5c1e', marginBottom: '16px', letterSpacing: '1px' }}>NO EVENTS YET</div>
+              <p style={{ color: '#9a8f7a', fontSize: '15px', fontWeight: 300, marginBottom: '28px' }}>Create your first bingo event to get started.</p>
+              <Link href="/events/new" style={{
+                display: 'inline-flex', alignItems: 'center', padding: '14px 32px',
+                fontFamily: "'Syne', sans-serif", fontWeight: 700, fontSize: '15px',
+                background: '#e8b84b', color: '#0c0a08', borderRadius: '6px',
+                textDecoration: 'none', boxShadow: '0 0 32px rgba(232,184,75,0.25)',
+              }}>
+                Create Your First Event →
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {myEvents.map((event: any) => <EventCard key={event.id} event={event} />)}
-            </div>
+            <>
+              {myEvents.length > 0 && (
+                <section style={{ marginBottom: '48px' }}>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: '#4a4438', letterSpacing: '2px', marginBottom: '20px' }}>MY EVENTS</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+                    {myEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} />)}
+                  </div>
+                </section>
+              )}
+              {joinedEvents.length > 0 && (
+                <section>
+                  <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: '#4a4438', letterSpacing: '2px', marginBottom: '20px' }}>JOINED EVENTS</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+                    {joinedEvents.map((event: any) => <EventCard key={event.id} event={event} stats={tileStats[event.id]} />)}
+                  </div>
+                </section>
+              )}
+            </>
           )}
-        </section>
-
-        {/* Joined Events */}
-        {joinedEvents.length > 0 && (
-          <section>
-            <div className="font-pixel text-[7px] text-text-3 tracking-widest mb-5 uppercase">Joined Events</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {joinedEvents.map((event: any) => <EventCard key={event.id} event={event} />)}
-            </div>
-          </section>
-        )}
+        </div>
       </main>
     </div>
   )
 }
 
-function EventCard({ event }: { event: any }) {
+const STATUS_STYLES: Record<string, { bg: string; color: string; border: string; label: string }> = {
+  live:   { bg: 'rgba(62,207,116,0.1)',   color: '#3ecf74', border: 'rgba(62,207,116,0.25)',  label: 'LIVE'   },
+  draft:  { bg: 'rgba(154,143,122,0.08)', color: '#9a8f7a', border: 'rgba(154,143,122,0.15)', label: 'DRAFT'  },
+  ended:  { bg: 'rgba(74,68,56,0.3)',     color: '#4a4438', border: 'rgba(74,68,56,0.4)',     label: 'ENDED'  },
+}
+
+function EventCard({ event, stats }: { event: any; stats?: { total: number; done: number; purples: number; teams: number } }) {
   const now = new Date()
   const end = event.end_date ? new Date(event.end_date) : null
   const daysLeft = end ? Math.ceil((end.getTime() - now.getTime()) / 86400000) : null
+  const pct = stats ? Math.round(stats.done / Math.max(stats.total, 1) * 100) : 0
+  const st = STATUS_STYLES[event.status] ?? STATUS_STYLES.draft
 
   return (
-    <Link href={`/events/${event.id}`} className="block group">
-      <div className="bg-surface border border-[rgba(232,184,75,0.10)] rounded-xl p-5 h-full transition-all duration-150 hover:border-[rgba(232,184,75,0.25)] hover:bg-surface2 hover:-translate-y-0.5 hover:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
-        <div className="flex items-start justify-between mb-3">
-          <StatusBadge status={event.status} />
-          {event.myRole === 'owner' && <span className="font-pixel text-[6px] text-gold-dim">OWNER</span>}
-          {event.myRole === 'moderator' && <span className="font-pixel text-[6px] text-[#4b9ef0]">MOD</span>}
-        </div>
-        <h3 className="font-syne font-bold text-base tracking-tight mb-1 group-hover:text-gold transition-colors leading-tight">
-          {event.name}
-        </h3>
-        {event.description && (
-          <p className="text-text-2 text-xs leading-relaxed mb-3 line-clamp-2 font-light">{event.description}</p>
-        )}
-        <div className="flex items-center justify-between mt-4 pt-3 border-t border-[rgba(232,184,75,0.08)]">
-          <span className="font-pixel text-[6px] text-text-3 tracking-wider">{event.invite_code}</span>
-          {daysLeft !== null && event.status === 'live' && (
-            <span className={`font-pixel text-[6px] ${daysLeft <= 1 ? 'text-red' : daysLeft <= 3 ? 'text-gold' : 'text-text-3'}`}>
-              {daysLeft <= 0 ? 'ENDING TODAY' : `${daysLeft}D LEFT`}
-            </span>
+    <Link href={`/events/${event.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+      <div style={{
+        background: 'var(--surface)',
+        border: '1px solid rgba(232,184,75,0.10)',
+        borderRadius: '12px', overflow: 'hidden',
+        transition: 'all .15s',
+        cursor: 'pointer',
+      }}
+        onMouseEnter={e => {
+          const el = e.currentTarget as HTMLElement
+          el.style.borderColor = 'rgba(232,184,75,0.28)'
+          el.style.background = 'var(--surface2)'
+          el.style.transform = 'translateY(-2px)'
+          el.style.boxShadow = '0 12px 40px rgba(0,0,0,0.4)'
+        }}
+        onMouseLeave={e => {
+          const el = e.currentTarget as HTMLElement
+          el.style.borderColor = 'rgba(232,184,75,0.10)'
+          el.style.background = 'var(--surface)'
+          el.style.transform = 'none'
+          el.style.boxShadow = 'none'
+        }}
+      >
+        {/* Top bar — coloured by status */}
+        <div style={{ height: '3px', background: event.status === 'live' ? '#3ecf74' : event.status === 'ended' ? '#4a4438' : 'rgba(232,184,75,0.3)' }} />
+
+        <div style={{ padding: '18px 20px' }}>
+          {/* Header row */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '14px' }}>
+            <div style={{
+              fontFamily: "'Press Start 2P', monospace", fontSize: '6px',
+              padding: '3px 8px', borderRadius: '3px',
+              background: st.bg, color: st.color, border: `1px solid ${st.border}`,
+              display: 'flex', alignItems: 'center', gap: '5px',
+            }}>
+              {event.status === 'live' && <span style={{ width: '4px', height: '4px', background: '#3ecf74', borderRadius: '50%', display: 'inline-block' }} />}
+              {st.label}
+            </div>
+            {event.myRole === 'owner' && (
+              <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '6px', color: '#7a5c1e' }}>OWNER</span>
+            )}
+            {event.myRole === 'moderator' && (
+              <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '6px', color: '#4b9ef0' }}>MOD</span>
+            )}
+          </div>
+
+          {/* Title */}
+          <div style={{
+            fontFamily: "'Syne', sans-serif", fontWeight: 800,
+            fontSize: '18px', letterSpacing: '-0.5px',
+            color: '#f0e8d8', marginBottom: '6px', lineHeight: 1.1,
+          }}>
+            {event.name}
+          </div>
+          {event.description && (
+            <p style={{ fontSize: '13px', color: '#9a8f7a', fontWeight: 300, lineHeight: 1.5, marginBottom: '16px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+              {event.description}
+            </p>
           )}
+
+          {/* Progress bar */}
+          {stats && stats.total > 0 && (
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '6px', color: '#4a4438' }}>PROGRESS</span>
+                <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: event.status === 'live' ? '#3ecf74' : '#9a8f7a' }}>{pct}%</span>
+              </div>
+              <div style={{ height: '6px', background: 'var(--bg3)', borderRadius: '3px', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: '3px',
+                  width: `${pct}%`,
+                  background: event.status === 'live' ? '#3ecf74' : event.status === 'ended' ? '#4a4438' : '#e8b84b',
+                  transition: 'width .5s',
+                  position: 'relative',
+                }}>
+                  <div style={{ position: 'absolute', top: '1px', left: '2px', right: '2px', height: '40%', background: 'rgba(255,255,255,0.25)', borderRadius: '2px 2px 0 0' }} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Stat chips */}
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
+            {stats && (
+              <>
+                <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '5.5px', padding: '3px 8px', borderRadius: '3px', background: 'var(--surface2)', border: '1px solid rgba(232,184,75,0.1)', color: '#9a8f7a' }}>
+                  {stats.done}/{stats.total} TILES
+                </span>
+                {stats.teams > 0 && (
+                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '5.5px', padding: '3px 8px', borderRadius: '3px', background: 'var(--surface2)', border: '1px solid rgba(232,184,75,0.1)', color: '#9a8f7a' }}>
+                    {stats.teams} TEAM{stats.teams !== 1 ? 'S' : ''}
+                  </span>
+                )}
+                {stats.purples > 0 && (
+                  <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '5.5px', padding: '3px 8px', borderRadius: '3px', background: 'rgba(168,117,240,0.1)', border: '1px solid rgba(168,117,240,0.2)', color: '#a875f0' }}>
+                    {stats.purples} PURPLE{stats.purples !== 1 ? 'S' : ''}
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid rgba(232,184,75,0.08)' }}>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: '#4a4438', letterSpacing: '2px' }}>{event.invite_code}</span>
+            {daysLeft !== null && event.status === 'live' && (
+              <span style={{
+                fontFamily: "'Press Start 2P', monospace", fontSize: '6px',
+                color: daysLeft <= 1 ? '#e85555' : daysLeft <= 3 ? '#e8b84b' : '#4a4438',
+              }}>
+                {daysLeft <= 0 ? 'ENDS TODAY' : `${daysLeft}D LEFT`}
+              </span>
+            )}
+            {event.status === 'ended' && (
+              <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '6px', color: '#4a4438' }}>ENDED</span>
+            )}
+          </div>
         </div>
       </div>
     </Link>
