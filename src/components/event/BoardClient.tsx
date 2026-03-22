@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { AppNav } from '@/components/ui/AppNav'
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll'
 import { submitCompletion, reviewCompletion, quickCompleteTile, uncompleteTeamTile } from '@/app/actions/completions'
 import { goLive, endEvent } from '@/app/actions/forms'
 import { useRouter } from 'next/navigation'
@@ -47,6 +48,7 @@ function calcBingos(tiles: any[], teamId: string) {
 export function BoardClient({ event, initialTiles, teams, members, pendingSubmissions, userTeamId, isOwnerOrMod, isOwner, displayName, avatarUrl, eventId }: Props) {
   const [tiles, setTiles] = useState(initialTiles)
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
+  useLockBodyScroll()
   const [selectedTile, setSelectedTile] = useState<any | null>(null)
   const [proofUrl, setProofUrl] = useState('')
   const [submitting, setSubmitting] = useState(false)

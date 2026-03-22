@@ -4,6 +4,7 @@ import { useState, useTransition, useRef, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { AppNav } from '@/components/ui/AppNav'
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll'
 import { Avatar } from '@/components/ui/Avatar'
 import {
   loadTemplate, removeTile, addTileAction,
@@ -952,6 +953,7 @@ interface Props {
 }
 
 export function ManageClient({ event, tiles, teams, members, isOwner, currentUserId, avatarUrl }: Props) {
+  useLockBodyScroll()
   const [tab, setTab] = useState<Tab>('Board')
   const displayName = members.find(m => m.users?.id === currentUserId)?.users?.display_name ?? ''
 
