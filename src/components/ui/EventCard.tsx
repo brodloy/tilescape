@@ -136,19 +136,14 @@ export function EventCard({ event, stats, isOwner, tiles = [] }: {
           </div>
         )}
 
-        {/* Footer — invite code + copy + action buttons */}
+        {/* Footer — invite code group + action buttons */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           paddingTop: '16px', borderTop: '1px solid rgba(232,184,75,0.08)',
           gap: '12px',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div>
-              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '10px', color: '#4a4438', letterSpacing: '1px', marginBottom: '5px' }}>INVITE CODE</div>
-              <div style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '13px', color: '#e8b84b', letterSpacing: '4px' }}>{event.invite_code}</div>
-            </div>
-            <CopyCodeButton code={event.invite_code} />
-          </div>
+          {/* Invite code pill group */}
+          <InviteCodeGroup code={event.invite_code} />
 
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             {isOwner && event.status !== 'ended' && (
@@ -208,24 +203,72 @@ function Chip({ label, color = '#9a8f7a', border = 'rgba(232,184,75,0.12)', bg =
   )
 }
 
-function CopyCodeButton({ code }: { code: string }) {
+function InviteCodeGroup({ code }: { code: string }) {
   const [copied, setCopied] = useState(false)
+
   function handleCopy(e: React.MouseEvent) {
     e.preventDefault(); e.stopPropagation()
     navigator.clipboard.writeText(`https://tilescape.vercel.app/join?code=${code}`)
-    setCopied(true); setTimeout(() => setCopied(false), 2000)
+    setCopied(true); setTimeout(() => setCopied(false), 2200)
   }
+
   return (
-    <button onClick={handleCopy} style={{
-      fontFamily: "'Press Start 2P', monospace", fontSize: '9px',
-      padding: '7px 12px', borderRadius: '6px', cursor: 'pointer',
-      border: copied ? '1px solid rgba(62,207,116,0.4)' : '1px solid rgba(232,184,75,0.2)',
-      background: copied ? 'rgba(62,207,116,0.08)' : 'rgba(232,184,75,0.06)',
-      color: copied ? '#3ecf74' : '#9a8f7a',
-      transition: 'all .2s', whiteSpace: 'nowrap', flexShrink: 0,
-    }}>
-      {copied ? '✓ COPIED' : '📋 COPY'}
-    </button>
+    <div style={{ display: 'flex', alignItems: 'stretch', borderRadius: '9px', overflow: 'hidden', border: '1px solid rgba(232,184,75,0.18)', flexShrink: 0 }}>
+      {/* Label segment */}
+      <div style={{
+        padding: '0 10px',
+        background: 'rgba(232,184,75,0.06)',
+        borderRight: '1px solid rgba(232,184,75,0.14)',
+        display: 'flex', alignItems: 'center',
+      }}>
+        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', color: '#4a4438', letterSpacing: '1px', whiteSpace: 'nowrap' }}>
+          INVITE
+        </span>
+      </div>
+
+      {/* Code segment */}
+      <div style={{
+        padding: '10px 14px',
+        background: 'var(--bg3)',
+        display: 'flex', alignItems: 'center',
+        borderRight: '1px solid rgba(232,184,75,0.14)',
+      }}>
+        <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '12px', color: '#e8b84b', letterSpacing: '4px', lineHeight: 1 }}>
+          {code}
+        </span>
+      </div>
+
+      {/* Copy button segment */}
+      <button
+        onClick={handleCopy}
+        title="Copy join link"
+        style={{
+          padding: '0 14px',
+          background: copied ? 'rgba(62,207,116,0.12)' : 'var(--bg3)',
+          border: 'none', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: '6px',
+          transition: 'background .2s',
+          color: copied ? '#3ecf74' : '#9a8f7a',
+        }}
+      >
+        {copied ? (
+          <>
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M2 7L5 10L11 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', whiteSpace: 'nowrap' }}>COPIED</span>
+          </>
+        ) : (
+          <>
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <rect x="4.5" y="1.5" width="7" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.4"/>
+              <path d="M2.5 4.5H2A1.5 1.5 0 0 0 .5 6v5A1.5 1.5 0 0 0 2 12.5h5A1.5 1.5 0 0 0 8.5 11v-.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+            </svg>
+            <span style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', whiteSpace: 'nowrap' }}>COPY</span>
+          </>
+        )}
+      </button>
+    </div>
   )
 }
 
