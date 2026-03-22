@@ -108,18 +108,171 @@ function btn(variant: 'gold'|'ghost'|'danger'|'neutral' = 'ghost'): React.CSSPro
   return { ...base, background: 'var(--surface2)', border: '1px solid rgba(255,255,255,0.06)', color: '#9a8f7a' }
 }
 
-// ── ItemSearchDropdown ────────────────────────────────────────────────────────
-type OsrsItem = typeof OSRS_ITEMS[0]
+// ── Live OSRS item search using wiki API ───────────────────────────────────────
+type OsrsItem = { name: string; source: string; purple: boolean; sprite: string; id?: number }
 
-function ItemSearchDropdown({ onSelect, existingNames, boardTiles }: {
+// Curated bingo-relevant items with source metadata
+const CURATED: OsrsItem[] = [
+  { name: 'Twisted bow',            source: 'CoX',     purple: true,  sprite: W('Twisted bow') },
+  { name: 'Scythe of vitur',        source: 'ToB',     purple: true,  sprite: W('Scythe of vitur') },
+  { name: "Tumeken's shadow",       source: 'ToA',     purple: true,  sprite: W("Tumeken's shadow") },
+  { name: 'Ghrazi rapier',          source: 'ToB',     purple: true,  sprite: W('Ghrazi rapier') },
+  { name: "Osmumten's fang",        source: 'ToA',     purple: true,  sprite: W("Osmumten's fang") },
+  { name: 'Kodai wand',             source: 'CoX',     purple: false, sprite: W('Kodai wand') },
+  { name: 'Elder maul',             source: 'CoX',     purple: false, sprite: W('Elder maul') },
+  { name: 'Avernic defender hilt',  source: 'ToB',     purple: false, sprite: W('Avernic defender hilt') },
+  { name: 'Zaryte crossbow',        source: 'Nex',     purple: false, sprite: W('Zaryte crossbow') },
+  { name: 'Sanguinesti staff',      source: 'ToB',     purple: false, sprite: W('Sanguinesti staff') },
+  { name: 'Dragon hunter crossbow', source: 'CoX',     purple: false, sprite: W('Dragon hunter crossbow') },
+  { name: 'Justiciar faceguard',    source: 'ToB',     purple: false, sprite: W('Justiciar faceguard') },
+  { name: "Elidinis' ward (f)",     source: 'ToA',     purple: false, sprite: W("Elidinis' ward (f)") },
+  { name: 'Lightbearer',            source: 'ToA',     purple: false, sprite: W('Lightbearer') },
+  { name: 'Olmlet',                 source: 'CoX',     purple: true,  sprite: W('Olmlet') },
+  { name: 'Magus ring',             source: 'DT2',     purple: true,  sprite: W('Magus ring') },
+  { name: "Inquisitor's mace",      source: 'NM',      purple: false, sprite: W("Inquisitor's mace") },
+  { name: 'Dragon warhammer',       source: 'Liz',     purple: false, sprite: W('Dragon warhammer') },
+  { name: 'Infernal cape',          source: 'Inferno', purple: true,  sprite: W('Infernal cape') },
+  { name: "Lil' zik",               source: 'ToB',     purple: true,  sprite: W("Lil' zik") },
+  { name: 'Jal-nib-rek',            source: 'Inferno', purple: true,  sprite: W('Jal-nib-rek') },
+  { name: 'Nightmare staff',        source: 'NM',      purple: true,  sprite: W('Nightmare staff') },
+  { name: 'Ancestral robe top',     source: 'CoX',     purple: false, sprite: W('Ancestral robe top') },
+  { name: 'Ancient blood ornament kit', source: 'Nex', purple: true,  sprite: W('Ancient blood ornament kit') },
+  { name: 'Ancestral robe bottom',  source: 'CoX',     purple: false, sprite: W('Ancestral robe bottom') },
+  { name: 'Ancestral hat',          source: 'CoX',     purple: false, sprite: W('Ancestral hat') },
+  { name: 'Dexterous prayer scroll',source: 'CoX',     purple: false, sprite: W('Dexterous prayer scroll') },
+  { name: 'Arcane prayer scroll',   source: 'CoX',     purple: false, sprite: W('Arcane prayer scroll') },
+  { name: "Dinh's bulwark",         source: 'CoX',     purple: false, sprite: W("Dinh's bulwark") },
+  { name: 'Dragon hunter lance',    source: 'CoX',     purple: false, sprite: W('Dragon hunter lance') },
+  { name: 'Dragon claws',           source: 'CoX',     purple: false, sprite: W('Dragon claws') },
+  { name: 'Justiciar legguards',    source: 'ToB',     purple: false, sprite: W('Justiciar legguards') },
+  { name: 'Justiciar chestguard',   source: 'ToB',     purple: false, sprite: W('Justiciar chestguard') },
+  { name: 'Avernic defender',       source: 'ToB',     purple: false, sprite: W('Avernic defender') },
+  { name: 'Torva full helm',        source: 'Nex',     purple: false, sprite: W('Torva full helm') },
+  { name: 'Torva platebody',        source: 'Nex',     purple: false, sprite: W('Torva platebody') },
+  { name: 'Torva platelegs',        source: 'Nex',     purple: false, sprite: W('Torva platelegs') },
+  { name: 'Nihil horn',             source: 'Nex',     purple: false, sprite: W('Nihil horn') },
+  { name: 'Bellator ring',          source: 'DT2',     purple: true,  sprite: W('Bellator ring') },
+  { name: 'Venator ring',           source: 'DT2',     purple: true,  sprite: W('Venator ring') },
+  { name: 'Ultor ring',             source: 'DT2',     purple: true,  sprite: W('Ultor ring') },
+  { name: "Inquisitor's great helm",source: 'NM',      purple: false, sprite: W("Inquisitor's great helm") },
+  { name: "Inquisitor's hauberk",   source: 'NM',      purple: false, sprite: W("Inquisitor's hauberk") },
+  { name: "Inquisitor's plateskirt",source: 'NM',      purple: false, sprite: W("Inquisitor's plateskirt") },
+  { name: 'Volatile orb',           source: 'NM',      purple: true,  sprite: W('Volatile orb') },
+  { name: 'Harmonised orb',         source: 'NM',      purple: true,  sprite: W('Harmonised orb') },
+  { name: 'Eldritch orb',           source: 'NM',      purple: true,  sprite: W('Eldritch orb') },
+  { name: 'Masori mask',            source: 'ToA',     purple: false, sprite: W('Masori mask') },
+  { name: 'Masori body (f)',         source: 'ToA',     purple: false, sprite: W('Masori body (f)') },
+  { name: 'Masori chaps (f)',        source: 'ToA',     purple: false, sprite: W('Masori chaps (f)') },
+  { name: 'Bandos chestplate',      source: 'GWD',     purple: false, sprite: W('Bandos chestplate') },
+  { name: 'Bandos tassets',         source: 'GWD',     purple: false, sprite: W('Bandos tassets') },
+  { name: 'Bandos boots',           source: 'GWD',     purple: false, sprite: W('Bandos boots') },
+  { name: 'Armadyl helmet',         source: 'GWD',     purple: false, sprite: W('Armadyl helmet') },
+  { name: 'Armadyl chestplate',     source: 'GWD',     purple: false, sprite: W('Armadyl chestplate') },
+  { name: 'Armadyl chainskirt',     source: 'GWD',     purple: false, sprite: W('Armadyl chainskirt') },
+  { name: 'Zamorakian spear',       source: 'GWD',     purple: false, sprite: W('Zamorakian spear') },
+  { name: 'Saradomin sword',        source: 'GWD',     purple: false, sprite: W('Saradomin sword') },
+  { name: 'Pet general graardor',   source: 'GWD',     purple: true,  sprite: W('Pet general graardor') },
+  { name: "Pet kree'arra",          source: 'GWD',     purple: true,  sprite: W("Pet kree'arra") },
+  { name: 'Pet zilyana',            source: 'GWD',     purple: true,  sprite: W('Pet zilyana') },
+  { name: 'Pet kril tsutsaroth',    source: 'GWD',     purple: true,  sprite: W("Pet k'ril tsutsaroth") },
+  { name: 'Abyssal whip',           source: 'Slayer',  purple: false, sprite: W('Abyssal whip') },
+  { name: 'Abyssal dagger',         source: 'Slayer',  purple: false, sprite: W('Abyssal dagger') },
+  { name: 'Trident of the seas',    source: 'Slayer',  purple: false, sprite: W('Trident of the seas') },
+  { name: 'Occult necklace',        source: 'Slayer',  purple: false, sprite: W('Occult necklace') },
+  { name: 'Tanzanite fang',         source: 'Slayer',  purple: false, sprite: W('Tanzanite fang') },
+  { name: 'Magic fang',             source: 'Slayer',  purple: false, sprite: W('Magic fang') },
+  { name: 'Jar of souls',           source: 'Slayer',  purple: true,  sprite: W('Jar of souls') },
+  { name: 'Abyssal bludgeon',       source: 'Slayer',  purple: false, sprite: W('Abyssal bludgeon') },
+  { name: 'Dragon pickaxe',         source: 'Wildy',   purple: false, sprite: W('Dragon pickaxe') },
+  { name: 'Dragon 2h sword',        source: 'Wildy',   purple: false, sprite: W('Dragon 2h sword') },
+  { name: "Voidwaker",              source: 'Wildy',   purple: true,  sprite: W('Voidwaker') },
+  { name: 'Skull of vet\'ion',      source: 'Wildy',   purple: true,  sprite: W("Skull of vet'ion") },
+  { name: 'Fangs of venenatis',     source: 'Wildy',   purple: true,  sprite: W('Fangs of venenatis') },
+  { name: 'Claws of callisto',      source: 'Wildy',   purple: true,  sprite: W('Claws of callisto') },
+  { name: 'Scorpia\'s offspring',   source: 'Wildy',   purple: true,  sprite: W("Scorpia's offspring") },
+  { name: 'Amulet of torture',      source: 'Zulrah',  purple: false, sprite: W('Amulet of torture') },
+  { name: 'Necklace of anguish',    source: 'Zulrah',  purple: false, sprite: W('Necklace of anguish') },
+  { name: 'Tormented bracelet',     source: 'Zulrah',  purple: false, sprite: W('Tormented bracelet') },
+  { name: 'Tanzanite mutagen',      source: 'Zulrah',  purple: true,  sprite: W('Tanzanite mutagen') },
+  { name: 'Magma mutagen',          source: 'Zulrah',  purple: true,  sprite: W('Magma mutagen') },
+  { name: 'Pet snakeling',          source: 'Zulrah',  purple: true,  sprite: W('Pet snakeling') },
+  { name: 'Dragonfire ward',        source: 'Vorkath', purple: false, sprite: W('Dragonfire ward') },
+  { name: 'Draconic visage',        source: 'Vorkath', purple: false, sprite: W('Draconic visage') },
+  { name: 'Skeletal visage',        source: 'Vorkath', purple: false, sprite: W('Skeletal visage') },
+  { name: 'Vorki',                  source: 'Vorkath', purple: true,  sprite: W('Vorki') },
+  { name: 'Zenyte shard',           source: 'Demonic', purple: true,  sprite: W('Zenyte shard') },
+  { name: 'Ballista spring',        source: 'Demonic', purple: false, sprite: W('Ballista spring') },
+  { name: 'Heavy frame',            source: 'Demonic', purple: false, sprite: W('Heavy frame') },
+  { name: 'Monkey tail',            source: 'Demonic', purple: false, sprite: W('Monkey tail') },
+  { name: 'Pegasian crystal',       source: 'Cerb',    purple: true,  sprite: W('Pegasian crystal') },
+  { name: 'Eternal crystal',        source: 'Cerb',    purple: true,  sprite: W('Eternal crystal') },
+  { name: 'Smouldering stone',      source: 'Cerb',    purple: true,  sprite: W('Smouldering stone') },
+  { name: 'Hellpuppy',              source: 'Cerb',    purple: true,  sprite: W('Hellpuppy') },
+  { name: 'Primordial crystal',     source: 'Cerb',    purple: true,  sprite: W('Primordial crystal') },
+  { name: 'Blowpipe',               source: 'Zulrah',  purple: false, sprite: W('Toxic blowpipe') },
+  { name: 'Toxic staff of the dead',source: 'Zulrah',  purple: false, sprite: W('Toxic staff of the dead') },
+  { name: 'Serpentine visage',      source: 'Zulrah',  purple: false, sprite: W('Serpentine visage') },
+  { name: 'Berserker ring (i)',      source: 'Raids',   purple: false, sprite: W('Berserker ring (i)') },
+  { name: 'Imbued heart',           source: 'Slayer',  purple: false, sprite: W('Imbued heart') },
+  { name: 'Dust devil pet',         source: 'Slayer',  purple: true,  sprite: W('Noon') },
+  { name: 'Crystal armour seed',    source: 'Gauntlet',purple: false, sprite: W('Crystal armour seed') },
+  { name: 'Crystal weapon seed',    source: 'Gauntlet',purple: false, sprite: W('Crystal weapon seed') },
+  { name: 'Youngllef',              source: 'Gauntlet',purple: true,  sprite: W('Youngllef') },
+  { name: 'Enhanced crystal weapon seed', source: 'Gauntlet', purple: true, sprite: W('Enhanced crystal weapon seed') },
+  { name: 'Corrupted youngllef',    source: 'Gauntlet',purple: true,  sprite: W('Corrupted youngllef') },
+]
+
+function useWikiSearch(query: string) {
+  const [results, setResults] = useState<OsrsItem[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (query.length < 2) { setResults([]); return }
+
+    // First check curated list
+    const curatedMatches = CURATED.filter(i =>
+      i.name.toLowerCase().includes(query.toLowerCase()) ||
+      i.source.toLowerCase().includes(query.toLowerCase())
+    )
+
+    if (curatedMatches.length > 0) {
+      setResults(curatedMatches.slice(0, 20))
+      return
+    }
+
+    // Fall back to OSRS wiki search API for anything not in curated list
+    setLoading(true)
+    const controller = new AbortController()
+    fetch(
+      `https://oldschool.runescape.wiki/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=10&namespace=0&format=json&origin=*`,
+      { signal: controller.signal }
+    )
+      .then(r => r.json())
+      .then(([_, names]: [string, string[]]) => {
+        const items: OsrsItem[] = names.map(n => ({
+          name: n, source: '', purple: false, sprite: W(n),
+        }))
+        setResults(items)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+
+    return () => controller.abort()
+  }, [query])
+
+  return { results, loading }
+}
+
+function ItemSearchDropdown({ onSelect, takenPositions, boardTiles }: {
   onSelect: (item: OsrsItem) => void
-  existingNames: string[]
+  takenPositions: Set<number>
   boardTiles: any[]
 }) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<OsrsItem | null>(null)
   const ref = useRef<HTMLDivElement>(null)
+  const { results: wikiResults, loading } = useWikiSearch(query)
 
   useEffect(() => {
     const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
@@ -127,16 +280,12 @@ function ItemSearchDropdown({ onSelect, existingNames, boardTiles }: {
     return () => document.removeEventListener('mousedown', h)
   }, [])
 
-  // Merge catalogue with already-used custom tiles on this board
-  const customTilesOnBoard = boardTiles
-    .filter(t => !t.free_space && !OSRS_ITEMS.find(i => i.name === t.name))
-    .map(t => ({ name: t.name, source: t.source_raid ?? '', purple: t.is_purple, sprite: t.sprite_url ?? W(t.name) }))
+  const boardNames = new Set(boardTiles.filter(t => !t.free_space).map((t: any) => t.name.toLowerCase()))
 
-  const allItems = [...OSRS_ITEMS, ...customTilesOnBoard]
-
-  const filtered = query.length < 1
-    ? allItems.slice(0, 12)
-    : allItems.filter(i =>
+  // Items to show: curated popular when no query, wiki results when searching
+  const displayItems: OsrsItem[] = query.length < 2
+    ? CURATED.slice(0, 16)
+    : wikiResults.length > 0 ? wikiResults : CURATED.filter(i =>
         i.name.toLowerCase().includes(query.toLowerCase()) ||
         i.source.toLowerCase().includes(query.toLowerCase())
       ).slice(0, 20)
@@ -145,59 +294,64 @@ function ItemSearchDropdown({ onSelect, existingNames, boardTiles }: {
     setSelected(item); setQuery(item.name); setOpen(false); onSelect(item)
   }
 
+  function clear() {
+    setSelected(null); setQuery(''); onSelect({ name: '', source: '', purple: false, sprite: '' })
+  }
+
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <div onClick={() => setOpen(true)} style={{
+      <div onClick={() => { setOpen(true) }} style={{
         display: 'flex', alignItems: 'center', gap: '10px',
-        height: '44px', padding: '0 14px',
+        height: '48px', padding: '0 14px',
         background: 'var(--bg3)',
         border: `1px solid ${open ? 'rgba(232,184,75,0.5)' : 'rgba(232,184,75,0.2)'}`,
-        borderRadius: '8px', cursor: 'text',
+        borderRadius: '10px', cursor: 'text',
       }}>
         {selected?.sprite && (
-          <img src={selected.sprite} alt="" style={{ width: '24px', height: '24px', objectFit: 'contain', imageRendering: 'pixelated', flexShrink: 0 }} onError={e => (e.currentTarget.style.display = 'none')} />
+          <img src={selected.sprite} alt="" style={{ width: '28px', height: '28px', objectFit: 'contain', imageRendering: 'pixelated', flexShrink: 0 }} onError={e => (e.currentTarget.style.display = 'none')} />
         )}
+        {!selected && <span style={{ fontSize: '16px', flexShrink: 0 }}>🔍</span>}
         <input
           value={query}
           onChange={e => { setQuery(e.target.value); setOpen(true); if (!e.target.value) setSelected(null) }}
           onFocus={() => setOpen(true)}
-          placeholder="Search items… e.g. Twisted bow, CoX, purple"
-          style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '14px', fontFamily: "'DM Sans',sans-serif" }}
+          placeholder="Search any OSRS item…"
+          style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--text)', fontSize: '15px', fontFamily: "'DM Sans',sans-serif" }}
         />
+        {loading && <span style={{ fontSize: '12px', color: '#4a4438' }}>…</span>}
         {selected && (
-          <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', padding: '3px 8px', borderRadius: '4px', background: selected.purple ? 'rgba(168,117,240,0.12)' : 'rgba(232,184,75,0.08)', color: selected.purple ? '#a875f0' : '#9a8f7a', border: `1px solid ${selected.purple ? 'rgba(168,117,240,0.25)' : 'rgba(232,184,75,0.15)'}`, whiteSpace: 'nowrap', flexShrink: 0 }}>{selected.source || 'CUSTOM'}</span>
+          <>
+            <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', padding: '3px 8px', borderRadius: '4px', background: selected.purple ? 'rgba(168,117,240,0.12)' : 'rgba(232,184,75,0.08)', color: selected.purple ? '#a875f0' : '#9a8f7a', border: `1px solid ${selected.purple ? 'rgba(168,117,240,0.25)' : 'rgba(232,184,75,0.15)'}`, whiteSpace: 'nowrap', flexShrink: 0 }}>{selected.source || 'CUSTOM'}</span>
+            <button onClick={e => { e.stopPropagation(); clear() }} style={{ background: 'none', border: 'none', color: '#4a4438', cursor: 'pointer', fontSize: '16px', padding: '0 2px', flexShrink: 0 }}>×</button>
+          </>
         )}
       </div>
 
       {open && (
-        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, background: 'var(--bg2)', border: '1px solid rgba(232,184,75,0.18)', borderRadius: '12px', boxShadow: '0 24px 64px rgba(0,0,0,0.8)', zIndex: 300, maxHeight: '320px', overflowY: 'auto' }}>
-          {!query && <div style={{ padding: '10px 14px 6px', fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1px' }}>POPULAR ITEMS</div>}
-          {filtered.map((item, i) => {
-            const used = existingNames.includes(item.name)
-            const isOnBoard = boardTiles.find(t => t.name === item.name)
+        <div style={{ position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, background: 'var(--bg2)', border: '1px solid rgba(232,184,75,0.18)', borderRadius: '12px', boxShadow: '0 24px 64px rgba(0,0,0,0.8)', zIndex: 300, maxHeight: '340px', overflowY: 'auto' }}>
+          {!query && <div style={{ padding: '10px 14px 6px', fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1px' }}>POPULAR BINGO ITEMS · type to search all OSRS items</div>}
+          {query.length >= 2 && wikiResults.length === 0 && !loading && <div style={{ padding: '10px 14px 6px', fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438' }}>SEARCHING CURATED LIST</div>}
+          {displayItems.map((item, i) => {
+            const onBoard = boardNames.has(item.name.toLowerCase())
             return (
-              <div key={i} onClick={() => !used && pick(item)}
-                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', cursor: used ? 'default' : 'pointer', opacity: used ? 0.4 : 1, borderBottom: '1px solid rgba(232,184,75,0.04)', transition: 'background .1s' }}
-                onMouseEnter={e => { if (!used) (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
+              <div key={i} onClick={() => pick(item)}
+                style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid rgba(232,184,75,0.04)', transition: 'background .1s', background: 'none' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'none' }}>
-                {item.sprite ? (
-                  <img src={item.sprite} alt={item.name} style={{ width: '32px', height: '32px', objectFit: 'contain', imageRendering: 'pixelated', flexShrink: 0 }} onError={e => (e.currentTarget.style.display = 'none')} />
-                ) : (
-                  <div style={{ width: '32px', height: '32px', background: 'rgba(232,184,75,0.06)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>⭐</div>
-                )}
+                <img src={item.sprite} alt={item.name} style={{ width: '32px', height: '32px', objectFit: 'contain', imageRendering: 'pixelated', flexShrink: 0 }} onError={e => { (e.currentTarget as HTMLImageElement).style.opacity = '0.15' }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: used ? '#4a4438' : 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
+                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
                   {item.source && <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', marginTop: '2px' }}>{item.source}</div>}
                 </div>
                 <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexShrink: 0 }}>
                   {item.purple && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#a875f0', padding: '2px 6px', borderRadius: '3px', background: 'rgba(168,117,240,0.1)', border: '1px solid rgba(168,117,240,0.2)' }}>PURPLE</span>}
-                  {used && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438' }}>ON BOARD</span>}
-                  {isOnBoard && !used && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4b9ef0', padding: '2px 6px', borderRadius: '3px', background: 'rgba(75,158,240,0.08)', border: '1px solid rgba(75,158,240,0.15)' }}>USED</span>}
+                  {onBoard && <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4b9ef0', padding: '2px 6px', borderRadius: '3px', background: 'rgba(75,158,240,0.08)', border: '1px solid rgba(75,158,240,0.15)' }}>ON BOARD</span>}
                 </div>
               </div>
             )
           })}
-          {query && !allItems.find(i => i.name.toLowerCase() === query.toLowerCase()) && (
+          {/* Always allow custom */}
+          {query && !CURATED.find(i => i.name.toLowerCase() === query.toLowerCase()) && (
             <div onClick={() => pick({ name: query, source: '', purple: false, sprite: W(query) })}
               style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', cursor: 'pointer', borderTop: '1px solid rgba(232,184,75,0.08)' }}
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface)' }}
@@ -205,7 +359,7 @@ function ItemSearchDropdown({ onSelect, existingNames, boardTiles }: {
               <div style={{ width: '32px', height: '32px', background: 'rgba(232,184,75,0.08)', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', flexShrink: 0 }}>+</div>
               <div>
                 <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: '#e8b84b' }}>Add "{query}" as custom tile</div>
-                <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', marginTop: '2px' }}>CUSTOM ITEM · OSRS wiki sprite will be used</div>
+                <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', marginTop: '2px' }}>OSRS wiki sprite auto-loaded</div>
               </div>
             </div>
           )}
@@ -271,7 +425,7 @@ function AddTilePanel({ position, eventId, existingNames, boardTiles, onClose, o
           <>
             <div>
               <div style={label}>SEARCH ITEM</div>
-              <ItemSearchDropdown onSelect={handleSelect} existingNames={existingNames} boardTiles={boardTiles} />
+              <ItemSearchDropdown onSelect={handleSelect} takenPositions={new Set()} boardTiles={boardTiles} />
             </div>
 
             {selectedItem && (
@@ -337,91 +491,100 @@ function BoardTab({ tiles, eventId, isOwner }: { tiles: any[]; eventId: string; 
 
   return (
     <div style={{ display: 'flex', flex: 1, minHeight: 0, overflow: 'hidden' }}>
-      {/* Main scrollable area */}
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '32px 40px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px', gap: '16px' }}>
-          <div>
-            <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '24px', letterSpacing: '-0.5px', color: 'var(--text)', marginBottom: '6px' }}>Bingo Board</h2>
-            <p style={{ fontSize: '14px', color: '#9a8f7a' }}>{tiles.length}/25 tiles placed · Click an empty cell to add a tile</p>
-          </div>
-          <div style={{ display: 'flex', gap: '10px', flexShrink: 0 }}>
-            {isOwner && tiles.length === 0 && (
-              <button onClick={() => startLoadTpl(async () => { await loadTemplate(eventId); router.refresh() })} disabled={loadingTpl}
-                style={{ ...btn('ghost') }}>
-                {loadingTpl ? 'Loading…' : '⚡ Load OSRS Template'}
-              </button>
-            )}
+      {/* Board area */}
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {/* Header */}
+        <div style={{ padding: '18px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(232,184,75,0.06)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '18px', color: 'var(--text)' }}>Bingo Board</div>
+            <div style={{ fontSize: '13px', color: '#9a8f7a' }}>
+              {tiles.length}/25 tiles
+              {selectedPos !== null ? <span style={{ color: '#e8b84b', marginLeft: '8px' }}>· editing position {selectedPos}</span> : <span style={{ marginLeft: '8px' }}>· click empty cell to add</span>}
+            </div>
             {tiles.length > 0 && tiles.length < 25 && (
-              <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438', padding: '10px 14px', border: '1px solid rgba(232,184,75,0.1)', borderRadius: '8px', display: 'flex', alignItems: 'center' }}>
-                {25 - tiles.length} SLOTS OPEN
-              </div>
+              <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6.5px', color: '#4a4438', padding: '5px 10px', border: '1px solid rgba(232,184,75,0.1)', borderRadius: '6px' }}>{25 - tiles.length} EMPTY</div>
             )}
           </div>
+          {isOwner && tiles.length === 0 && (
+            <button onClick={() => startLoadTpl(async () => { await loadTemplate(eventId); router.refresh() })} disabled={loadingTpl}
+              style={{ ...btn('gold'), padding: '10px 20px', fontSize: '13px' }}>
+              {loadingTpl ? 'Loading…' : '⚡ Load OSRS Template'}
+            </button>
+          )}
         </div>
 
-        {/* 5×5 Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '8px', maxWidth: '540px' }}>
-          {Array.from({ length: 25 }, (_, pos) => {
-            const tile = tileMap.get(pos)
-            const isSelected = selectedPos === pos
-            const isEmpty = !tile
-            return (
-              <div key={pos}
-                onClick={() => isEmpty && isOwner && setSelectedPos(pos === selectedPos ? null : pos)}
-                style={{
-                  aspectRatio: '1', borderRadius: '10px', position: 'relative',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: '4px', padding: '8px 4px 6px', overflow: 'hidden',
-                  cursor: tile ? 'default' : isOwner ? 'pointer' : 'default', transition: 'all .15s',
-                  background: tile?.free_space ? 'rgba(232,184,75,0.06)' : tile?.is_purple ? 'rgba(168,117,240,0.08)' : tile ? 'var(--surface)' : isSelected ? 'rgba(232,184,75,0.08)' : 'var(--bg3)',
-                  border: tile?.free_space ? '1px solid rgba(232,184,75,0.3)' : tile?.is_purple ? '1px solid rgba(168,117,240,0.3)' : tile ? '1px solid rgba(255,255,255,0.06)' : isSelected ? '2px dashed rgba(232,184,75,0.6)' : '1px dashed rgba(255,255,255,0.06)',
-                  boxShadow: isSelected ? '0 0 0 3px rgba(232,184,75,0.15)' : 'none',
-                }}>
-                {tile ? (
-                  <>
-                    {tile.is_purple && <div style={{ position: 'absolute', top: '4px', left: '4px', width: '5px', height: '5px', background: '#a875f0', borderRadius: '1px', boxShadow: '0 0 4px #a875f0' }} />}
-                    {tile.source_raid && (
-                      <div style={{ position: 'absolute', top: '3px', right: '3px', fontFamily: "'Press Start 2P',monospace", fontSize: '4px', color: '#4a4438', padding: '1px 3px' }}>{tile.source_raid}</div>
-                    )}
-                    {tile.sprite_url ? (
-                      <img src={tile.sprite_url} alt={tile.name} style={{ width: '50%', height: '50%', objectFit: 'contain', imageRendering: 'pixelated' }} onError={e => (e.currentTarget.style.display = 'none')} />
-                    ) : tile.free_space ? (
-                      <span style={{ fontSize: '20px' }}>⭐</span>
-                    ) : null}
-                    <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5px', color: tile.free_space ? '#e8b84b' : '#9a8f7a', textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>
-                      {tile.free_space ? 'FREE' : tile.name.split(' ').slice(0, 2).join(' ')}
+        {/* Centered grid */}
+        <div style={{ flex: 1, display: 'flex', alignItems: tiles.length === 0 ? 'center' : 'flex-start', justifyContent: 'center', padding: '32px', paddingTop: tiles.length > 0 ? '28px' : '32px' }}>
+          {tiles.length === 0 ? (
+            <div style={{ textAlign: 'center', maxWidth: '380px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '20px' }}>🎯</div>
+              <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '24px', color: 'var(--text)', marginBottom: '10px' }}>Board is empty</div>
+              <p style={{ color: '#9a8f7a', fontSize: '14px', lineHeight: 1.7, marginBottom: '28px' }}>Load the full OSRS bingo template instantly, or click any cell in the grid below to build your own board from scratch.</p>
+              {isOwner && (
+                <button onClick={() => startLoadTpl(async () => { await loadTemplate(eventId); router.refresh() })} disabled={loadingTpl}
+                  style={{ ...btn('gold'), padding: '14px 32px', fontSize: '15px' }}>
+                  {loadingTpl ? 'Loading…' : '⚡ Load OSRS Template'}
+                </button>
+              )}
+              {/* Show grid even when empty so cells are clickable */}
+              <div style={{ marginTop: '32px', display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '8px', maxWidth: '380px' }}>
+                {Array.from({ length: 25 }, (_, pos) => {
+                  const isSelected = selectedPos === pos
+                  return (
+                    <div key={pos}
+                      onClick={() => isOwner && setSelectedPos(pos === selectedPos ? null : pos)}
+                      style={{ aspectRatio: '1', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: isOwner ? 'pointer' : 'default', transition: 'all .15s', background: isSelected ? 'rgba(232,184,75,0.08)' : 'var(--bg3)', border: isSelected ? '2px dashed rgba(232,184,75,0.5)' : '1px dashed rgba(255,255,255,0.05)', boxShadow: isSelected ? '0 0 0 2px rgba(232,184,75,0.12)' : 'none' }}>
+                      <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: isSelected ? '8px' : '6px', color: isSelected ? '#e8b84b' : '#2a2520' }}>{isSelected ? '+ ADD' : pos}</div>
                     </div>
-                    {isOwner && (
-                      <button onClick={e => handleRemove(tile.id, e)} disabled={removing}
-                        style={{ position: 'absolute', top: '3px', right: tile.source_raid ? '24px' : '3px', width: '16px', height: '16px', background: 'rgba(232,85,85,0.8)', border: 'none', borderRadius: '4px', color: 'white', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900 }}>
-                        ×
-                      </button>
+                  )
+                })}
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '10px', width: '100%', maxWidth: '680px' }}>
+              {Array.from({ length: 25 }, (_, pos) => {
+                const tile = tileMap.get(pos)
+                const isSelected = selectedPos === pos
+                return (
+                  <div key={pos}
+                    onClick={() => !tile && isOwner && setSelectedPos(pos === selectedPos ? null : pos)}
+                    className="tile-cell"
+                    style={{ aspectRatio: '1', borderRadius: '12px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '10px 6px 8px', overflow: 'hidden', cursor: !tile && isOwner ? 'pointer' : 'default', transition: 'all .15s',
+                      background: tile?.free_space ? 'rgba(232,184,75,0.06)' : tile?.is_purple ? 'rgba(168,117,240,0.08)' : tile ? 'var(--surface)' : isSelected ? 'rgba(232,184,75,0.07)' : 'var(--bg3)',
+                      border: tile?.free_space ? '1px solid rgba(232,184,75,0.3)' : tile?.is_purple ? '1px solid rgba(168,117,240,0.3)' : tile ? '1px solid rgba(255,255,255,0.07)' : isSelected ? '2px dashed rgba(232,184,75,0.5)' : '1px dashed rgba(255,255,255,0.05)',
+                      boxShadow: isSelected ? '0 0 0 3px rgba(232,184,75,0.12)' : 'none',
+                    }}>
+                    {tile ? (
+                      <>
+                        {tile.is_purple && <div style={{ position: 'absolute', top: '6px', left: '6px', width: '6px', height: '6px', background: '#a875f0', borderRadius: '1px', boxShadow: '0 0 5px #a875f0' }} />}
+                        {isOwner && (
+                          <button onClick={e => handleRemove(tile.id, e)} disabled={removing} title="Remove"
+                            style={{ position: 'absolute', top: '5px', right: '5px', width: '18px', height: '18px', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(232,85,85,0.4)', borderRadius: '50%', color: '#e85555', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, opacity: 0, transition: 'opacity .15s', zIndex: 5 }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '1' }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0' }}
+                          >×</button>
+                        )}
+                        {tile.sprite_url ? (
+                          <img src={tile.sprite_url} alt={tile.name} style={{ width: '52%', height: '52%', objectFit: 'contain', imageRendering: 'pixelated', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.8))' }} onError={e => (e.currentTarget.style.display = 'none')} />
+                        ) : tile.free_space ? <span style={{ fontSize: '26px' }}>⭐</span> : null}
+                        <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '5px', color: tile.free_space ? '#e8b84b' : tile.is_purple ? '#c4a0f5' : '#9a8f7a', textAlign: 'center', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 4px' }}>
+                          {tile.free_space ? 'FREE' : tile.name.split(' ').slice(0, 2).join(' ')}
+                        </div>
+                        {tile.source_raid && !tile.free_space && (
+                          <div style={{ position: 'absolute', bottom: '4px', fontFamily: "'Press Start 2P',monospace", fontSize: '4px', color: '#4a4438' }}>{tile.source_raid}</div>
+                        )}
+                      </>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                        <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: isSelected ? '9px' : '7px', color: isSelected ? '#e8b84b' : '#2a2520', transition: 'all .15s' }}>{isSelected ? '+ ADD' : pos}</div>
+                      </div>
                     )}
-                  </>
-                ) : (
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: isSelected ? '8px' : '6px', color: isSelected ? '#e8b84b' : '#4a4438' }}>
-                      {isSelected ? '+ ADD' : pos}
-                    </div>
                   </div>
-                )}
-              </div>
-            )
-          })}
+                )
+              })}
+            </div>
+          )}
         </div>
-
-        {tiles.length === 0 && (
-          <div style={{ marginTop: '32px', padding: '40px', background: 'var(--surface)', border: '1px dashed rgba(232,184,75,0.15)', borderRadius: '14px', textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '22px', color: 'var(--text)', marginBottom: '8px' }}>Board is empty</div>
-            <p style={{ color: '#9a8f7a', fontSize: '14px', marginBottom: '24px' }}>Load the OSRS template instantly, or click any cell to build manually.</p>
-            {isOwner && (
-              <button onClick={() => startLoadTpl(async () => { await loadTemplate(eventId); router.refresh() })} disabled={loadingTpl}
-                style={{ ...btn('gold'), padding: '14px 32px', fontSize: '15px' }}>
-                {loadingTpl ? 'Loading…' : '⚡ Load OSRS Template'}
-              </button>
-            )}
-          </div>
-        )}
       </div>
 
       {selectedPos !== null && isOwner && (
@@ -430,7 +593,6 @@ function BoardTab({ tiles, eventId, isOwner }: { tiles: any[]; eventId: string; 
     </div>
   )
 }
-
 // ── TeamsTab ──────────────────────────────────────────────────────────────────
 function TeamsTab({ teams, members, eventId, isOwner }: { teams: any[]; members: any[]; eventId: string; isOwner: boolean }) {
   const [pending, startTransition] = useTransition()
