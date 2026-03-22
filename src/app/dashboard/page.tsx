@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { joinEventAction } from '@/app/actions/forms'
-import { UserMenu } from '@/components/ui/UserMenu'
+import { AppNav } from '@/components/ui/AppNav'
 import { EventCard } from '@/components/ui/EventCard'
 
 export default async function DashboardPage() {
@@ -33,7 +33,7 @@ export default async function DashboardPage() {
   if (eventIds.length > 0) {
     const { data: tiles } = await db
       .from('tiles')
-      .select('event_id, free_space, is_purple, position, sprite_url, name, tile_completions(status, team_id)')
+      .select('event_id, free_space, position, tile_completions(status, team_id)')
       .in('event_id', eventIds)
       .order('position')
     const { data: teams } = await db
@@ -65,36 +65,16 @@ export default async function DashboardPage() {
       {/* Grid */}
       <div className="fixed inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(232,184,75,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(232,184,75,0.025) 1px,transparent 1px)', backgroundSize: '48px 48px', maskImage: 'linear-gradient(to bottom, black 0%, transparent 40%)' }} />
 
-      {/* ── NAV ── matches public pages exactly */}
-      <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 48px', height: '64px',
-        background: 'rgba(12,10,8,0.88)', backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(232,184,75,0.12)',
-      }}>
-        {/* Logo */}
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,6px)', gridTemplateRows: 'repeat(3,6px)', gap: '2px' }}>
-            {[1,0,1,1,1,0,0,1,1].map((on, i) => (
-              <span key={i} style={{ display: 'block', background: on ? '#e8b84b' : 'transparent', borderRadius: '1px' }} />
-            ))}
+      <AppNav
+        displayName={displayName}
+        avatarUrl={avatarUrl}
+        context={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+            <Link href="/dashboard" style={{ fontSize: '14px', color: '#e8b84b', textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
+            <Link href="/events/new" style={{ fontSize: '14px', color: '#9a8f7a', textDecoration: 'none' }}>New Event</Link>
           </div>
-          <span style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: '20px', color: 'var(--text)', letterSpacing: '-0.5px' }}>
-            Tile<em style={{ color: '#e8b84b', fontStyle: 'normal' }}>Scape</em>
-          </span>
-        </Link>
-
-        {/* Nav links */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <Link href="/dashboard" style={{ fontSize: '14px', color: '#e8b84b', textDecoration: 'none', fontWeight: 500 }}>Dashboard</Link>
-          <Link href="/events/new" style={{ fontSize: '14px', color: '#9a8f7a', textDecoration: 'none', transition: 'color .2s' }}
-            onMouseEnter={undefined}>New Event</Link>
-        </div>
-
-        {/* User menu */}
-        <UserMenu displayName={displayName} avatarUrl={avatarUrl} />
-      </nav>
+        }
+      />
 
       <main style={{ paddingTop: '64px', position: 'relative', zIndex: 10 }}>
 

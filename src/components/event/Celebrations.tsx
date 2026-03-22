@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 // ── Toast system ───────────────────────────────────────────────────────────────
 export interface Toast {
   id: string
-  type: 'complete' | 'purple' | 'bingo' | 'undo' | 'error'
+  type: 'complete' | 'bingo' | 'undo' | 'error'
   title: string
   subtitle?: string
 }
@@ -33,10 +33,10 @@ export function ToastArea() {
   }, [])
 
   const icons: Record<Toast['type'], string> = {
-    complete: '✓', purple: '⬥', bingo: '🎉', undo: '↩', error: '!'
+    complete: '✓', bingo: '🎉', undo: '↩', error: '!'
   }
   const colors: Record<Toast['type'], string> = {
-    complete: '#3ecf74', purple: '#a875f0', bingo: '#e8b84b', undo: '#9a8f7a', error: '#e85555'
+    complete: '#3ecf74', bingo: '#e8b84b', undo: '#9a8f7a', error: '#e85555'
   }
 
   return (

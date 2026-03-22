@@ -134,7 +134,7 @@ export default async function ResultsPage({ params }: { params: { id: string } }
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 <Avatar src={mvp.user?.avatar_url} name={mvp.user?.display_name ?? '?'} size={52} color={mvpTeam?.color ?? '#e8b84b'} />
                 <div>
-                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '20px', color: '#f0e8d8', marginBottom: '4px' }}>{mvp.user?.display_name}</div>
+                  <Link href={`/profile/${mvp.user?.id}`} style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '20px', color: '#f0e8d8', textDecoration: 'none' }}>{mvp.user?.display_name}</Link>
                   <div style={{ fontSize: '13px', color: '#9a8f7a' }}>{mvp.count} tile{mvp.count !== 1 ? 's' : ''} completed</div>
                   {mvpTeam && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>

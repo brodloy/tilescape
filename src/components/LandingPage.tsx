@@ -240,9 +240,9 @@ export function LandingPage() {
       {/* SOCIAL PROOF */}
       <div className="proof-bar">
         {[
-          {num:'2,400+',label:'Active Clans'},
-          {num:'18k+',label:'Members Tracked'},
-          {num:'94k+',label:'Tiles Completed'},
+          {num:'Early',label:'Access'},
+          {num:'Free',label:'To Use'},
+          {num:'OSRS',label:'Clan Bingo'},
           {num:'6,500+',label:'Events Hosted'},
         ].map((s,i) => (
           <div key={i} style={{display:'contents'}}>
@@ -319,7 +319,7 @@ export function LandingPage() {
         <div className="cta-inner">
           <span className="cta-pixel-label">⚔ Join the Early Access</span>
           <h2 className="cta-title">Ready to run<br/>your best bingo?</h2>
-          <p className="cta-sub">Join 2,400+ clans already tracking their events on TileScape.</p>
+          <p className="cta-sub">The OSRS clan bingo tracker built for serious clans.</p>
           <Link href="/login" className="btn-hero-primary" style={{fontSize:'16px',padding:'16px 40px',display:'inline-block'}}>Create Your Clan Board →</Link>
         </div>
       </section>

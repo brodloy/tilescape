@@ -574,7 +574,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
             <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {/* Sprite */}
               <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <div style={{ width: '96px', height: '96px', borderRadius: '16px', border: `1px solid ${selectedTile.is_purple ? 'rgba(168,117,240,0.3)' : 'rgba(232,184,75,0.15)'}`, background: selectedTile.is_purple ? 'rgba(168,117,240,0.08)' : 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: selectedTile.is_purple ? '0 0 24px rgba(168,117,240,0.15)' : 'none' }}>
+                <div style={{ width: '96px', height: '96px', borderRadius: '16px', border: '1px solid rgba(232,184,75,0.15)', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <img src={selectedTile.sprite_url || W(selectedTile.name)} alt={selectedTile.name}
                     style={{ width: '64px', height: '64px', objectFit: 'contain', imageRendering: 'pixelated', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.9))' }} />
                 </div>

@@ -18,7 +18,10 @@ export function LoginClient() {
     const supabase = createClient()
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'discord',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: { next: new URLSearchParams(window.location.search).get('redirectTo') ?? '/dashboard' },
+      },
     })
     if (error || !data?.url) {
       setLoading(false)

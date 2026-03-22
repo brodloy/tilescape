@@ -152,7 +152,7 @@ async function fireDiscordWebhook(
 
     const { data: completion } = await db
       .from('tile_completions')
-      .select(`proof_url, tiles(name, is_purple, source_raid), teams(name, color), users!submitted_by(display_name)`)
+      .select(`proof_url, tiles(name, sprite_url), teams(name, color), users!submitted_by(display_name)`)
       .eq('id', completionId)
       .single()
 

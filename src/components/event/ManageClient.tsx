@@ -781,7 +781,7 @@ function MembersTab({ members, teams, eventId, isOwner, currentUserId }: { membe
               <Avatar src={usr?.avatar_url} name={usr?.display_name ?? '?'} color={team?.color ?? '#e8b84b'} size={42} />
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-                  <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '16px', color: isMe ? '#e8b84b' : 'var(--text)' }}>{usr?.display_name}</span>
+                  <Link href={`/profile/${usr?.id}`} style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '16px', color: isMe ? '#e8b84b' : 'var(--text)', textDecoration: 'none' }}>{usr?.display_name}</Link>
                   {m.role === 'owner' && <Tag label="OWNER" color="#7a5c1e" bg="rgba(232,184,75,0.08)" border="rgba(232,184,75,0.2)" />}
                   {m.role === 'moderator' && <Tag label="MOD" color="#4b9ef0" bg="rgba(75,158,240,0.08)" border="rgba(75,158,240,0.2)" />}
                   {isMe && <Tag label="YOU" color="#4a4438" bg="transparent" border="transparent" />}

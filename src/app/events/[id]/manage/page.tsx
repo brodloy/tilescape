@@ -10,7 +10,7 @@ export default async function ManagePage({ params }: { params: { id: string } })
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: event } = await db.from('events').select('*, prize_pool').eq('id', params.id).single()
+  const { data: event } = await db.from('events').select('*').eq('id', params.id).single()
   if (!event) notFound()
 
   const { data: membership } = await db
