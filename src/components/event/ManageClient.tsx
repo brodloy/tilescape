@@ -9,6 +9,7 @@ import {
   addTeamAction, removeTeam, assignTeam, toggleMod, saveWebhook,
   goLive, endEvent,
 } from '@/app/actions/forms'
+import { updateTile } from '@/app/actions/tiles'
 import { deleteEventVoid } from '@/app/actions/deleteEvent'
 
 // ── OSRS catalogue ────────────────────────────────────────────────────────────
@@ -370,16 +371,25 @@ function ItemSearchDropdown({ onSelect, takenPositions, boardTiles }: {
 }
 
 // ── AddTilePanel ──────────────────────────────────────────────────────────────
-function AddTilePanel({ position, eventId, existingNames, boardTiles, onClose, onDone }: {
-  position: number; eventId: string; existingNames: string[]; boardTiles: any[]; onClose: () => void; onDone: () => void
+function TilePanel({ position, existingTile, eventId, boardTiles, onClose, onDone }: {
+  position: number; existingTile: any | null; eventId: string
+  boardTiles: any[]; onClose: () => void; onDone: () => void
 }) {
+  const isEdit = !!existingTile
   const [pending, startTransition] = useTransition()
-  const [selectedItem, setSelectedItem] = useState<OsrsItem | null>(null)
-  const [isFree, setIsFree] = useState(false)
-  const [isPurple, setIsPurple] = useState(false)
-  const [source, setSource] = useState('')
+  const [deleting, startDelete] = useTransition()
+  const [selectedItem, setSelectedItem] = useState<OsrsItem | null>(
+    isEdit && !existingTile.free_space ? {
+      name: existingTile.name, source: existingTile.source_raid ?? '',
+      purple: existingTile.is_purple ?? false, sprite: existingTile.sprite_url ?? W(existingTile.name),
+    } : null
+  )
+  const [isFree, setIsFree] = useState(isEdit ? !!existingTile.free_space : false)
+  const [isPurple, setIsPurple] = useState(isEdit ? !!existingTile.is_purple : false)
+  const [source, setSource] = useState(isEdit ? (existingTile.source_raid ?? '') : '')
 
   function handleSelect(item: OsrsItem) {
+    if (!item.name) { setSelectedItem(null); return }
     setSelectedItem(item); setIsPurple(item.purple); setSource(item.source)
   }
 
@@ -387,34 +397,70 @@ function AddTilePanel({ position, eventId, existingNames, boardTiles, onClose, o
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
     fd.set('position', String(position))
-    if (isFree) { fd.set('name', 'FREE'); fd.set('free_space', 'true') }
-    else {
-      if (!selectedItem) return
+    if (isFree) {
+      fd.set('name', 'FREE'); fd.set('free_space', 'true'); fd.set('sprite_url', ''); fd.set('is_purple', 'false')
+    } else {
+      if (!selectedItem?.name) return
       fd.set('name', selectedItem.name)
-      if (selectedItem.sprite) fd.set('sprite_url', selectedItem.sprite)
+      fd.set('sprite_url', selectedItem.sprite || W(selectedItem.name))
     }
-    startTransition(async () => { await addTileAction(eventId, fd); onDone() })
+    startTransition(async () => {
+      if (isEdit) await updateTile(existingTile.id, eventId, fd)
+      else await addTileAction(eventId, fd)
+      onDone()
+    })
   }
 
+  function handleDelete() {
+    if (!existingTile) return
+    startDelete(async () => { await removeTile(existingTile.id, eventId); onDone() })
+  }
+
+  const canSubmit = isFree || !!selectedItem?.name
+
   return (
-    <div style={{ background: 'var(--bg2)', borderLeft: '1px solid rgba(232,184,75,0.12)', display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+    <div style={{ background: 'var(--bg2)', borderLeft: '1px solid rgba(232,184,75,0.12)', display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', width: '400px', flexShrink: 0 }}>
+      {/* Header */}
       <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(232,184,75,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, background: 'var(--bg2)', zIndex: 10 }}>
         <div>
-          <div style={label}>ADD TILE · POSITION {position}</div>
-          <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '20px', color: 'var(--text)' }}>Choose an Item</div>
+          <div style={label}>{isEdit ? 'EDIT TILE' : 'ADD TILE'} · POSITION {position}</div>
+          <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '20px', color: 'var(--text)' }}>
+            {isEdit ? (existingTile.free_space ? 'Free Space ⭐' : existingTile.name) : 'Choose an Item'}
+          </div>
         </div>
-        <button onClick={onClose} style={{ width: '36px', height: '36px', background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.12)', borderRadius: '8px', color: '#9a8f7a', cursor: 'pointer', fontSize: '18px' }}>×</button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          {isEdit && (
+            <button onClick={handleDelete} disabled={deleting}
+              style={{ height: '36px', padding: '0 14px', background: 'rgba(232,85,85,0.08)', border: '1px solid rgba(232,85,85,0.25)', borderRadius: '8px', color: '#e85555', cursor: 'pointer', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px' }}>
+              {deleting ? '…' : 'Remove'}
+            </button>
+          )}
+          <button onClick={onClose} style={{ width: '36px', height: '36px', background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.12)', borderRadius: '8px', color: '#9a8f7a', cursor: 'pointer', fontSize: '18px' }}>×</button>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Edit mode — show current tile */}
+      {isEdit && !existingTile.free_space && existingTile.sprite_url && (
+        <div style={{ padding: '20px 24px 4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 16px', background: existingTile.is_purple ? 'rgba(168,117,240,0.06)' : 'var(--surface)', border: `2px solid ${existingTile.is_purple ? 'rgba(168,117,240,0.3)' : 'rgba(232,184,75,0.12)'}`, borderRadius: '12px' }}>
+            <img src={existingTile.sprite_url} alt={existingTile.name} style={{ width: '52px', height: '52px', objectFit: 'contain', imageRendering: 'pixelated', flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '15px', color: existingTile.is_purple ? '#a875f0' : 'var(--text)', marginBottom: '3px' }}>{existingTile.name}</div>
+              {existingTile.source_raid && <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438' }}>{existingTile.source_raid}</div>}
+            </div>
+          </div>
+          <div style={{ fontSize: '12px', color: '#4a4438', padding: '8px 2px 0' }}>Search below to replace with a different item</div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <input type="hidden" name="position" value={position} />
         <input type="hidden" name="is_purple" value={isPurple ? 'true' : 'false'} />
         <input type="hidden" name="source_raid" value={source} />
-        <input type="hidden" name="points" value="1" />
 
-        {/* Free space toggle */}
-        <label style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', padding: '16px', background: isFree ? 'rgba(232,184,75,0.06)' : 'var(--surface)', border: `1px solid ${isFree ? 'rgba(232,184,75,0.3)' : 'rgba(232,184,75,0.1)'}`, borderRadius: '12px', transition: 'all .15s' }}>
-          <input type="checkbox" checked={isFree} onChange={e => setIsFree(e.target.checked)} style={{ accentColor: '#e8b84b', width: '18px', height: '18px', flexShrink: 0 }} />
+        {/* Free space */}
+        <label style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', padding: '14px 16px', background: isFree ? 'rgba(232,184,75,0.06)' : 'var(--surface)', border: `1px solid ${isFree ? 'rgba(232,184,75,0.3)' : 'rgba(232,184,75,0.1)'}`, borderRadius: '12px', transition: 'all .15s' }}>
+          <input type="checkbox" checked={isFree} onChange={e => { setIsFree(e.target.checked); if (e.target.checked) setSelectedItem(null) }} style={{ accentColor: '#e8b84b', width: '18px', height: '18px', flexShrink: 0 }} />
           <div>
             <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '15px', color: isFree ? '#e8b84b' : 'var(--text)' }}>⭐ Free Space</div>
             <div style={{ fontSize: '13px', color: '#9a8f7a', marginTop: '2px' }}>Always completed for all teams</div>
@@ -428,18 +474,17 @@ function AddTilePanel({ position, eventId, existingNames, boardTiles, onClose, o
               <ItemSearchDropdown onSelect={handleSelect} takenPositions={new Set()} boardTiles={boardTiles} />
             </div>
 
-            {selectedItem && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: isPurple ? 'rgba(168,117,240,0.06)' : 'var(--surface)', border: `2px solid ${isPurple ? 'rgba(168,117,240,0.3)' : 'rgba(232,184,75,0.12)'}`, borderRadius: '12px' }}>
-                <img src={selectedItem.sprite} alt={selectedItem.name} style={{ width: '56px', height: '56px', objectFit: 'contain', imageRendering: 'pixelated', flexShrink: 0 }} onError={e => (e.currentTarget.style.display = 'none')} />
+            {selectedItem?.name && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px', background: isPurple ? 'rgba(168,117,240,0.06)' : 'var(--surface)', border: `2px solid ${isPurple ? 'rgba(168,117,240,0.3)' : 'rgba(232,184,75,0.15)'}`, borderRadius: '12px' }}>
+                <img src={selectedItem.sprite} alt={selectedItem.name} style={{ width: '50px', height: '50px', objectFit: 'contain', imageRendering: 'pixelated', flexShrink: 0 }} onError={e => (e.currentTarget.style.display = 'none')} />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '17px', color: isPurple ? '#a875f0' : 'var(--text)', marginBottom: '3px' }}>{selectedItem.name}</div>
-                  {source && <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438' }}>{source}</div>}
+                  <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '15px', color: isPurple ? '#a875f0' : 'var(--text)', marginBottom: '3px' }}>{selectedItem.name}</div>
+                  {source && <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438' }}>{source}</div>}
                 </div>
-                {isPurple && <div style={{ width: '10px', height: '10px', borderRadius: '2px', background: '#a875f0', boxShadow: '0 0 8px #a875f0', flexShrink: 0 }} />}
               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
                 <div style={label}>SOURCE / RAID</div>
                 <select value={source} onChange={e => setSource(e.target.value)} style={{ ...input, cursor: 'pointer' }}>
@@ -449,42 +494,43 @@ function AddTilePanel({ position, eventId, existingNames, boardTiles, onClose, o
               </div>
               <div>
                 <div style={label}>POINTS</div>
-                <input name="points" type="number" min="1" defaultValue="1" style={input} />
+                <input name="points" type="number" min="1" defaultValue={existingTile?.points ?? 1} style={input} />
               </div>
             </div>
 
-            <label style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', padding: '16px', background: isPurple ? 'rgba(168,117,240,0.06)' : 'var(--surface)', border: `1px solid ${isPurple ? 'rgba(168,117,240,0.25)' : 'rgba(232,184,75,0.1)'}`, borderRadius: '12px', transition: 'all .15s' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', padding: '14px 16px', background: isPurple ? 'rgba(168,117,240,0.06)' : 'var(--surface)', border: `1px solid ${isPurple ? 'rgba(168,117,240,0.25)' : 'rgba(232,184,75,0.1)'}`, borderRadius: '12px', transition: 'all .15s' }}>
               <input type="checkbox" checked={isPurple} onChange={e => setIsPurple(e.target.checked)} style={{ accentColor: '#a875f0', width: '18px', height: '18px', flexShrink: 0 }} />
               <div>
-                <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '15px', color: isPurple ? '#a875f0' : 'var(--text)' }}>⬥ Purple / Mega-rare Drop</div>
+                <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '15px', color: isPurple ? '#a875f0' : 'var(--text)' }}>⬥ Purple / Mega-rare</div>
                 <div style={{ fontSize: '13px', color: '#9a8f7a', marginTop: '2px' }}>Highlighted with purple glow on board</div>
               </div>
             </label>
           </>
         )}
 
-        <button type="submit" disabled={pending || (!isFree && !selectedItem)}
-          style={{ ...btn('gold'), width: '100%', padding: '14px', fontSize: '15px', opacity: (!isFree && !selectedItem) ? 0.4 : 1, cursor: (!isFree && !selectedItem) ? 'not-allowed' : 'pointer' }}>
-          {pending ? 'Adding…' : `Add Tile to Position ${position}`}
+        <button type="submit" disabled={pending || !canSubmit}
+          style={{ ...btn('gold'), width: '100%', padding: '14px', fontSize: '15px', opacity: !canSubmit ? 0.4 : 1, cursor: !canSubmit ? 'not-allowed' : 'pointer' }}>
+          {pending ? (isEdit ? 'Saving…' : 'Adding…') : isEdit ? 'Save Changes' : `Add to Position ${position}`}
         </button>
       </form>
     </div>
   )
 }
 
+
 // ── BoardTab ──────────────────────────────────────────────────────────────────
 function BoardTab({ tiles, eventId, isOwner }: { tiles: any[]; eventId: string; isOwner: boolean }) {
   const [selectedPos, setSelectedPos] = useState<number | null>(null)
-  const [removing, startRemove] = useTransition()
   const [loadingTpl, startLoadTpl] = useTransition()
   const router = useRouter()
 
   const tileMap = new Map(tiles.map(t => [t.position, t]))
   const existingNames = tiles.filter(t => !t.free_space).map(t => t.name)
+  const selectedTile = selectedPos !== null ? (tileMap.get(selectedPos) ?? null) : null
 
-  function handleRemove(tileId: string, e: React.MouseEvent) {
-    e.stopPropagation()
-    startRemove(async () => { await removeTile(tileId, eventId); router.refresh() })
+  function handleCellClick(pos: number) {
+    if (!isOwner) return
+    setSelectedPos(pos === selectedPos ? null : pos)
   }
 
   function handleDone() { setSelectedPos(null); router.refresh() }
@@ -547,22 +593,19 @@ function BoardTab({ tiles, eventId, isOwner }: { tiles: any[]; eventId: string; 
                 const isSelected = selectedPos === pos
                 return (
                   <div key={pos}
-                    onClick={() => !tile && isOwner && setSelectedPos(pos === selectedPos ? null : pos)}
-                    className="tile-cell"
-                    style={{ aspectRatio: '1', borderRadius: '12px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '10px 6px 8px', overflow: 'hidden', cursor: !tile && isOwner ? 'pointer' : 'default', transition: 'all .15s',
-                      background: tile?.free_space ? 'rgba(232,184,75,0.06)' : tile?.is_purple ? 'rgba(168,117,240,0.08)' : tile ? 'var(--surface)' : isSelected ? 'rgba(232,184,75,0.07)' : 'var(--bg3)',
-                      border: tile?.free_space ? '1px solid rgba(232,184,75,0.3)' : tile?.is_purple ? '1px solid rgba(168,117,240,0.3)' : tile ? '1px solid rgba(255,255,255,0.07)' : isSelected ? '2px dashed rgba(232,184,75,0.5)' : '1px dashed rgba(255,255,255,0.05)',
-                      boxShadow: isSelected ? '0 0 0 3px rgba(232,184,75,0.12)' : 'none',
+                    onClick={() => isOwner && handleCellClick(pos)}
+                    style={{ aspectRatio: '1', borderRadius: '12px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '10px 6px 8px', overflow: 'hidden',
+                      cursor: isOwner ? 'pointer' : 'default', transition: 'all .15s',
+                      background: isSelected ? (tile ? 'rgba(232,184,75,0.1)' : 'rgba(232,184,75,0.07)') : tile?.free_space ? 'rgba(232,184,75,0.06)' : tile?.is_purple ? 'rgba(168,117,240,0.08)' : tile ? 'var(--surface)' : 'var(--bg3)',
+                      border: isSelected ? '2px solid rgba(232,184,75,0.6)' : tile?.free_space ? '1px solid rgba(232,184,75,0.3)' : tile?.is_purple ? '1px solid rgba(168,117,240,0.3)' : tile ? '1px solid rgba(255,255,255,0.07)' : '1px dashed rgba(255,255,255,0.05)',
+                      boxShadow: isSelected ? '0 0 0 3px rgba(232,184,75,0.15)' : 'none',
                     }}>
                     {tile ? (
                       <>
                         {tile.is_purple && <div style={{ position: 'absolute', top: '6px', left: '6px', width: '6px', height: '6px', background: '#a875f0', borderRadius: '1px', boxShadow: '0 0 5px #a875f0' }} />}
-                        {isOwner && (
-                          <button onClick={e => handleRemove(tile.id, e)} disabled={removing} title="Remove"
-                            style={{ position: 'absolute', top: '5px', right: '5px', width: '18px', height: '18px', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(232,85,85,0.4)', borderRadius: '50%', color: '#e85555', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, opacity: 0, transition: 'opacity .15s', zIndex: 5 }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '1' }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0' }}
-                          >×</button>
+                        {/* Edit indicator */}
+                        {isOwner && isSelected && (
+                          <div style={{ position: 'absolute', top: '5px', right: '5px', fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#e8b84b', background: 'rgba(232,184,75,0.15)', border: '1px solid rgba(232,184,75,0.3)', borderRadius: '4px', padding: '2px 4px' }}>EDIT</div>
                         )}
                         {tile.sprite_url ? (
                           <img src={tile.sprite_url} alt={tile.name} style={{ width: '52%', height: '52%', objectFit: 'contain', imageRendering: 'pixelated', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.8))' }} onError={e => (e.currentTarget.style.display = 'none')} />
@@ -588,7 +631,7 @@ function BoardTab({ tiles, eventId, isOwner }: { tiles: any[]; eventId: string; 
       </div>
 
       {selectedPos !== null && isOwner && (
-        <AddTilePanel position={selectedPos} eventId={eventId} existingNames={existingNames} boardTiles={tiles} onClose={() => setSelectedPos(null)} onDone={handleDone} />
+        <TilePanel position={selectedPos} existingTile={selectedTile} eventId={eventId} boardTiles={tiles} onClose={() => setSelectedPos(null)} onDone={handleDone} />
       )}
     </div>
   )
