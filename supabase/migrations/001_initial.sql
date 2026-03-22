@@ -346,3 +346,26 @@ create policy "Owner can review completions"
         and em.role in ('owner', 'moderator')
     )
   );
+
+-- Team members can delete their own team's completions (for undo)
+-- Owners and moderators can delete any completion
+create policy "Members can delete own team completions"
+  on public.tile_completions for delete
+  using (
+    exists (
+      select 1 from public.tiles tl
+      join public.event_members em on em.event_id = tl.event_id
+      join public.team_members tm on tm.event_member_id = em.id
+      where tl.id = public.tile_completions.tile_id
+        and em.user_id = auth.uid()
+        and tm.team_id = public.tile_completions.team_id
+    )
+    or
+    exists (
+      select 1 from public.tiles tl
+      join public.event_members em on em.event_id = tl.event_id
+      where tl.id = public.tile_completions.tile_id
+        and em.user_id = auth.uid()
+        and em.role in ('owner', 'moderator')
+    )
+  );

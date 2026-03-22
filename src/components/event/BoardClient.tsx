@@ -544,11 +544,26 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                         <div style={{ fontSize: '12px', color: '#9a8f7a', marginTop: '2px' }}>Your team has completed this tile.</div>
                       </div>
                     </div>
+                    {submitError && <div style={{ fontSize: '13px', color: '#e85555', textAlign: 'center' }}>{submitError}</div>}
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={() => setSelectedTile(null)} style={{ flex: 1, height: '42px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '8px', color: '#9a8f7a', cursor: 'pointer' }}>Close</button>
-                      <button onClick={() => { handleQuickComplete(selectedTile); setSelectedTile(null) }} disabled={!!completingTileId}
-                        style={{ flex: 1, height: '42px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: 'none', border: '1px solid rgba(232,85,85,0.25)', borderRadius: '8px', color: '#e85555', cursor: 'pointer' }}>
-                        Undo
+                      <button
+                        onClick={async () => {
+                          setSubmitError('')
+                          setCompletingTileId(liveTile.id)
+                          const result = await uncompleteTeamTile(liveTile.id, userTeamId!)
+                          await refreshTiles()
+                          setCompletingTileId(null)
+                          if (result?.error) {
+                            setSubmitError(result.error)
+                          } else {
+                            setSelectedTile(null)
+                            showToast({ type: 'undo', title: 'Tile uncompleted', subtitle: liveTile.name })
+                          }
+                        }}
+                        disabled={!!completingTileId}
+                        style={{ flex: 1, height: '42px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: 'none', border: '1px solid rgba(232,85,85,0.25)', borderRadius: '8px', color: '#e85555', cursor: 'pointer', opacity: completingTileId ? 0.5 : 1 }}>
+                        {completingTileId === liveTile.id ? 'Undoing…' : 'Undo'}
                       </button>
                     </div>
                   </div>

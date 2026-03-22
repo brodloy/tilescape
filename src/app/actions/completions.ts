@@ -247,8 +247,26 @@ export async function uncompleteTeamTile(tileId: string, teamId: string) {
   const { data: tile } = await db.from('tiles').select('event_id').eq('id', tileId).single()
   if (!tile) return { error: 'Tile not found' }
 
-  await db.from('tile_completions')
-    .delete().eq('tile_id', tileId).eq('team_id', teamId)
+  // Verify user is a member of this event and on this team
+  const { data: member } = await db
+    .from('event_members').select('id, role')
+    .eq('event_id', tile.event_id).eq('user_id', user.id).single()
+  if (!member) return { error: 'Not a member of this event' }
+
+  const { data: teamMembership } = await db
+    .from('team_members').select('id')
+    .eq('team_id', teamId).eq('event_member_id', member.id).single()
+  if (!teamMembership) return { error: 'Not on this team' }
+
+  // Use admin client to bypass RLS on delete
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const admin = createAdminClient() as any
+  const { error } = await admin.from('tile_completions')
+    .delete()
+    .eq('tile_id', tileId)
+    .eq('team_id', teamId)
+
+  if (error) return { error: error.message }
 
   revalidatePath(`/events/${tile.event_id}`)
   return { success: true }
