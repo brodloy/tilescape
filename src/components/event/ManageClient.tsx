@@ -8,7 +8,7 @@ import { useLockBodyScroll } from '@/hooks/useLockBodyScroll'
 import { Avatar } from '@/components/ui/Avatar'
 import {
   loadTemplate, removeTile, addTileAction,
-  addTeamAction, removeTeam, assignTeam, toggleMod, saveWebhook, savePrizePool,
+  addTeamAction, removeTeam, assignTeam, toggleMod, saveWebhook, savePrizePool, saveRequireProof,
   goLive, endEvent,
 } from '@/app/actions/forms'
 import { updateTile } from '@/app/actions/tiles'
@@ -785,6 +785,7 @@ function SettingsTab({ event, eventId, isOwner }: { event: any; eventId: string;
   const [deleting, startDelete] = useTransition()
   const [webhook, setWebhook] = useState(event.discord_webhook_url ?? '')
   const [prizePool, setPrizePool] = useState(event.prize_pool ? String(event.prize_pool) : '')
+  const [requireProof, setRequireProof] = useState<boolean>(event.require_proof ?? false)
   const [saved, setSaved] = useState(false)
   const [prizeSaved, setPrizeSaved] = useState(false)
   const router = useRouter()
@@ -846,6 +847,28 @@ function SettingsTab({ event, eventId, isOwner }: { event: any; eventId: string;
             )}
           </div>
         </div>
+
+        {/* Proof Required */}
+        {isOwner && (
+          <div style={{ ...card }}>
+            <div style={{ padding: '18px 24px', borderBottom: '1px solid rgba(232,184,75,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '17px', color: 'var(--text)', marginBottom: '3px' }}>Require Proof</div>
+                <div style={{ fontSize: '13px', color: '#9a8f7a' }}>Players must submit a screenshot URL to complete a tile</div>
+              </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', flexShrink: 0, marginLeft: '20px' }}>
+                <div
+                  onClick={() => { const next = !requireProof; setRequireProof(next); startTransition(async () => { await saveRequireProof(eventId, next) }) }}
+                  style={{ width: '44px', height: '24px', borderRadius: '12px', background: requireProof ? '#e8b84b' : 'var(--bg3)', border: `1px solid ${requireProof ? '#e8b84b' : 'rgba(255,255,255,0.1)'}`, position: 'relative', cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}>
+                  <div style={{ position: 'absolute', top: '3px', left: requireProof ? '23px' : '3px', width: '16px', height: '16px', borderRadius: '50%', background: requireProof ? '#0c0a08' : '#4a4438', transition: 'left .2s', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }} />
+                </div>
+                <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: requireProof ? '#e8b84b' : '#4a4438' }}>
+                  {requireProof ? 'ON' : 'OFF'}
+                </span>
+              </label>
+            </div>
+          </div>
+        )}
 
         {/* Prize Pool */}
         {isOwner && (

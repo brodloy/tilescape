@@ -128,6 +128,12 @@ export function EventCard({ event, stats, isOwner, teams = [] }: {
                 Manage
               </Link>
             )}
+            {isEnded && (
+              <Link href={`/events/${event.id}/results`} onClick={e => e.stopPropagation()}
+                style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px', padding: '8px 14px', borderRadius: '7px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', color: '#9a8f7a', textDecoration: 'none' }}>
+                Results
+              </Link>
+            )}
             {isOwner && (
               <button onClick={handleDelete} disabled={deleting}
                 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px', padding: '8px 14px', borderRadius: '7px', background: 'none', border: '1px solid rgba(232,85,85,0.2)', color: deleting ? '#4a4438' : '#e85555', cursor: deleting ? 'not-allowed' : 'pointer' }}>

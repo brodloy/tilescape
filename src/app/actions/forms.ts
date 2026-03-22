@@ -350,3 +350,13 @@ export async function savePrizePool(eventId: string, formData: FormData) {
   revalidatePath(`/events/${eventId}`)
   revalidatePath('/dashboard')
 }
+
+export async function saveRequireProof(eventId: string, requireProof: boolean) {
+  const supabase = await createClient()
+  const db = supabase as any
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await db.from('events').update({ require_proof: requireProof }).eq('id', eventId)
+  revalidatePath(`/events/${eventId}/manage`)
+  revalidatePath(`/events/${eventId}`)
+}

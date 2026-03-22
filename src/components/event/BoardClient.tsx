@@ -28,7 +28,8 @@ interface Props {
   event: any; initialTiles: any[]; teams: any[]; members: any[]
   pendingSubmissions: any[]; userTeamId: string | null
   isOwnerOrMod: boolean; isOwner: boolean
-  displayName: string; avatarUrl: string | null; eventId: string
+  displayName: string; avatarUrl: string | null
+  requireProof: boolean; eventId: string
 }
 
 function calcBingos(tiles: any[], teamId: string) {
@@ -45,7 +46,7 @@ function calcBingos(tiles: any[], teamId: string) {
   return lines.filter(l => l.every(check)).length
 }
 
-export function BoardClient({ event, initialTiles, teams, members, pendingSubmissions, userTeamId, isOwnerOrMod, isOwner, displayName, avatarUrl, eventId }: Props) {
+export function BoardClient({ event, initialTiles, teams, members, pendingSubmissions, userTeamId, isOwnerOrMod, isOwner, displayName, avatarUrl, requireProof, eventId }: Props) {
   const [tiles, setTiles] = useState(initialTiles)
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
   useLockBodyScroll()
@@ -63,20 +64,38 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
   const router = useRouter()
   const supabase = createClient()
 
+  const prevTilesRef = useRef<any[]>([])
+
   const refreshTiles = useCallback(async () => {
     const db = supabase as any
     const { data } = await db.from('tiles')
-      .select('*, tile_completions(id, status, proof_url, submitted_at, team_id, users!submitted_by(display_name))')
+      .select('*, tile_completions(id, status, proof_url, submitted_at, team_id, users!submitted_by(id, display_name))')
       .eq('event_id', eventId).order('position')
     if (data) setTiles(data)
   }, [eventId, supabase])
 
   useEffect(() => {
     const channel = supabase.channel(`board-${eventId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'tile_completions',
+        filter: `status=eq.approved` },
+        async (payload: any) => {
+          await refreshTiles()
+          // Show teammate toast if it's someone else on our team
+          if (!userTeamId || payload.new.team_id !== userTeamId) return
+          const db = supabase as any
+          const { data: submitter } = await db.from('users').select('id, display_name').eq('id', payload.new.submitted_by).single()
+          const { data: tile } = await db.from('tiles').select('name').eq('id', payload.new.tile_id).single()
+          // Don't toast for our own completions
+          const { data: { user } } = await supabase.auth.getUser()
+          if (submitter?.id === user?.id) return
+          if (submitter && tile) {
+            showToast({ type: 'complete', title: `${submitter.display_name} got a tile!`, subtitle: tile.name })
+          }
+        })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tile_completions' }, () => refreshTiles())
       .subscribe(status => setConnected(status === 'SUBSCRIBED'))
     return () => { supabase.removeChannel(channel) }
-  }, [eventId, supabase, refreshTiles])
+  }, [eventId, supabase, refreshTiles, userTeamId])
 
   // Check for new bingos after tiles update
   useEffect(() => {
@@ -192,6 +211,9 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
 
   const navActions = (
     <div style={{ display: 'flex', gap: '8px' }}>
+      <Link href={`/events/${eventId}/results`} style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px', padding: '7px 16px', borderRadius: '8px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', color: '#9a8f7a', textDecoration: 'none' }}>
+        Results
+      </Link>
       {isOwner && event.status === 'draft' && (
         <button onClick={handleGoLive} disabled={pending} style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px', padding: '7px 16px', borderRadius: '8px', background: '#e8b84b', color: '#0c0a08', border: 'none', cursor: 'pointer', boxShadow: '0 0 16px rgba(232,184,75,0.2)' }}>
           🟢 Go Live
@@ -592,22 +614,52 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                   </div>
                 )
 
-                // Not completed — show Mark as Completed
+                // Not completed — show Mark as Completed OR proof form
                 return (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {submitError && <div style={{ fontSize: '13px', color: '#e85555', textAlign: 'center' }}>{submitError}</div>}
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button onClick={() => setSelectedTile(null)}
-                        style={{ flex: 1, height: '48px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '10px', color: '#9a8f7a', cursor: 'pointer' }}>
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => { handleQuickComplete(selectedTile); setSelectedTile(null) }}
-                        disabled={!!completingTileId}
-                        style={{ flex: 2, height: '48px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '15px', background: selectedTile.is_purple ? '#a875f0' : '#e8b84b', border: 'none', borderRadius: '10px', color: '#0c0a08', cursor: completingTileId ? 'not-allowed' : 'pointer', boxShadow: `0 0 24px ${selectedTile.is_purple ? 'rgba(168,117,240,0.25)' : 'rgba(232,184,75,0.25)'}`, opacity: completingTileId ? 0.6 : 1 }}>
-                        {completingTileId ? 'Completing…' : '✓ Mark as Completed'}
-                      </button>
-                    </div>
+
+                    {requireProof ? (
+                      // Proof required mode — show URL input
+                      <>
+                        <div>
+                          <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#6a5c3e', letterSpacing: '1px', marginBottom: '8px' }}>SCREENSHOT URL</div>
+                          <input
+                            type="url"
+                            value={proofUrl}
+                            onChange={e => setProofUrl(e.target.value)}
+                            placeholder="https://imgur.com/..."
+                            style={{ width: '100%', height: '44px', padding: '0 14px', background: 'var(--bg3)', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '8px', color: 'var(--text)', fontSize: '14px', outline: 'none', fontFamily: "'DM Sans',sans-serif" }}
+                            onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+                          />
+                          <div style={{ fontSize: '12px', color: '#4a4438', marginTop: '6px' }}>Paste a link to your screenshot (Imgur, Discord CDN, etc.)</div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => setSelectedTile(null)}
+                            style={{ flex: 1, height: '48px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '10px', color: '#9a8f7a', cursor: 'pointer' }}>
+                            Cancel
+                          </button>
+                          <button onClick={handleSubmit} disabled={submitting || !proofUrl.trim()}
+                            style={{ flex: 2, height: '48px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '15px', background: '#e8b84b', border: 'none', borderRadius: '10px', color: '#0c0a08', cursor: (submitting || !proofUrl.trim()) ? 'not-allowed' : 'pointer', opacity: (submitting || !proofUrl.trim()) ? 0.5 : 1 }}>
+                            {submitting ? 'Submitting…' : '↑ Submit for Review'}
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      // Quick complete mode
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={() => setSelectedTile(null)}
+                          style={{ flex: 1, height: '48px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '10px', color: '#9a8f7a', cursor: 'pointer' }}>
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => { handleQuickComplete(selectedTile); setSelectedTile(null) }}
+                          disabled={!!completingTileId}
+                          style={{ flex: 2, height: '48px', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '15px', background: '#e8b84b', border: 'none', borderRadius: '10px', color: '#0c0a08', cursor: completingTileId ? 'not-allowed' : 'pointer', boxShadow: 'rgba(232,184,75,0.25)', opacity: completingTileId ? 0.6 : 1 }}>
+                          {completingTileId ? 'Completing…' : '✓ Mark as Completed'}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )
               })()}

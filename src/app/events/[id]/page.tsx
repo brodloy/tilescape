@@ -68,6 +68,7 @@ export default async function EventPage({ params }: { params: { id: string } }) 
       isOwner={membership.role === 'owner'}
       displayName={displayName}
       avatarUrl={avatarUrl}
+      requireProof={event.require_proof ?? false}
       eventId={params.id}
     />
   )

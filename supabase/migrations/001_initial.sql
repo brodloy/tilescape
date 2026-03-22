@@ -372,3 +372,6 @@ create policy "Members can delete own team completions"
 
 -- Add prize pool to events
 alter table public.events add column if not exists prize_pool bigint default 0;
+
+-- Proof required toggle
+alter table public.events add column if not exists require_proof boolean not null default false;
