@@ -324,7 +324,13 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                 else if (!isTeamMode && approvedTeams.length > 0) { bg = 'var(--surface)' }
                                 else { bg = 'var(--bg3)'; border = 'rgba(255,255,255,0.04)' }
 
-                const imgFilter = isTeamMode && state === 'none' ? 'grayscale(1) brightness(0.35)' : isTeamMode && state === 'approved' ? 'drop-shadow(0 0 8px rgba(62,207,116,0.4)) brightness(1.1)' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.9))'
+                const imgFilter = isTeamMode && state === 'none'
+                  ? 'grayscale(1) brightness(0.35)'
+                  : isTeamMode && state === 'approved'
+                    ? 'drop-shadow(0 0 8px rgba(62,207,116,0.4)) brightness(1.1)'
+                    : !isTeamMode && approvedTeams.length === 0
+                      ? 'grayscale(0.6) brightness(0.55)'
+                      : 'drop-shadow(0 2px 6px rgba(0,0,0,0.9))'
 
                 return (
                   <button key={tile.id}
@@ -371,7 +377,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
                     )}
 
                     {/* Name */}
-                    <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', textAlign: 'center', color: isTeamMode && state === 'approved' ? '#88ffbb' : isTeamMode && state === 'none' ? '#2a2520' : '#c8b882', padding: '0 2px', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'color .2s' }}>
+                    <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', textAlign: 'center', color: isTeamMode && state === 'approved' ? '#88ffbb' : isTeamMode && state === 'none' ? '#2a2520' : !isTeamMode && approvedTeams.length === 0 ? '#2a2520' : '#c8b882', padding: '0 2px', width: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', transition: 'color .2s' }}>
                       {tile.name}
                     </div>
 
