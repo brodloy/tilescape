@@ -90,7 +90,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
   }, [tiles, userTeamId, teams])
 
   async function handleQuickComplete(tile: any) {
-    if (!userTeamId || !tile || tile.free_space) return
+    if (!userTeamId || !tile) return
 
     // Always read current state from the live tiles array, not the stale modal tile
     const liveTile = tiles.find(t => t.id === tile.id) ?? tile
@@ -126,7 +126,6 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
   const totalApproved = nonFree.filter(t => t.tile_completions?.some((c: any) => c.status === 'approved')).length
 
   function getTileState(tile: any, teamId: string | null): 'free'|'approved'|'pending'|'none' {
-    if (tile.free_space) return 'free'
     if (!teamId) return 'none'
     const c = tile.tile_completions?.find((c: any) => c.team_id === teamId)
     if (!c) return 'none'
@@ -317,8 +316,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
 
                 let bg = 'var(--surface)'
                 let border = 'rgba(255,255,255,0.06)'
-                if (tile.free_space) { bg = 'rgba(232,184,75,0.06)'; border = 'rgba(232,184,75,0.2)' }
-                else if (isTeamMode && state === 'approved') { bg = 'rgba(62,207,116,0.12)'; border = 'rgba(62,207,116,0.55)' }
+                if (isTeamMode && state === 'approved') { bg = 'rgba(62,207,116,0.12)'; border = 'rgba(62,207,116,0.55)' }
                 else if (isTeamMode && state === 'pending') { bg = 'rgba(232,184,75,0.08)'; border = 'rgba(232,184,75,0.3)' }
                 else if (isTeamMode && state === 'none') { bg = '#0e0c09'; border = 'rgba(255,255,255,0.04)' }
                 else if (!isTeamMode && approvedTeams.length > 0) { bg = 'var(--surface)' }
