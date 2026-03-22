@@ -267,7 +267,13 @@ export async function joinEventAction(formData: FormData) {
     .eq('invite_code', code)
     .single()
 
-  if (!event || event.status === 'ended') return
+  if (!event) {
+    redirect(`/join?code=${code}&error=invalid`)
+  }
+
+  if (event.status === 'ended') {
+    redirect(`/join?code=${code}&error=${encodeURIComponent('This event has ended')}`)
+  }
 
   const { data: existing } = await db
     .from('event_members')
