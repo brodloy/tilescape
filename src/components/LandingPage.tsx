@@ -11,21 +11,21 @@ export function LandingPage() {
 
     // ── Hero board ──
     const HERO_TILES = [
-      { sprite: W('Twisted bow'),            label: 'Tbow',       purple: true  },
-      { sprite: W('Scythe of vitur'),        label: 'Scythe',     purple: true  },
-      { sprite: W("Tumeken's shadow"),       label: 'Shadow',     purple: true  },
-      { sprite: W('Ghrazi rapier'),          label: 'Rapier',     purple: true  },
-      { sprite: W('Olmlet'),                 label: 'Olmlet',     purple: true  },
-      { sprite: W('Kodai wand'),             label: 'Kodai',      purple: false },
-      { sprite: W('Elder maul'),             label: 'Maul',       purple: false },
-      { sprite: W('Avernic defender hilt'),  label: 'Avernic',    purple: false },
-      { sprite: W('Ancestral robe top'),     label: 'Ancestral',  purple: false },
-      { sprite: W('Zaryte crossbow'),        label: 'ZCB',        purple: false },
-      { sprite: W('Dragon hunter crossbow'), label: 'DHCbow',     purple: false },
-      { sprite: W('Justiciar faceguard'),    label: 'Justiciar',  purple: false },
-      { sprite: W('Sanguinesti staff'),      label: 'Sang',       purple: false },
-      { sprite: W('Lightbearer'),            label: 'Lightbearer',purple: false },
-      { sprite: W('Ancestral robe bottom'),  label: 'Anc Legs',   purple: false },
+      { sprite: W('Twisted bow'),            label: 'Tbow'},
+      { sprite: W('Scythe of vitur'),        label: 'Scythe'},
+      { sprite: W("Tumeken's shadow"),       label: 'Shadow'},
+      { sprite: W('Ghrazi rapier'),          label: 'Rapier'},
+      { sprite: W('Olmlet'),                 label: 'Olmlet'},
+      { sprite: W('Kodai wand'),             label: 'Kodai'},
+      { sprite: W('Elder maul'),             label: 'Maul'},
+      { sprite: W('Avernic defender hilt'),  label: 'Avernic'},
+      { sprite: W('Ancestral robe top'),     label: 'Ancestral'},
+      { sprite: W('Zaryte crossbow'),        label: 'ZCB'},
+      { sprite: W('Dragon hunter crossbow'), label: 'DHCbow'},
+      { sprite: W('Justiciar faceguard'),    label: 'Justiciar'},
+      { sprite: W('Sanguinesti staff'),      label: 'Sang'},
+      { sprite: W('Lightbearer'),            label: 'Lightbearer'},
+      { sprite: W('Ancestral robe bottom'),  label: 'Anc Legs'},
     ]
     const PRE_DONE = [5, 7, 9, 10, 13]
     const heroBoard = document.getElementById('hero-board')
@@ -34,8 +34,7 @@ export function LandingPage() {
     const cellEls: HTMLElement[] = []
     HERO_TILES.forEach((t) => {
       const cell = document.createElement('div')
-      cell.className = 'mini-cell' + (t.purple ? ' purple' : '')
-      if (t.purple) { const pip = document.createElement('div'); pip.className = 'purple-pip'; cell.appendChild(pip) }
+      cell.className = 'mini-cell'
       const img = document.createElement('img') as HTMLImageElement
       img.src = t.sprite; img.alt = t.label
       img.onerror = function(this: HTMLImageElement) { this.style.opacity = '0.15' }
@@ -107,36 +106,36 @@ export function LandingPage() {
 
     // ── Marquee ──
     const MARQUEE_TILES = [
-      { name:'Twisted bow',            src:WD('Twisted bow'),                 source:'CoX',    purple:true,  done:true  },
-      { name:'Scythe of vitur',        src:WD('Scythe of vitur'),             source:'ToB',    purple:true,  done:true  },
-      { name:"Tumeken's shadow",       src:WD("Tumeken's_shadow"),            source:'ToA',    purple:true,  done:false },
-      { name:'Ghrazi rapier',          src:WD('Ghrazi rapier'),               source:'ToB',    purple:true,  done:true  },
-      { name:"Osmumten's fang",        src:WD("Osmumten's_fang"),            source:'ToA',    purple:true,  done:false },
-      { name:'Kodai wand',             src:WD('Kodai wand'),                  source:'CoX',    purple:false, done:true  },
-      { name:'Elder maul',             src:WD('Elder maul'),                  source:'CoX',    purple:false, done:true  },
-      { name:'Avernic hilt',           src:WD('Avernic defender hilt'),       source:'ToB',    purple:false, done:true  },
-      { name:'Olmlet',                 src:WD('Olmlet'),                      source:'CoX',    purple:true,  done:true  },
-      { name:'Zaryte xbow',            src:WD('Zaryte crossbow'),             source:'Nex',    purple:false, done:false },
-      { name:'Sanguinesti',            src:WD('Sanguinesti staff'),           source:'ToB',    purple:false, done:true  },
-      { name:'Blood torva kit',        src:WD('Ancient blood ornament kit'),  source:'Nex',    purple:true,  done:false },
-      { name:'Lightbearer',            src:WD('Lightbearer'),                 source:'ToA',    purple:false, done:true  },
-      { name:'Dragon hunter xbow',     src:WD('Dragon hunter crossbow'),      source:'CoX',    purple:false, done:false },
-      { name:'Magus ring',             src:WD('Magus ring'),                  source:'DT2',    purple:true,  done:false },
-      { name:'Dragon warhammer',       src:WD('Dragon warhammer'),            source:'Lizard', purple:false, done:true  },
-      { name:'Infernal cape',          src:WD('Infernal cape'),               source:'Inferno',purple:true,  done:true  },
-      { name:'Jal-nib-rek',            src:WD('Jal-nib-rek'),                source:'Inferno',purple:true,  done:false },
-      { name:"Lil' Zik",               src:WD("Lil'_zik"),                   source:'ToB',    purple:true,  done:true  },
-      { name:'Nightmare staff',        src:WD('Nightmare staff'),             source:'NM',     purple:true,  done:false },
-      { name:"Elidinis' ward",         src:WD("Elidinis'_ward_(f)"),         source:'ToA',    purple:false, done:true  },
-      { name:'Ancestral robe top',     src:WD('Ancestral robe top'),          source:'CoX',    purple:false, done:false },
-      { name:"Inquisitor's mace",      src:WD("Inquisitor's_mace"),          source:'NM',     purple:false, done:true  },
-      { name:'Justiciar faceguard',    src:WD('Justiciar faceguard'),         source:'ToB',    purple:false, done:false },
+      { name:'Twisted bow',            src:WD('Twisted bow'),  done:true  },
+      { name:'Scythe of vitur',        src:WD('Scythe of vitur'),  done:true  },
+      { name:"Tumeken's shadow",       src:WD("Tumeken's_shadow"),  done:false },
+      { name:'Ghrazi rapier',          src:WD('Ghrazi rapier'),  done:true  },
+      { name:"Osmumten's fang",        src:WD("Osmumten's_fang"),  done:false },
+      { name:'Kodai wand',             src:WD('Kodai wand'), done:true  },
+      { name:'Elder maul',             src:WD('Elder maul'), done:true  },
+      { name:'Avernic hilt',           src:WD('Avernic defender hilt'), done:true  },
+      { name:'Olmlet',                 src:WD('Olmlet'),  done:true  },
+      { name:'Zaryte xbow',            src:WD('Zaryte crossbow'), done:false },
+      { name:'Sanguinesti',            src:WD('Sanguinesti staff'), done:true  },
+      { name:'Blood torva kit',        src:WD('Ancient blood ornament kit'),  done:false },
+      { name:'Lightbearer',            src:WD('Lightbearer'), done:true  },
+      { name:'Dragon hunter xbow',     src:WD('Dragon hunter crossbow'), done:false },
+      { name:'Magus ring',             src:WD('Magus ring'),  done:false },
+      { name:'Dragon warhammer',       src:WD('Dragon warhammer'), done:true  },
+      { name:'Infernal cape',          src:WD('Infernal cape'),  done:true  },
+      { name:'Jal-nib-rek',            src:WD('Jal-nib-rek'),  done:false },
+      { name:"Lil' Zik",               src:WD("Lil'_zik"),  done:true  },
+      { name:'Nightmare staff',        src:WD('Nightmare staff'),  done:false },
+      { name:"Elidinis' ward",         src:WD("Elidinis'_ward_(f)"), done:true  },
+      { name:'Ancestral robe top',     src:WD('Ancestral robe top'), done:false },
+      { name:"Inquisitor's mace",      src:WD("Inquisitor's_mace"), done:true  },
+      { name:'Justiciar faceguard',    src:WD('Justiciar faceguard'), done:false },
     ]
 
     function buildMarqueeTile(tile: typeof MARQUEE_TILES[0]) {
       const el = document.createElement('div')
-      el.className = 'marquee-tile' + (tile.purple ? ' is-purple' : '') + (tile.done ? ' is-done' : '')
-      if (tile.purple) { const pip = document.createElement('div'); pip.className = 'marquee-pip'; el.appendChild(pip) }
+      el.className = 'marquee-tile' + (tile.done ? ' is-done' : '')
+
       if (tile.done) { const chk = document.createElement('div'); chk.className = 'marquee-check'; chk.textContent = '✓'; el.appendChild(chk) }
       const img = document.createElement('img') as HTMLImageElement
       img.className = 'marquee-sprite'; img.alt = tile.name; img.src = tile.src
@@ -146,7 +145,7 @@ export function LandingPage() {
       }
       el.appendChild(img)
       const name = document.createElement('div'); name.className = 'marquee-name'; name.textContent = tile.name; el.appendChild(name)
-      const src = document.createElement('div'); src.className = 'marquee-source'; src.textContent = tile.source; el.appendChild(src)
+
       return el
     }
 
@@ -200,11 +199,10 @@ export function LandingPage() {
         <ul>
           <li><a href="#tiles-marquee">How It Works</a></li>
           <li><a href="#testimonials">Reviews</a></li>
-          <li><a href="/preview">Preview Dashboard</a></li>
+
         </ul>
         <div className="nav-actions">
-          <Link href="/login" className="btn-ghost">Log in</Link>
-          <Link href="/login" className="btn-gold">Register →</Link>
+          <Link href="/login" className="btn-gold">Sign in with Discord →</Link>
         </div>
       </nav>
 
@@ -217,8 +215,7 @@ export function LandingPage() {
         <h1 className="hero-title">Run Better<br/>Clan <span className="accent">Bingos</span></h1>
         <p className="hero-sub">The modern event platform built for OSRS clans. Track bingo boards, manage teams, and celebrate every purple drop — no spreadsheets required.</p>
         <div className="hero-ctas">
-          <Link href="/login" className="btn-hero-primary">Create Your Clan Board</Link>
-          <Link href="/preview" className="btn-hero-secondary">Preview Dashboard →</Link>
+          <Link href="/login" className="btn-hero-primary">Get Started with Discord →</Link>
         </div>
         <div className="hero-board">
           <div className="board-chrome">
@@ -243,7 +240,7 @@ export function LandingPage() {
           {num:'Early',label:'Access'},
           {num:'Free',label:'To Use'},
           {num:'OSRS',label:'Clan Bingo'},
-          {num:'6,500+',label:'Events Hosted'},
+          {num:'Discord',label:'Auth Only'},
         ].map((s,i) => (
           <div key={i} style={{display:'contents'}}>
             {i > 0 && <div className="proof-divider"/>}
@@ -262,7 +259,7 @@ export function LandingPage() {
           <h2 className="section-title" style={{textAlign:'center',marginBottom:'48px'}}>Up and running<br/>in minutes.</h2>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'24px',textAlign:'left'}}>
             {[
-              {num:'01',title:'Create your event',desc:'Register in seconds, create an event, share the invite code with your clan.'},
+              {num:'01',title:'Sign in with Discord',desc:'One click with Discord — no passwords, no email. Your avatar and name carry over automatically.'},
               {num:'02',title:'Build your board',desc:'Pick your tiles — bosses, skills, drops. Set your start and end date and go live.'},
               {num:'03',title:'Grind & celebrate',desc:'Members submit drops. Admins approve. Bingos get announced. Your clan does the rest.'},
             ].map((step) => (
@@ -291,7 +288,7 @@ export function LandingPage() {
         </div>
         <div className="testi-grid reveal">
           {[
-            {id:'tav-1',quote:'We used to run bingos on a shared Google Sheet that nobody could figure out. TileScape fixed that overnight. The purple drop highlight alone gets the whole Discord going every time.',name:'Zekrom99',clan:'Leader — Bandos Boys CC',stars:5},
+            {id:'tav-1',quote:'We used to run bingos on a shared Google Sheet that nobody could figure out. TileScape fixed that overnight. The real-time updates and team progress boards keep the whole Discord buzzing.',name:'Zekrom99',clan:'Leader — Bandos Boys CC',stars:5},
             {id:'tav-2',quote:'Brilliant for running events — the team progress bars and live leaderboard keep rivalry high all week. Would love a mobile app eventually, but the site works fine on phone for now.',name:'ArmaRaider',clan:'Organiser — Crystal Key Clan',stars:4},
             {id:'tav-3',quote:'52 members, three teams, a month-long bingo. TileScape handled everything without a hitch. I actually spent time playing the game instead of wrangling a spreadsheet.',name:'MossyMage',clan:'Leader — The Varrock Guards',stars:5},
           ].map((t) => (
@@ -330,9 +327,7 @@ export function LandingPage() {
         <div className="footer-links">
           <a href="#tiles-marquee">How It Works</a>
           <a href="#testimonials">Reviews</a>
-          <Link href="/preview">Dashboard</Link>
-          <Link href="/login">Log in</Link>
-          <Link href="/login">Register</Link>
+          <Link href="/login">Sign in</Link>
         </div>
         <div className="footer-copy">© 2025 TileScape · Not affiliated with Jagex</div>
       </footer>
@@ -395,12 +390,12 @@ nav ul a:hover { color: var(--text); }
 .mini-cell.bingo-flash { background: rgba(62,207,116,0.22)!important; border-color: rgba(62,207,116,0.8)!important; box-shadow: 0 0 20px rgba(62,207,116,0.25)!important; transform: scale(1.06); }
 @keyframes tile-check { 0%{transform:scale(1)} 40%{transform:scale(1.18)} 65%{transform:scale(0.94)} 100%{transform:scale(1)} }
 .mini-cell.checking { animation: tile-check 0.45s ease forwards; }
-.mini-cell.purple { border-color: rgba(168,117,240,0.25); } .mini-cell.purple.done { border-color: rgba(62,207,116,0.55); }
+
 .mini-cell-label { font-family: 'Press Start 2P', monospace; font-size: 5px; color: var(--text3); text-align: center; line-height: 1.4; padding: 0 4px; transition: color 0.3s; }
 .mini-cell.done .mini-cell-label { color: rgba(62,207,116,0.7); }
 .tick-badge { position: absolute; top: 4px; right: 4px; width: 16px; height: 16px; background: var(--green); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #041a0c; font-weight: 900; opacity: 0; transform: scale(0); transition: opacity 0.25s, transform 0.25s; box-shadow: 0 0 6px rgba(62,207,116,0.5); }
 .mini-cell.done .tick-badge { opacity: 1; transform: scale(1); }
-.purple-pip { position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; background: var(--purple); border-radius: 1px; box-shadow: 0 0 6px var(--purple); }
+
 #bingo-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 10; opacity: 0; transition: opacity 0.2s; }
 #bingo-overlay.show { opacity: 1; }
 .bingo-text { font-family: 'Press Start 2P', monospace; font-size: 28px; color: var(--green); text-shadow: 0 0 20px rgba(62,207,116,0.9), 0 0 40px rgba(62,207,116,0.5), 3px 3px 0 rgba(0,0,0,0.8); letter-spacing: 4px; transform: scale(0) rotate(-8deg); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); white-space: nowrap; }
@@ -425,15 +420,14 @@ section { padding: 100px 48px; }
 @keyframes marquee-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
 .marquee-tile { display: flex; flex-direction: column; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); padding: 14px 12px 12px; width: 110px; flex-shrink: 0; position: relative; transition: border-color 0.2s, transform 0.2s; cursor: default; }
 .marquee-tile:hover { border-color: var(--border2); transform: translateY(-3px); }
-.marquee-tile.is-purple { border-color: rgba(168,117,240,0.22); }
-.marquee-tile.is-purple::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--purple); border-radius: var(--r2) var(--r2) 0 0; opacity: 0.7; }
+
 .marquee-tile.is-done { border-color: rgba(62,207,116,0.3); }
 .marquee-tile.is-done::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--green); border-radius: var(--r2) var(--r2) 0 0; }
 .marquee-sprite { width: 52px; height: 52px; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.9)); transition: transform 0.2s; }
 .marquee-tile:hover .marquee-sprite { transform: scale(1.1) translateY(-2px); }
 .marquee-name { font-family: 'Press Start 2P', monospace; font-size: 5.5px; text-align: center; color: var(--text2); line-height: 1.5; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.marquee-source { font-family: 'Press Start 2P', monospace; font-size: 5px; color: var(--text3); letter-spacing: 0.3px; }
-.marquee-pip { position: absolute; top: 5px; left: 5px; width: 5px; height: 5px; background: var(--purple); border-radius: 1px; box-shadow: 0 0 4px var(--purple); }
+
+
 .marquee-check { position: absolute; top: 5px; right: 5px; width: 13px; height: 13px; background: var(--green); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 7px; color: #041a0c; font-weight: 900; }
 #testimonials { max-width: 1100px; margin: 0 auto; }
 .testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-top: 56px; }
