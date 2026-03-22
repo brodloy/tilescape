@@ -8,6 +8,7 @@ import {
   addTeamAction, removeTeam, assignTeam, toggleMod, saveWebhook,
 } from '@/app/actions/forms'
 import { deleteEvent, deleteEventVoid } from '@/app/actions/deleteEvent'
+import { DeleteEventButton } from '@/components/event/DeleteEventButton'
 
 const WIKI = 'https://oldschool.runescape.wiki/w/Special:FilePath/'
 const w = (n: string) => `${WIKI}${encodeURIComponent(n.replace(/ /g, '_'))}.png`
@@ -306,15 +307,7 @@ export default async function ManagePage({ params }: { params: { id: string } })
                 <p className="text-sm text-text-2 font-light mb-4">
                   Permanently delete this event. All tiles, teams, members and submissions will be removed. This cannot be undone.
                 </p>
-                <form action={deleteEventVoid.bind(null, eventId)}
-                  onSubmit={(e) => {
-                    if (!confirm(`Delete "${event.name}"? This cannot be undone.`)) e.preventDefault()
-                  }}>
-                  <button type="submit"
-                    className="font-pixel text-[6px] px-4 py-2.5 rounded bg-[rgba(232,85,85,0.08)] border border-[rgba(232,85,85,0.25)] text-red hover:bg-[rgba(232,85,85,0.18)] transition-colors">
-                    DELETE EVENT PERMANENTLY
-                  </button>
-                </form>
+                <DeleteEventButton eventId={eventId} eventName={event.name} />
               </CardBody>
             </Card>
           )}
