@@ -3,10 +3,10 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import {
   signInWithEmail,
   signUpWithEmail,
-  signInWithDiscord,
 } from '@/app/actions/auth'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -26,10 +26,23 @@ export function LoginClient() {
   function switchTab(t: Tab) { setTab(t); setError(null); setSuccess(null) }
 
   async function handleDiscord() {
-    setDiscordLoading(true); setError(null)
-    await signInWithDiscord()
-    setDiscordLoading(false)
-    setError('Discord sign-in failed. Please try again.')
+    setDiscordLoading(true)
+    setError(null)
+    const supabase = createClient()
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'discord',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        skipBrowserRedirect: false,
+      },
+    })
+    if (error || !data?.url) {
+      setDiscordLoading(false)
+      setError('Could not connect to Discord. Please try again.')
+      return
+    }
+    // Stay in loading state — browser is navigating to Discord
+    window.location.href = data.url
   }
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
