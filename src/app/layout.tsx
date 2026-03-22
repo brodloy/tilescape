@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import './globals.css'
+import { NavigationProgress } from '@/components/ui/NavigationProgress'
 
 export const metadata: Metadata = {
   title: 'TileScape — OSRS Clan Bingo & Event Tracker',
@@ -18,6 +20,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="bg-bg text-text antialiased">
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         {children}
       </body>
     </html>
