@@ -12,7 +12,6 @@ function formatGP(gp: number): string {
 }
 
 const MEDAL = ['🥇', '🥈', '🥉']
-const COINS = 'https://oldschool.runescape.wiki/w/Special:FilePath/Coins_10000.png?action=raw'
 
 export default async function ResultsPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -85,7 +84,16 @@ export default async function ResultsPage({ params }: { params: { id: string } }
           </h1>
           {event.prize_pool > 0 && (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '10px 20px', background: 'rgba(232,184,75,0.06)', border: '1px solid rgba(232,184,75,0.2)', borderRadius: '12px' }}>
-              <img src={COINS} alt="GP" style={{ width: '24px', height: '24px', imageRendering: 'pixelated' }} />
+              <svg width="24" height="24" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
+              <ellipse cx="22" cy="34" rx="14" ry="5" fill="#7a5c1e"/>
+              <rect x="8" y="20" width="28" height="14" fill="#c8861a"/>
+              <ellipse cx="22" cy="20" rx="14" ry="5" fill="#e8b84b"/>
+              <ellipse cx="22" cy="28" rx="14" ry="5" fill="#7a5c1e"/>
+              <rect x="8" y="14" width="28" height="14" fill="#c8861a"/>
+              <ellipse cx="22" cy="14" rx="14" ry="5" fill="#e8b84b"/>
+              <ellipse cx="22" cy="8" rx="14" ry="5" fill="#e8b84b"/>
+              <ellipse cx="22" cy="8" rx="10" ry="3.5" fill="#f5d060"/>
+            </svg>
               <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '22px', color: '#e8b84b', letterSpacing: '-0.5px' }}>{formatGP(event.prize_pool)}</span>
               <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#7a5c1e' }}>PRIZE POOL</span>
             </div>

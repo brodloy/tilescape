@@ -19,13 +19,11 @@ export async function submitCompletion(
 
   const { data: tile } = await db
     .from('tiles')
-    .select('id, event_id, free_space')
+    .select('id, event_id')
     .eq('id', tileId)
     .single()
 
   if (!tile) return { error: 'Tile not found' }
-  if (tile.free_space) return { error: 'Cannot submit for a free space' }
-
   const { data: member } = await db
     .from('event_members')
     .select('id')
@@ -161,20 +159,18 @@ async function fireDiscordWebhook(
     if (!completion) return
 
     const { tiles: tile, teams: team, users: submitter } = completion
-    const isPurple = tile?.is_purple
 
     await fetch(event.discord_webhook_url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         embeds: [{
-          title:       isPurple ? '🟣 PURPLE DROP!' : '✅ Tile Completed',
+          title:       '✅ Tile Completed',
           description: `**${submitter?.display_name}** completed **${tile?.name}** for **${team?.name}**`,
-          color:       isPurple ? 0xa875f0 : parseInt((team?.color ?? '#e8b84b').replace('#', ''), 16),
+          color:       parseInt((team?.color ?? '#e8b84b').replace('#', ''), 16),
           fields: [
             { name: 'Tile',   value: tile?.name       ?? '—', inline: true },
             { name: 'Team',   value: team?.name       ?? '—', inline: true },
-            { name: 'Source', value: tile?.source_raid ?? '—', inline: true },
           ],
           image:     { url: completion.proof_url },
           footer:    { text: `TileScape · ${event.name}` },
@@ -196,10 +192,10 @@ export async function quickCompleteTile(tileId: string, teamId: string) {
   if (!user) return { error: 'Not authenticated' }
 
   const { data: tile } = await db
-    .from('tiles').select('id, event_id, free_space, name, is_purple')
+    .from('tiles').select('id, event_id, name')
     .eq('id', tileId).single()
 
-  if (!tile || tile.free_space) return { error: 'Invalid tile' }
+  if (!tile) return { error: 'Invalid tile' }
 
   const { data: member } = await db
     .from('event_members').select('id')
@@ -234,7 +230,7 @@ export async function quickCompleteTile(tileId: string, teamId: string) {
   }
 
   revalidatePath(`/events/${tile.event_id}`)
-  return { success: true, tileName: tile.name, isPurple: tile.is_purple }
+  return { success: true, tileName: tile.name }
 }
 
 // Undo a quick completion

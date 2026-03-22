@@ -39,31 +39,31 @@ export async function loadTemplate(eventId: string) {
   await db.from('tiles').delete().eq('event_id', eventId)
 
   await db.from('tiles').insert([
-    { event_id: eventId, position: 0,  name: 'Twisted bow',           source_raid: 'CoX',     is_purple: true,  sprite_url: w('Twisted bow'),            points: 1, free_space: false },
-    { event_id: eventId, position: 1,  name: 'Scythe of vitur',       source_raid: 'ToB',     is_purple: true,  sprite_url: w('Scythe of vitur'),         points: 1, free_space: false },
-    { event_id: eventId, position: 2,  name: "Tumeken's shadow",       source_raid: 'ToA',     is_purple: true,  sprite_url: w("Tumeken's shadow"),        points: 1, free_space: false },
-    { event_id: eventId, position: 3,  name: 'Ghrazi rapier',          source_raid: 'ToB',     is_purple: true,  sprite_url: w('Ghrazi rapier'),           points: 1, free_space: false },
-    { event_id: eventId, position: 4,  name: "Osmumten's fang",        source_raid: 'ToA',     is_purple: true,  sprite_url: w("Osmumten's fang"),         points: 1, free_space: false },
-    { event_id: eventId, position: 5,  name: 'Kodai wand',             source_raid: 'CoX',     is_purple: false, sprite_url: w('Kodai wand'),              points: 1, free_space: false },
-    { event_id: eventId, position: 6,  name: 'Elder maul',             source_raid: 'CoX',     is_purple: false, sprite_url: w('Elder maul'),              points: 1, free_space: false },
-    { event_id: eventId, position: 7,  name: 'Avernic hilt',           source_raid: 'ToB',     is_purple: false, sprite_url: w('Avernic defender hilt'),   points: 1, free_space: false },
-    { event_id: eventId, position: 8,  name: 'Zaryte crossbow',        source_raid: 'Nex',     is_purple: false, sprite_url: w('Zaryte crossbow'),         points: 1, free_space: false },
-    { event_id: eventId, position: 9,  name: 'Sanguinesti staff',      source_raid: 'ToB',     is_purple: false, sprite_url: w('Sanguinesti staff'),       points: 1, free_space: false },
-    { event_id: eventId, position: 10, name: 'Dragon hunter crossbow', source_raid: 'CoX',     is_purple: false, sprite_url: w('Dragon hunter crossbow'),  points: 1, free_space: false },
-    { event_id: eventId, position: 11, name: 'Justiciar faceguard',    source_raid: 'ToB',     is_purple: false, sprite_url: w('Justiciar faceguard'),     points: 1, free_space: false },
-    { event_id: eventId, position: 12, name: 'FREE',                   source_raid: null,      is_purple: false, sprite_url: null,                         points: 0, free_space: true  },
-    { event_id: eventId, position: 13, name: "Elidinis' ward",         source_raid: 'ToA',     is_purple: false, sprite_url: w("Elidinis' ward (f)"),      points: 1, free_space: false },
-    { event_id: eventId, position: 14, name: 'Lightbearer',            source_raid: 'ToA',     is_purple: false, sprite_url: w('Lightbearer'),             points: 1, free_space: false },
-    { event_id: eventId, position: 15, name: 'Olmlet',                 source_raid: 'CoX',     is_purple: true,  sprite_url: w('Olmlet'),                  points: 1, free_space: false },
-    { event_id: eventId, position: 16, name: 'Magus ring',             source_raid: 'DT2',     is_purple: true,  sprite_url: w('Magus ring'),              points: 1, free_space: false },
-    { event_id: eventId, position: 17, name: "Inquisitor's mace",      source_raid: 'NM',      is_purple: false, sprite_url: w("Inquisitor's mace"),       points: 1, free_space: false },
-    { event_id: eventId, position: 18, name: 'Dragon warhammer',       source_raid: 'Liz',     is_purple: false, sprite_url: w('Dragon warhammer'),        points: 1, free_space: false },
-    { event_id: eventId, position: 19, name: 'Infernal cape',          source_raid: 'Inferno', is_purple: true,  sprite_url: w('Infernal cape'),           points: 1, free_space: false },
-    { event_id: eventId, position: 20, name: "Lil' Zik",               source_raid: 'ToB',     is_purple: true,  sprite_url: w("Lil' zik"),                points: 1, free_space: false },
-    { event_id: eventId, position: 21, name: 'Jal-nib-rek',            source_raid: 'Inferno', is_purple: true,  sprite_url: w('Jal-nib-rek'),             points: 1, free_space: false },
-    { event_id: eventId, position: 22, name: 'Nightmare staff',        source_raid: 'NM',      is_purple: true,  sprite_url: w('Nightmare staff'),         points: 1, free_space: false },
-    { event_id: eventId, position: 23, name: 'Ancestral robe top',     source_raid: 'CoX',     is_purple: false, sprite_url: w('Ancestral robe top'),      points: 1, free_space: false },
-    { event_id: eventId, position: 24, name: 'Blood torva',            source_raid: 'Nex',     is_purple: true,  sprite_url: w('Ancient blood ornament kit'), points: 1, free_space: false },
+    { event_id: eventId, position: 0,  name: 'Twisted bow',  sprite_url: w('Twisted bow'),            points: 1 },
+    { event_id: eventId, position: 1,  name: 'Scythe of vitur',  sprite_url: w('Scythe of vitur'),         points: 1 },
+    { event_id: eventId, position: 2,  name: "Tumeken's shadow",  sprite_url: w("Tumeken's shadow"),        points: 1 },
+    { event_id: eventId, position: 3,  name: 'Ghrazi rapier',  sprite_url: w('Ghrazi rapier'),           points: 1 },
+    { event_id: eventId, position: 4,  name: "Osmumten's fang",  sprite_url: w("Osmumten's fang"),         points: 1 },
+    { event_id: eventId, position: 5,  name: 'Kodai wand', sprite_url: w('Kodai wand'),              points: 1 },
+    { event_id: eventId, position: 6,  name: 'Elder maul', sprite_url: w('Elder maul'),              points: 1 },
+    { event_id: eventId, position: 7,  name: 'Avernic hilt', sprite_url: w('Avernic defender hilt'),   points: 1 },
+    { event_id: eventId, position: 8,  name: 'Zaryte crossbow', sprite_url: w('Zaryte crossbow'),         points: 1 },
+    { event_id: eventId, position: 9,  name: 'Sanguinesti staff', sprite_url: w('Sanguinesti staff'),       points: 1 },
+    { event_id: eventId, position: 10, name: 'Dragon hunter crossbow', sprite_url: w('Dragon hunter crossbow'),  points: 1 },
+    { event_id: eventId, position: 11, name: 'Justiciar faceguard', sprite_url: w('Justiciar faceguard'),     points: 1 },
+    { event_id: eventId, position: 12, name: 'FREE', sprite_url: null,                         points: 0  },
+    { event_id: eventId, position: 13, name: "Elidinis' ward", sprite_url: w("Elidinis' ward (f)"),      points: 1 },
+    { event_id: eventId, position: 14, name: 'Lightbearer', sprite_url: w('Lightbearer'),             points: 1 },
+    { event_id: eventId, position: 15, name: 'Olmlet',  sprite_url: w('Olmlet'),                  points: 1 },
+    { event_id: eventId, position: 16, name: 'Magus ring',  sprite_url: w('Magus ring'),              points: 1 },
+    { event_id: eventId, position: 17, name: "Inquisitor's mace", sprite_url: w("Inquisitor's mace"),       points: 1 },
+    { event_id: eventId, position: 18, name: 'Dragon warhammer', sprite_url: w('Dragon warhammer'),        points: 1 },
+    { event_id: eventId, position: 19, name: 'Infernal cape',  sprite_url: w('Infernal cape'),           points: 1 },
+    { event_id: eventId, position: 20, name: "Lil' Zik",  sprite_url: w("Lil' zik"),                points: 1 },
+    { event_id: eventId, position: 21, name: 'Jal-nib-rek',  sprite_url: w('Jal-nib-rek'),             points: 1 },
+    { event_id: eventId, position: 22, name: 'Nightmare staff',  sprite_url: w('Nightmare staff'),         points: 1 },
+    { event_id: eventId, position: 23, name: 'Ancestral robe top', sprite_url: w('Ancestral robe top'),      points: 1 },
+    { event_id: eventId, position: 24, name: 'Blood torva',  sprite_url: w('Ancient blood ornament kit'), points: 1 },
   ])
 
   revalidatePath(`/events/${eventId}/manage`)
@@ -186,15 +186,6 @@ export async function updateProfile(formData: FormData) {
   if (displayName) {
     await db.from('users').update({ display_name: displayName }).eq('id', user.id)
   }
-  redirect('/account')
-}
-
-export async function updatePassword(formData: FormData) {
-  const supabase = await createClient()
-  const password = formData.get('password') as string
-  const confirm  = formData.get('confirm') as string
-  if (!password || password !== confirm) redirect('/account?error=password_mismatch')
-  await supabase.auth.updateUser({ password })
   redirect('/account')
 }
 

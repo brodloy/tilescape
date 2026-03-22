@@ -13,6 +13,40 @@ import { Avatar } from '@/components/ui/Avatar'
 import { ReviewModal } from '@/components/event/ReviewModal'
 
 const W = (n: string) => `https://oldschool.runescape.wiki/w/Special:FilePath/${encodeURIComponent(n.replace(/ /g, '_'))}.png?action=raw`
+function CoinSprite({ size = 44 }: { size?: number }) {
+  return (
+    <div style={{ width: size, height: size, flexShrink: 0, position: 'relative' }}>
+      <img
+        src="https://oldschool.runescape.wiki/w/Special:FilePath/Coins_10000.png?action=raw"
+        alt="GP"
+        width={size}
+        height={size}
+        style={{ width: size, height: size, imageRendering: 'pixelated', display: 'block' }}
+        onError={e => {
+          const el = e.currentTarget as HTMLImageElement
+          el.style.display = 'none'
+          const next = el.nextElementSibling as HTMLElement | null
+          if (next) next.style.display = 'flex'
+        }}
+      />
+      <div style={{ display: 'none', width: size, height: size, position: 'absolute', top: 0, left: 0, alignItems: 'center', justifyContent: 'center' }}>
+        <svg width={size} height={size} viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="22" cy="34" rx="14" ry="5" fill="#7a5c1e"/>
+          <rect x="8" y="20" width="28" height="14" fill="#c8861a"/>
+          <ellipse cx="22" cy="20" rx="14" ry="5" fill="#e8b84b"/>
+          <ellipse cx="22" cy="28" rx="14" ry="5" fill="#7a5c1e"/>
+          <rect x="8" y="14" width="28" height="14" fill="#c8861a"/>
+          <ellipse cx="22" cy="14" rx="14" ry="5" fill="#e8b84b"/>
+          <ellipse cx="22" cy="22" rx="14" ry="5" fill="#7a5c1e"/>
+          <rect x="8" y="8" width="28" height="14" fill="#c8861a"/>
+          <ellipse cx="22" cy="8" rx="14" ry="5" fill="#e8b84b"/>
+          <ellipse cx="22" cy="8" rx="10" ry="3.5" fill="#f5d060"/>
+        </svg>
+      </div>
+    </div>
+  )
+}
+
 function formatGP(gp: number): string {
   if (gp >= 1_000_000_000) return `${(gp / 1_000_000_000).toFixed(1)}B`
   if (gp >= 1_000_000) return `${(gp / 1_000_000).toFixed(1)}M`
@@ -21,7 +55,6 @@ function formatGP(gp: number): string {
 }
 
 // DEV MODE: set to false to require proof URLs
-const DEV_QUICK_COMPLETE = true
 
 interface Props {
   event: any; initialTiles: any[]; teams: any[]; members: any[]
@@ -62,8 +95,6 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
   const prevBingosRef = useRef<Record<string, number>>({})
   const router = useRouter()
   const supabase = createClient()
-
-  const prevTilesRef = useRef<any[]>([])
 
   const refreshTiles = useCallback(async () => {
     const db = supabase as any
@@ -250,18 +281,7 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
           {/* Prize pool */}
           {event.prize_pool > 0 && (
             <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(232,184,75,0.08)', display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(232,184,75,0.03)' }}>
-              <svg width="20" height="20" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0 }}>
-              <ellipse cx="22" cy="34" rx="14" ry="5" fill="#7a5c1e"/>
-              <rect x="8" y="20" width="28" height="14" fill="#c8861a"/>
-              <ellipse cx="22" cy="20" rx="14" ry="5" fill="#e8b84b"/>
-              <ellipse cx="22" cy="28" rx="14" ry="5" fill="#7a5c1e"/>
-              <rect x="8" y="14" width="28" height="14" fill="#c8861a"/>
-              <ellipse cx="22" cy="14" rx="14" ry="5" fill="#e8b84b"/>
-              <ellipse cx="22" cy="22" rx="14" ry="5" fill="#7a5c1e"/>
-              <rect x="8" y="8" width="28" height="14" fill="#c8861a"/>
-              <ellipse cx="22" cy="8" rx="14" ry="5" fill="#e8b84b"/>
-              <ellipse cx="22" cy="8" rx="10" ry="3.5" fill="#f5d060"/>
-            </svg>
+              <CoinSprite size={20} />
               <div>
                 <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '16px', color: '#e8b84b', letterSpacing: '-0.3px', lineHeight: 1 }}>{formatGP(event.prize_pool)}</div>
                 <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '10px', color: '#7a5c1e', marginTop: '3px' }}>PRIZE POOL</div>

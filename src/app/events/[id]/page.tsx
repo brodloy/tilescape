@@ -41,7 +41,7 @@ export default async function EventPage({ params }: { params: { id: string } }) 
     if (tileIds.length > 0) {
       const { data } = await db
         .from('tile_completions')
-        .select('id, proof_url, status, submitted_at, tile_id, tiles(name, is_purple, source_raid), teams(name, color), users!submitted_by(display_name)')
+        .select('id, proof_url, status, submitted_at, tile_id, tiles(name, sprite_url), teams(name, color), users!submitted_by(display_name, avatar_url)')
         .eq('status', 'pending').in('tile_id', tileIds)
         .order('submitted_at', { ascending: false })
       pendingSubmissions = data ?? []

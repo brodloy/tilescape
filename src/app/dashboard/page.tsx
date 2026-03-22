@@ -27,8 +27,7 @@ export default async function DashboardPage() {
 
   // For each event get tile stats
   const eventIds = allEvents.map((e: any) => e.id).filter(Boolean)
-  let tileStats: Record<string, { total: number; done: number; teams: number; purples: number }> = {}
-  let tilesByEvent: Record<string, any[]> = {}
+  let tileStats: Record<string, { total: number; done: number; teams: number }> = {}
   let teamsByEvent: Record<string, { id: string; name: string; color: string; done: number; pct: number }[]> = {}
 
   if (eventIds.length > 0) {
@@ -45,10 +44,9 @@ export default async function DashboardPage() {
     eventIds.forEach((id: string) => {
       const evTiles = (tiles ?? []).filter((t: any) => t.event_id === id && !t.free_space)
       const done = evTiles.filter((t: any) => t.tile_completions?.some((c: any) => c.status === 'approved'))
-      const purples = done.filter((t: any) => t.is_purple)
       const evTeams = (teams ?? []).filter((t: any) => t.event_id === id)
-      tileStats[id] = { total: evTiles.length, done: done.length, purples: purples.length, teams: evTeams.length }
-      tilesByEvent[id] = (tiles ?? []).filter((t: any) => t.event_id === id)
+      tileStats[id] = { total: evTiles.length, done: done.length, teams: evTeams.length }
+
       teamsByEvent[id] = evTeams.map((team: any) => {
         const teamDone = evTiles.filter((t: any) => t.tile_completions?.some((c: any) => c.team_id === team.id && c.status === 'approved')).length
         return { id: team.id as string, name: team.name as string, color: team.color as string, done: teamDone, pct: Math.round(teamDone / Math.max(evTiles.length, 1) * 100) }

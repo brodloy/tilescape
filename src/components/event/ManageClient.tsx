@@ -99,6 +99,40 @@ const card: React.CSSProperties = {
   background: 'var(--surface)', border: '1px solid rgba(232,184,75,0.10)',
   borderRadius: '14px', overflow: 'hidden',
 }
+function CoinSprite({ size = 44 }: { size?: number }) {
+  return (
+    <div style={{ width: size, height: size, flexShrink: 0, position: 'relative' }}>
+      <img
+        src="https://oldschool.runescape.wiki/w/Special:FilePath/Coins_10000.png?action=raw"
+        alt="GP"
+        width={size}
+        height={size}
+        style={{ width: size, height: size, imageRendering: 'pixelated', display: 'block' }}
+        onError={e => {
+          const el = e.currentTarget as HTMLImageElement
+          el.style.display = 'none'
+          const next = el.nextElementSibling as HTMLElement | null
+          if (next) next.style.display = 'flex'
+        }}
+      />
+      <div style={{ display: 'none', width: size, height: size, position: 'absolute', top: 0, left: 0, alignItems: 'center', justifyContent: 'center' }}>
+        <svg width={size} height={size} viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="22" cy="34" rx="14" ry="5" fill="#7a5c1e"/>
+          <rect x="8" y="20" width="28" height="14" fill="#c8861a"/>
+          <ellipse cx="22" cy="20" rx="14" ry="5" fill="#e8b84b"/>
+          <ellipse cx="22" cy="28" rx="14" ry="5" fill="#7a5c1e"/>
+          <rect x="8" y="14" width="28" height="14" fill="#c8861a"/>
+          <ellipse cx="22" cy="14" rx="14" ry="5" fill="#e8b84b"/>
+          <ellipse cx="22" cy="22" rx="14" ry="5" fill="#7a5c1e"/>
+          <rect x="8" y="8" width="28" height="14" fill="#c8861a"/>
+          <ellipse cx="22" cy="8" rx="14" ry="5" fill="#e8b84b"/>
+          <ellipse cx="22" cy="8" rx="10" ry="3.5" fill="#f5d060"/>
+        </svg>
+      </div>
+    </div>
+  )
+}
+
 function btn(variant: 'gold'|'ghost'|'danger'|'neutral' = 'ghost'): React.CSSProperties {
   const base: React.CSSProperties = {
     fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px',
@@ -874,16 +908,7 @@ function SettingsTab({ event, eventId, isOwner }: { event: any; eventId: string;
         {isOwner && (
           <div style={{ ...card }}>
             <div style={{ padding: '18px 24px', borderBottom: '1px solid rgba(232,184,75,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <svg width="24" height="24" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="22" cy="34" rx="14" ry="5" fill="#7a5c1e"/>
-              <rect x="8" y="20" width="28" height="14" fill="#c8861a"/>
-              <ellipse cx="22" cy="20" rx="14" ry="5" fill="#e8b84b"/>
-              <ellipse cx="22" cy="28" rx="14" ry="5" fill="#7a5c1e"/>
-              <rect x="8" y="14" width="28" height="14" fill="#c8861a"/>
-              <ellipse cx="22" cy="14" rx="14" ry="5" fill="#e8b84b"/>
-              <ellipse cx="22" cy="8" rx="14" ry="5" fill="#e8b84b"/>
-              <ellipse cx="22" cy="8" rx="10" ry="3.5" fill="#f5d060"/>
-            </svg>
+              <CoinSprite size={24} />
               <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '17px', color: 'var(--text)' }}>Prize Pool</div>
             </div>
             <form onSubmit={handleSavePrize} style={{ padding: '20px 24px' }}>
