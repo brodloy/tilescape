@@ -265,7 +265,7 @@ export async function joinEventAction(formData: FormData) {
     .from('events')
     .select('id, status')
     .eq('invite_code', code)
-    .single()
+    .maybeSingle()
 
   if (!event) {
     redirect(`/join?code=${code}&error=invalid`)
@@ -280,11 +280,11 @@ export async function joinEventAction(formData: FormData) {
     .select('id')
     .eq('event_id', event.id)
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!existing) {
     // Ensure public.users row exists for brand-new Discord users
-    const { data: existingUser } = await db.from('users').select('id').eq('id', user.id).single()
+    const { data: existingUser } = await db.from('users').select('id').eq('id', user.id).maybeSingle()
     if (!existingUser) {
       const identity = user.identities?.find((i: any) => i.provider === 'discord')
       await db.from('users').insert({
@@ -319,7 +319,7 @@ export async function joinEventWithRedirect(formData: FormData) {
     .from('events')
     .select('id, status')
     .eq('invite_code', code)
-    .single()
+    .maybeSingle()
 
   if (!event) {
     redirect(`/join?error=${encodeURIComponent('Invalid invite code')}${returnCode ? `&code=${returnCode}` : ''}`)
@@ -330,7 +330,7 @@ export async function joinEventWithRedirect(formData: FormData) {
   }
 
   // Ensure public.users row exists (trigger may not have fired yet for brand-new Discord users)
-  const { data: existingUser } = await db.from('users').select('id').eq('id', user.id).single()
+  const { data: existingUser } = await db.from('users').select('id').eq('id', user.id).maybeSingle()
   if (!existingUser) {
     const identity = user.identities?.find((i: any) => i.provider === 'discord')
     await db.from('users').insert({
@@ -349,7 +349,7 @@ export async function joinEventWithRedirect(formData: FormData) {
     .select('id')
     .eq('event_id', event.id)
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!existing) {
     const { error: joinError } = await db

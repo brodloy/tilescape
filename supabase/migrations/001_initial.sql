@@ -375,3 +375,8 @@ alter table public.events add column if not exists prize_pool bigint default 0;
 
 -- Proof required toggle
 alter table public.events add column if not exists require_proof boolean not null default false;
+
+-- Allow anyone to look up an event by invite code (needed to join)
+create policy "Anyone can view events by invite code"
+  on public.events for select
+  using (invite_code is not null);

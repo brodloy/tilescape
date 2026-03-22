@@ -11,7 +11,7 @@ export async function generateMetadata({ searchParams }: { searchParams: { code?
   if (!searchParams.code) return { title: 'Join Event — TileScape' }
   const supabase = await createClient()
   const db = supabase as any
-  const { data: event } = await db.from('events').select('name, description, status').eq('invite_code', searchParams.code.toUpperCase()).single()
+  const { data: event } = await db.from('events').select('name, description, status').eq('invite_code', searchParams.code.toUpperCase()).maybeSingle()
   if (!event) return { title: 'Join Event — TileScape' }
   const title = `Join ${event.name} — TileScape`
   const description = event.description ?? `You've been invited to join "${event.name}" on TileScape — the OSRS clan bingo tracker.`
@@ -39,7 +39,7 @@ export default async function JoinPage({ searchParams }: { searchParams: { code?
   // If a valid code is present and no error, auto-join and redirect straight to the board
   if (searchParams.code && !searchParams.error) {
     const code = searchParams.code.toUpperCase()
-    const { data: event } = await db.from('events').select('id, name, status').eq('invite_code', code).single()
+    const { data: event } = await db.from('events').select('id, name, status').eq('invite_code', code).maybeSingle()
 
     if (!event) {
       // Fall through to show form with error
@@ -47,7 +47,7 @@ export default async function JoinPage({ searchParams }: { searchParams: { code?
       // Fall through to show form with error
     } else {
       // Ensure public.users row exists for brand-new Discord users
-      const { data: existingUser } = await db.from('users').select('id').eq('id', user.id).single()
+      const { data: existingUser } = await db.from('users').select('id').eq('id', user.id).maybeSingle()
       if (!existingUser) {
         const identity = user.identities?.find((i: any) => i.provider === 'discord')
         await db.from('users').insert({
@@ -59,7 +59,7 @@ export default async function JoinPage({ searchParams }: { searchParams: { code?
       }
 
       // Check if already a member
-      const { data: existing } = await db.from('event_members').select('id').eq('event_id', event.id).eq('user_id', user.id).single()
+      const { data: existing } = await db.from('event_members').select('id').eq('event_id', event.id).eq('user_id', user.id).maybeSingle()
       if (!existing) {
         await db.from('event_members').insert({ event_id: event.id, user_id: user.id, role: 'member' })
       }
@@ -76,7 +76,7 @@ export default async function JoinPage({ searchParams }: { searchParams: { code?
 
   // Still try to preview even if there was an error, using the code
   if (searchParams.code && !eventPreview) {
-    const { data } = await db.from('events').select('id, name, description, status, invite_code').eq('invite_code', searchParams.code.toUpperCase()).single()
+    const { data } = await db.from('events').select('id, name, description, status, invite_code').eq('invite_code', searchParams.code.toUpperCase()).maybeSingle()
     if (data && data.status !== 'ended') eventPreview = data
   }
 
