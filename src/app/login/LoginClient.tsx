@@ -32,9 +32,9 @@ export function LoginClient() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+    <div style={{ minHeight: '100vh', display: 'grid', gridTemplateColumns: '1fr 1fr' }} className="login-root">
       <style>{`
-        @media(max-width:1024px){.ll{display:none!important};.rr{grid-column:1/-1!important}}
+        @media(max-width:1024px){.ll{display:none!important}.login-root{grid-template-columns:1fr!important}.rr{grid-column:1/-1!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:32px 20px!important;min-height:100vh!important}}
         .dc:hover:not(:disabled){background:rgba(88,101,242,0.18)!important;border-color:rgba(88,101,242,0.6)!important;transform:translateY(-1px);box-shadow:0 8px 32px rgba(88,101,242,0.2)!important}
         @keyframes spin{to{transform:rotate(360deg)}}
         @keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}

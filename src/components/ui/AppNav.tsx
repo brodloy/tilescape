@@ -26,42 +26,51 @@ export function AppNav({ displayName, avatarUrl, context, actions }: Props) {
     <nav style={{
       position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
       display: 'flex', alignItems: 'center',
-      height: '64px', padding: '0 32px', gap: '16px',
-      background: 'rgba(12,10,8,0.88)', backdropFilter: 'blur(16px)',
+      height: '64px', padding: '0 16px', gap: '8px',
+      background: 'rgba(12,10,8,0.92)', backdropFilter: 'blur(16px)',
       borderBottom: '1px solid rgba(232,184,75,0.12)',
     }}>
       {/* Logo */}
-      <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
+      <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,6px)', gridTemplateRows: 'repeat(3,6px)', gap: '2px' }}>
           {[1,0,1,1,1,0,0,1,1].map((on, i) => (
             <span key={i} style={{ display: 'block', background: on ? '#e8b84b' : 'transparent', borderRadius: '1px' }} />
           ))}
         </div>
-        <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '18px', color: '#f0e8d8', letterSpacing: '-0.5px' }}>
+        <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: '17px', color: '#f0e8d8', letterSpacing: '-0.5px' }}>
           Tile<em style={{ color: '#e8b84b', fontStyle: 'normal' }}>Scape</em>
         </span>
       </Link>
 
-      {/* Centre context */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {context}
-      </div>
+      {/* Centre context — hidden on small screens */}
+      {context && (
+        <div className="app-nav-centre" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', minWidth: 0 }}>
+          {context}
+        </div>
+      )}
+      {!context && <div style={{ flex: 1 }} />}
 
       {/* Right slot */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-        {actions}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+        {actions && (
+          <div className="app-nav-actions" style={{ display: 'flex', gap: '6px' }}>
+            {actions}
+          </div>
+        )}
 
-        {/* User dropdown */}
+        {/* User dropdown — avatar only on mobile */}
         <div ref={ref} style={{ position: 'relative' }}>
           <button onClick={() => setOpen(o => !o)} style={{
             display: 'flex', alignItems: 'center', gap: '8px',
-            padding: '5px 12px 5px 5px', borderRadius: '999px',
-            background: open ? 'var(--surface2)' : 'var(--surface)',
-            border: '1px solid rgba(232,184,75,0.15)', cursor: 'pointer', transition: 'all .15s',
+            padding: '4px', borderRadius: '999px',
+            background: open ? 'var(--surface2)' : 'transparent',
+            border: 'none', cursor: 'pointer', transition: 'all .15s',
           }}>
-            <Avatar src={avatarUrl} name={displayName} size={30} />
-            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 600, fontSize: '13px', color: '#f0e8d8' }}>{displayName}</span>
-            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style={{ color: '#4a4438', transition: 'transform .15s', transform: open ? 'rotate(180deg)' : 'none' }}>
+            <Avatar src={avatarUrl} name={displayName} size={34} />
+            <span className="app-nav-name" style={{ fontFamily: "'Syne',sans-serif", fontWeight: 600, fontSize: '13px', color: '#f0e8d8', whiteSpace: 'nowrap' }}>
+              {displayName}
+            </span>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="app-nav-name" style={{ color: '#4a4438', transition: 'transform .15s', transform: open ? 'rotate(180deg)' : 'none', flexShrink: 0 }}>
               <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
@@ -75,7 +84,7 @@ export function AppNav({ displayName, avatarUrl, context, actions }: Props) {
               <div style={{ padding: '14px', borderBottom: '1px solid rgba(232,184,75,0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <Avatar src={avatarUrl} name={displayName} size={40} />
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '6px', color: '#4a4438', letterSpacing: '1px', marginBottom: '4px' }}>SIGNED IN AS</div>
+                  <div style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '7px', color: '#4a4438', letterSpacing: '1px', marginBottom: '4px' }}>SIGNED IN AS</div>
                   <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: '#e8b84b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</div>
                 </div>
               </div>
@@ -99,6 +108,17 @@ export function AppNav({ displayName, avatarUrl, context, actions }: Props) {
           )}
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .app-nav-name { display: none !important; }
+          .app-nav-centre { display: none !important; }
+          .app-nav-actions { display: none !important; }
+        }
+        @media (max-width: 900px) {
+          .app-nav-centre { display: none !important; }
+        }
+      `}</style>
     </nav>
   )
 }

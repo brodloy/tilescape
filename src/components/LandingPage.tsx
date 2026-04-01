@@ -202,7 +202,10 @@ export function LandingPage() {
 
         </ul>
         <div className="nav-actions">
-          <Link href="/login" className="btn-gold">Sign in with Discord →</Link>
+          <Link href="/login" className="btn-discord-nav">
+          <svg width="16" height="12" viewBox="0 0 18 14" fill="none" style={{flexShrink:0}}><path d="M15.246 1.177A14.9 14.9 0 0011.55.033a.056.056 0 00-.059.028c-.16.285-.337.657-.461.949a13.75 13.75 0 00-4.062 0 9.596 9.596 0 00-.468-.949.058.058 0 00-.059-.028 14.858 14.858 0 00-3.696 1.144.052.052 0 00-.024.021C.444 4.669-.265 8.059.082 11.406a.062.062 0 00.023.042 14.963 14.963 0 004.496 2.272.058.058 0 00.063-.021c.347-.473.655-.972.92-1.496a.057.057 0 00-.031-.08 9.851 9.851 0 01-1.407-.671.058.058 0 01-.006-.096c.095-.071.19-.144.28-.219a.055.055 0 01.058-.008c2.952 1.347 6.15 1.347 9.066 0a.055.055 0 01.059.007c.09.075.184.149.28.22a.058.058 0 01-.005.095 9.242 9.242 0 01-1.408.67.057.057 0 00-.03.082c.27.523.578 1.022.918 1.495a.057.057 0 00.063.022 14.92 14.92 0 004.503-2.272.058.058 0 00.024-.041c.375-3.877-.628-7.241-2.659-10.208a.046.046 0 00-.023-.021zM6.013 9.388c-.875 0-1.597-.803-1.597-1.789 0-.986.707-1.789 1.597-1.789.897 0 1.612.81 1.597 1.789 0 .986-.707 1.789-1.597 1.789zm5.904 0c-.876 0-1.597-.803-1.597-1.789 0-.986.706-1.789 1.597-1.789.897 0 1.612.81 1.597 1.789 0 .986-.7 1.789-1.597 1.789z" fill="currentColor"/></svg>
+          Sign in
+        </Link>
         </div>
       </nav>
 
@@ -215,7 +218,10 @@ export function LandingPage() {
         <h1 className="hero-title">Run Better<br/>Clan <span className="accent">Bingos</span></h1>
         <p className="hero-sub">The modern event platform built for OSRS clans. Track bingo boards, manage teams, and celebrate every purple drop — no spreadsheets required.</p>
         <div className="hero-ctas">
-          <Link href="/login" className="btn-hero-primary">Get Started with Discord →</Link>
+          <Link href="/login" className="btn-discord-hero">
+          <svg width="20" height="15" viewBox="0 0 18 14" fill="none" style={{flexShrink:0}}><path d="M15.246 1.177A14.9 14.9 0 0011.55.033a.056.056 0 00-.059.028c-.16.285-.337.657-.461.949a13.75 13.75 0 00-4.062 0 9.596 9.596 0 00-.468-.949.058.058 0 00-.059-.028 14.858 14.858 0 00-3.696 1.144.052.052 0 00-.024.021C.444 4.669-.265 8.059.082 11.406a.062.062 0 00.023.042 14.963 14.963 0 004.496 2.272.058.058 0 00.063-.021c.347-.473.655-.972.92-1.496a.057.057 0 00-.031-.08 9.851 9.851 0 01-1.407-.671.058.058 0 01-.006-.096c.095-.071.19-.144.28-.219a.055.055 0 01.058-.008c2.952 1.347 6.15 1.347 9.066 0a.055.055 0 01.059.007c.09.075.184.149.28.22a.058.058 0 01-.005.095 9.242 9.242 0 01-1.408.67.057.057 0 00-.03.082c.27.523.578 1.022.918 1.495a.057.057 0 00.063.022 14.92 14.92 0 004.503-2.272.058.058 0 00.024-.041c.375-3.877-.628-7.241-2.659-10.208a.046.046 0 00-.023-.021zM6.013 9.388c-.875 0-1.597-.803-1.597-1.789 0-.986.707-1.789 1.597-1.789.897 0 1.612.81 1.597 1.789 0 .986-.707 1.789-1.597 1.789zm5.904 0c-.876 0-1.597-.803-1.597-1.789 0-.986.706-1.789 1.597-1.789.897 0 1.612.81 1.597 1.789 0 .986-.7 1.789-1.597 1.789z" fill="currentColor"/></svg>
+          Continue with Discord
+        </Link>
         </div>
         <div className="hero-board">
           <div className="board-chrome">
@@ -257,7 +263,7 @@ export function LandingPage() {
         <div style={{maxWidth:'680px',margin:'0 auto',padding:'0 48px',textAlign:'center'}} className="reveal">
           <span className="section-eyebrow" style={{display:'block',textAlign:'center'}}>How It Works</span>
           <h2 className="section-title" style={{textAlign:'center',marginBottom:'48px'}}>Up and running<br/>in minutes.</h2>
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'24px',textAlign:'left'}}>
+          <div className="steps-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'24px',textAlign:'left'}}>
             {[
               {num:'01',title:'Sign in with Discord',desc:'One click with Discord — no passwords, no email. Your avatar and name carry over automatically.'},
               {num:'02',title:'Build your board',desc:'Pick your tiles — bosses, skills, drops. Set your start and end date and go live.'},
@@ -317,7 +323,7 @@ export function LandingPage() {
           <span className="cta-pixel-label">⚔ Join the Early Access</span>
           <h2 className="cta-title">Ready to run<br/>your best bingo?</h2>
           <p className="cta-sub">The OSRS clan bingo tracker built for serious clans.</p>
-          <Link href="/login" className="btn-hero-primary" style={{fontSize:'16px',padding:'16px 40px',display:'inline-block'}}>Create Your Clan Board →</Link>
+          <Link href="/login" className="btn-discord-hero" style={{fontSize:'16px'}}>Create Your Clan Board →</Link>
         </div>
       </section>
 
@@ -454,8 +460,26 @@ footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 4
 .footer-links a { font-size: 13px; color: var(--text2); text-decoration: none; transition: color 0.2s; }
 .footer-links a:hover { color: var(--text); }
 .footer-copy { font-family: 'Press Start 2P', monospace; font-size: 6px; color: var(--text3); letter-spacing: 0.5px; }
+
+.btn-discord-nav { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: #fff; background: #5865F2; border: none; padding: 9px 16px; border-radius: var(--r); cursor: pointer; text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-discord-nav:hover { background: #4752c4; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(88,101,242,0.4); }
+.btn-discord-hero { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; color: #fff; background: #5865F2; border: none; padding: 16px 36px; border-radius: var(--r); cursor: pointer; text-decoration: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 12px; box-shadow: 0 0 40px rgba(88,101,242,0.3); }
+.btn-discord-hero:hover { background: #4752c4; transform: translateY(-2px); box-shadow: 0 8px 40px rgba(88,101,242,0.5); }
 @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.65s ease, transform 0.65s ease; }
 .reveal.visible { opacity: 1; transform: translateY(0); }
-@media (max-width: 900px) { nav ul{display:none} nav{padding:0 24px} section{padding:72px 24px} .testi-grid{grid-template-columns:1fr} footer{flex-direction:column;align-items:flex-start} .mini-grid{grid-template-columns:repeat(5,62px);grid-template-rows:repeat(3,62px)} }
+@media (max-width: 900px) {
+  nav ul { display: none; }
+  nav { padding: 0 20px; }
+  section { padding: 60px 20px; }
+  .testi-grid { grid-template-columns: 1fr; }
+  footer { flex-direction: column; align-items: flex-start; padding: 32px 24px; gap: 16px; }
+  .footer-links { gap: 16px; flex-wrap: wrap; }
+  .mini-grid { grid-template-columns: repeat(5,56px); grid-template-rows: repeat(3,56px); }
+  .steps-grid { grid-template-columns: 1fr !important; }
+  .proof-bar { gap: 24px; padding: 16px 24px; }
+  .proof-divider { display: none; }
+  .hero-title { font-size: clamp(40px,12vw,72px) !important; }
+  .hero-sub { font-size: 16px !important; }
+}
 `
