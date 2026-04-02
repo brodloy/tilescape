@@ -174,6 +174,7 @@ export function EventCard({ event, stats, isOwner, teams = [] }: {
               </button>
             )}
             <Link href={`/events/${event.id}`} onClick={e => e.stopPropagation()}
+              className="card-view-btn"
               style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px', padding: '8px 18px', borderRadius: '7px', background: '#e8b84b', color: '#0c0a08', textDecoration: 'none', boxShadow: '0 0 18px rgba(232,184,75,0.2)', flexShrink: 0 }}>
               View Board →
             </Link>

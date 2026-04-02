@@ -49,9 +49,10 @@ export function AppNav({ displayName, avatarUrl, context, actions }: Props) {
         </div>
       )}
       {!context && <div style={{ flex: 1 }} />}
+      {context && <div style={{ flex: '0 0 0' }} />}
 
       {/* Right slot */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, marginLeft: 'auto' }}>
         {actions && (
           <div className="app-nav-actions" style={{ display: 'flex', gap: '6px' }}>
             {actions}

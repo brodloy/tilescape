@@ -79,13 +79,13 @@ export default async function DashboardPage() {
       <main style={{ paddingTop: '64px', position: 'relative', zIndex: 10 }}>
 
         {/* ── HERO HEADER ── inspired by landing page hero */}
-        <div style={{
+        <div className="hero-row" style={{
           padding: '64px 48px 48px',
           borderBottom: '1px solid rgba(232,184,75,0.08)',
           position: 'relative', overflow: 'hidden',
         }}>
           <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' }}>
+            <div className="hero-row" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' }}>
               <div>
                 <div style={{
                   display: 'inline-flex', alignItems: 'center', gap: '8px',
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
                     : `You have ${allEvents.length} event${allEvents.length > 1 ? 's' : ''} — ${liveEvents.length} currently live.`}
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
+              <div className="hero-actions" style={{ display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
                 <form action={joinEventAction} style={{ display: 'flex', gap: '8px' }}>
                   <input
                     name="code"
@@ -152,7 +152,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* ── EVENTS GRID ── */}
-        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 48px 80px' }}>
+        <div className="events-grid-wrap" style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 48px 80px' }}>
 
           {allEvents.length === 0 ? (
             <div style={{

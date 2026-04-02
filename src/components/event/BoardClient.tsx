@@ -484,7 +484,43 @@ export function BoardClient({ event, initialTiles, teams, members, pendingSubmis
           </div>
         </main>
 
-        {/* ── Right panel ── */}
+        {/* ── Mobile bottom bar — team filter + manage ── */}
+        <div className="board-mobile-bar" style={{ display: 'none' }}>
+          {/* Team filter pills */}
+          <div style={{ overflowX: 'auto', display: 'flex', gap: '6px', padding: '10px 14px', borderBottom: '1px solid rgba(232,184,75,0.08)', scrollbarWidth: 'none' }}>
+            <button onClick={() => setSelectedTeamId(null)}
+              style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 12px', borderRadius: '20px', border: `1px solid ${selectedTeamId === null ? 'rgba(232,184,75,0.35)' : 'rgba(255,255,255,0.1)'}`, background: selectedTeamId === null ? 'rgba(232,184,75,0.1)' : 'var(--surface)', cursor: 'pointer', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '12px', color: selectedTeamId === null ? '#e8b84b' : '#9a8f7a', whiteSpace: 'nowrap' }}>
+              All Teams
+            </button>
+            {teams.map(team => (
+              <button key={team.id} onClick={() => setSelectedTeamId(selectedTeamId === team.id ? null : team.id)}
+                style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 12px', borderRadius: '20px', border: `1px solid ${selectedTeamId === team.id ? team.color + '66' : 'rgba(255,255,255,0.1)'}`, background: selectedTeamId === team.id ? team.color + '20' : 'var(--surface)', cursor: 'pointer', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '12px', color: selectedTeamId === team.id ? team.color : '#9a8f7a', whiteSpace: 'nowrap' }}>
+                <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: team.color, flexShrink: 0 }} />
+                {team.name}
+                {team.id === userTeamId && <span style={{ opacity: 0.6, fontSize: '10px' }}>you</span>}
+              </button>
+            ))}
+          </div>
+          {/* Bottom actions */}
+          <div style={{ display: 'flex', gap: '8px', padding: '10px 14px', alignItems: 'center' }}>
+            <div style={{ flex: 1, fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '14px', color: 'var(--text)' }}>
+              {displayTeamId ? teams.find(t => t.id === displayTeamId)?.name ?? 'All Teams' : 'All Teams'}
+              <span style={{ fontFamily: "'Press Start 2P',monospace", fontSize: '9px', color: '#4a4438', marginLeft: '8px' }}>{totalApproved}/{nonFree.length}</span>
+            </div>
+            {isOwnerOrMod && (
+              <Link href={`/events/${eventId}/manage`}
+                style={{ padding: '8px 14px', borderRadius: '8px', background: 'none', border: '1px solid rgba(232,184,75,0.2)', color: '#9a8f7a', textDecoration: 'none', fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: '13px', flexShrink: 0 }}>
+                Manage
+              </Link>
+            )}
+            {pendingSubmissions.length > 0 && isOwnerOrMod && (
+              <button onClick={() => setReviewingSubmission(pendingSubmissions[0])}
+                style={{ padding: '8px 14px', borderRadius: '8px', background: 'rgba(232,184,75,0.1)', border: '1px solid rgba(232,184,75,0.2)', color: '#e8b84b', cursor: 'pointer', fontFamily: "'Press Start 2P',monospace", fontSize: '9px', flexShrink: 0 }}>
+                REVIEW {pendingSubmissions.length}
+              </button>
+            )}
+          </div>
+        </div>
         <aside className="board-right-panel" style={{ background: 'var(--bg2)', borderLeft: '1px solid rgba(232,184,75,0.10)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
           {/* Pending submissions */}
           {isOwnerOrMod && pendingSubmissions.length > 0 && (
