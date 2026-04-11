@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { joinEventWithRedirect } from '@/app/actions/forms'
 import { Button } from '@/components/ui/Button'
 import type { Metadata } from 'next'
@@ -50,7 +51,8 @@ export default async function JoinPage({ searchParams }: { searchParams: { code?
       const { data: existingUser } = await db.from('users').select('id').eq('id', user.id).maybeSingle()
       if (!existingUser) {
         const identity = user.identities?.find((i: any) => i.provider === 'discord')
-        await db.from('users').insert({
+        const adminForUser = createAdminClient() as any
+        await adminForUser.from('users').insert({
           id: user.id,
           email: user.email ?? '',
           display_name: identity?.identity_data?.full_name ?? identity?.identity_data?.name ?? user.email?.split('@')[0] ?? 'Adventurer',
@@ -61,7 +63,13 @@ export default async function JoinPage({ searchParams }: { searchParams: { code?
       // Check if already a member
       const { data: existing } = await db.from('event_members').select('id').eq('event_id', event.id).eq('user_id', user.id).maybeSingle()
       if (!existing) {
-        await db.from('event_members').insert({ event_id: event.id, user_id: user.id, role: 'member' })
+        // Use admin client to bypass RLS for the insert
+        const admin = createAdminClient() as any
+        const { error: insertError } = await admin.from('event_members').insert({ event_id: event.id, user_id: user.id, role: 'member' })
+        if (insertError) {
+          console.error('Failed to insert event_member:', insertError)
+          redirect(`/join?error=${encodeURIComponent('Failed to join event. Please try again.')}&code=${code}`)
+        }
       }
 
       redirect(`/events/${event.id}`)

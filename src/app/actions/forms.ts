@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function createEventVoid(formData: FormData): Promise<void> {
   await createEventAction(formData)
@@ -287,7 +288,8 @@ export async function joinEventAction(formData: FormData) {
     const { data: existingUser } = await db.from('users').select('id').eq('id', user.id).maybeSingle()
     if (!existingUser) {
       const identity = user.identities?.find((i: any) => i.provider === 'discord')
-      await db.from('users').insert({
+      const adminForUser = createAdminClient() as any
+      await adminForUser.from('users').insert({
         id: user.id,
         email: user.email ?? '',
         display_name: identity?.identity_data?.full_name ?? identity?.identity_data?.name ?? user.email?.split('@')[0] ?? 'Adventurer',
@@ -295,9 +297,11 @@ export async function joinEventAction(formData: FormData) {
       })
     }
 
-    await db
+    const admin = createAdminClient() as any
+    const { error: joinError } = await admin
       .from('event_members')
       .insert({ event_id: event.id, user_id: user.id, role: 'member' })
+    if (joinError) console.error('joinEventAction insert error:', joinError)
   }
 
   revalidatePath('/dashboard')
@@ -352,11 +356,13 @@ export async function joinEventWithRedirect(formData: FormData) {
     .maybeSingle()
 
   if (!existing) {
-    const { error: joinError } = await db
+    const admin = createAdminClient() as any
+    const { error: joinError } = await admin
       .from('event_members')
       .insert({ event_id: event.id, user_id: user.id, role: 'member' })
 
     if (joinError) {
+      console.error('joinEventWithRedirect insert error:', joinError)
       redirect(`/join?error=${encodeURIComponent('Failed to join event. Please try again.')}&code=${code}`)
     }
   }
